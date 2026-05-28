@@ -1,0 +1,64 @@
+name: Java CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Create .env
+        run: |
+          echo "DB_HOST=db" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_NAME=nwproject_db" >> .env
+          echo "DB_USER=root" >> .env
+          echo "DB_PASSWORD=root" >> .env
+
+      - name: Grant execute permission
+        run: chmod +x mvnw
+
+      - name: Build
+        run: ./mvnw clean package
+
+      - name: Upload WAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-war
+          path: target/app.war
+
+      - name: Docker Build
+        run: docker compose -f .devcontainer/docker-compose.yml build
+
+      - name: Start Containers
+        run: docker compose -f .devcontainer/docker-compose.yml up -d
+
+      - name: Wait for Tomcat
+        run: |
+          for i in {1..30}; do
+            curl -f http://localhost:8080/Login && break
+            echo "Waiting for Tomcat..."
+            sleep 5
+          done
+
+      - name: Show Container Logs
+        if: failure()
+        run: docker compose -f .devcontainer/docker-compose.yml logs
+
+      - name: Shutdown Containers
+        if: always()
+        run: docker compose -f .devcontainer/docker-compose.yml down

@@ -1,5 +1,5 @@
 # 修正後の資産適用
 
-- cd C:\git_repository\nwproject_docker
-- mvnw package
-- ブラウザ super reload
+1. cd nwproject_docker
+1. mvnw package
+1. ブラウザ super reload

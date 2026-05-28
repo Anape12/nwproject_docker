@@ -81,6 +81,14 @@ public class LoginCommand extends ApplicationCommand {
 
 		try {
 
+			// ユーザー情報の有無
+
+			// パスワードの整合性
+
+			// パスワード有効期限
+
+			// これらを以ってログイン成功とする
+
 			// ログイン後の遷移先画面を選択
 			if (this.loginChkF) {
 				/**
