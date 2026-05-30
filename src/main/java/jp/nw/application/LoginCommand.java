@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import jp.nw.base.ApplicationCommand;
 import jp.nw.model.LoginLogic;
 import jp.nw.model.User;
@@ -29,7 +32,9 @@ public class LoginCommand extends ApplicationCommand {
 
 		try {
 			this.inputName = (String) loginParam.get(KEY_USERID);
-			this.inputPass = (String) loginParam.get(KEY_USERPASS);
+			// パスワードハッシュ化
+			PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+			this.inputPass = passwordEncoder.encode((String) loginParam.get(KEY_USERPASS));
 		} catch (Exception e) {
 			e.toString();
 			return false;

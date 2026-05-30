@@ -1,7 +1,7 @@
 CREATE TABLE users_info (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(20),
-  password VARCHAR(30),
+  password VARCHAR(200),
   birthday DATE,
   permission VARCHAR(5),
   password_expiration VARCHAR(8),
@@ -9,8 +9,8 @@ CREATE TABLE users_info (
 );
 
 INSERT INTO users_info (name, password, birthday, permission, password_expiration, delete_flg)
-VALUES ('a0001', 'k1226', '1993-12-26', '1', '99999999', '0'),
-       ('a0002', 'm0526', '1956-05-26', '2', '99999999', '0');
+VALUES ('a0001', '$2a$10$45HSUdWr4xrIYVymHlDmL.v0sc6xpENpHAszdaiSUG8bVWKuUs5LK', '1993-12-26', '1', '99999999', '0'),
+       ('a0002', '$2a$10$Fi4YRJ0ONJB3/8S8pWhmdOkZLDwipULqyd5k7BXRnoXbDT.10/aAe', '1956-05-26', '2', '99999999', '0');
 
 CREATE TABLE thread_info (
     thread_id INT AUTO_INCREMENT PRIMARY KEY,
