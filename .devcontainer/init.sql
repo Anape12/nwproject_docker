@@ -4,12 +4,13 @@ CREATE TABLE users_info (
   password VARCHAR(30),
   birthday DATE,
   permission VARCHAR(5),
+  password_expiration VARCHAR(8),
   delete_flg VARCHAR(5)
 );
 
-INSERT INTO users_info (name, password, birthday, permission, delete_flg)
-VALUES ('a0001', 'k1226', '1993-12-26', '1', '0'),
-       ('a0002', 'm0526', '1956-05-26', '2', '0');
+INSERT INTO users_info (name, password, birthday, permission, password_expiration, delete_flg)
+VALUES ('a0001', 'k1226', '1993-12-26', '1', '99999999', '0'),
+       ('a0002', 'm0526', '1956-05-26', '2', '99999999', '0');
 
 CREATE TABLE thread_info (
     thread_id INT AUTO_INCREMENT PRIMARY KEY,

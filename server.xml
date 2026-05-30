@@ -164,7 +164,7 @@
 
                <Host name="localhost" appBase="webapps"
                     unpackWARs="true" autoDeploy="true">
-                    <Context reloadable="true" />
+                    <!-- <Context reloadable="true" /> -->
 
                     <!-- SingleSignOn valve, share authentication between web applications
              Documentation at: /docs/config/valve.html -->
