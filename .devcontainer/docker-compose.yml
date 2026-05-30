@@ -66,8 +66,28 @@ services:
       retries: 5
 
     volumes:
-      - mysql-data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+       - mysql-data:/var/lib/mysql
+
+    networks:
+      - app-network
+
+  flyway:
+    image: flyway/flyway:11
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    command:
+      - migrate
+
+    volumes:
+      - ./migration:/flyway/sql
+
+    environment:
+      FLYWAY_URL: jdbc:mysql://db:3306/nwproject_db?allowPublicKeyRetrieval=true&useSSL=false
+      FLYWAY_USER: root
+      FLYWAY_PASSWORD: root
 
     networks:
       - app-network
