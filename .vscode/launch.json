@@ -6,7 +6,8 @@
       "name": "Attach to Tomcat",
       "request": "attach",
       // "hostName": "host.docker.internal",
-      "hostName": "my-tomcat",
+      // "hostName": "my-tomcat",
+      "hostName": "localhost",
       "port": 5005
       // "preLaunchTask": "Start Tomcat (Debug)"
     }

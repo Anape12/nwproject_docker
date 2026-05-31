@@ -24,6 +24,7 @@ public class LoginCommand extends ApplicationCommand {
 	private static final String KEY_USERID = "userId";
 	private static final String KEY_USERPASS = "password";
 	private static final String KEY_USERPERMISS = "permission";
+	private static final String KEY_PASS_EXPIRATION = "password_expiration";
 	private static final String KEY_QERYNAME = "name";
 	private static final String KEY_QERYRESULT = "result";
 	private static final String KEY_USEROBJ = "userobj";
@@ -32,9 +33,7 @@ public class LoginCommand extends ApplicationCommand {
 
 		try {
 			this.inputName = (String) loginParam.get(KEY_USERID);
-			// パスワードハッシュ化
-			PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-			this.inputPass = passwordEncoder.encode((String) loginParam.get(KEY_USERPASS));
+			this.inputPass = (String) loginParam.get(KEY_USERPASS);
 		} catch (Exception e) {
 			e.toString();
 			return false;
@@ -59,6 +58,7 @@ public class LoginCommand extends ApplicationCommand {
 			// SELECT情報格納
 			colum.add(KEY_USERPASS);
 			colum.add(KEY_USERPERMISS);
+			colum.add(KEY_PASS_EXPIRATION);
 			sqlInfo.put(DaoPart.KOMOKU_INFO.SELECT_INFO, colum);
 			// WHERE情報格納
 			sInfo.add(KEY_QERYNAME);
@@ -68,6 +68,12 @@ public class LoginCommand extends ApplicationCommand {
 
 			LoginLogic loginLogic = new LoginLogic();
 			Map<String, Object> isLogin = loginLogic.execute(user, sqlInfo, table);
+
+			// ユーザー情報の有無チェック
+			if (!loginLogic.loginCheck(user, isLogin)) {
+				this.logger.writeInfo("ユーザー情報が存在しません。");
+				return false;
+			}
 
 			// SQL実行結果を取得
 			this.loginChkF = (boolean) isLogin.get(KEY_QERYRESULT);

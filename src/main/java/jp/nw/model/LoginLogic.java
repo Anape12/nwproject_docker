@@ -1,9 +1,14 @@
 package jp.nw.model;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jp.nw.parts.DBBase;
 
@@ -19,6 +24,9 @@ public class LoginLogic {
 	private DBBase dbCon = null;
 	// SQL結果格納Map
 	private Map<String, Object> selectResultMap = null;
+
+	// パスワード整合
+	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 	public Map<String, Object> execute(User user, Map<String, Object> sqlinfo, String table) {
 
@@ -40,7 +48,7 @@ public class LoginLogic {
 			}
 
 			// パスワード整合性チェック
-			if (user.getPass().equals(selectResultMap.get("password"))) {
+			if (this.passwordEncoder.matches(user.getPass(), (String) selectResultMap.get("password"))) {
 				param.put("result", true);
 				return param;
 			} else {
@@ -54,4 +62,49 @@ public class LoginLogic {
 		return param;
 	}
 
+	// 対象ユーザーのログイン要件を一括チェック
+	public boolean loginCheck(User user, Map<String, Object> loginInfo) {
+		boolean chkResult = false;
+
+		if (userInfoCheck(loginInfo) && passwordCheck(user, loginInfo) && passwordExpireCheck(loginInfo)) {
+			chkResult = true;
+		} else {
+			chkResult = false;
+		}
+
+		return chkResult;
+	}
+
+	// ユーザー情報の有無
+	private boolean userInfoCheck(Map<String, Object> selectResultMap) {
+		if (selectResultMap.get("userid") != null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// パスワードの整合性
+	private boolean passwordCheck(User user, Map<String, Object> selectResultMap) {
+		if (this.passwordEncoder.matches(user.getPass(), (String) selectResultMap.get("password"))) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	// パスワード有効期限
+	private boolean passwordExpireCheck(Map<String, Object> selectResultMap) { 
+		// 現在日付を取得
+		Calendar cl = Calendar.getInstance();
+
+		//日付をyyyyMMddの形で出力する
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		String str = sdf.format(cl.getTime());
+
+		if (Integer.parseInt(str) <= Integer.parseInt((String) selectResultMap.get("password_expiration"))) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
