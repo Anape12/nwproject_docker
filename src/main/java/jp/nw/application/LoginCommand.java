@@ -1,17 +1,15 @@
 package jp.nw.application;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jp.nw.base.ApplicationCommand;
 import jp.nw.model.LoginLogic;
 import jp.nw.model.User;
 import jp.nw.parts.DaoPart;
+import jp.nw.parts.Query;
+import jp.nw.parts.SqlType;
 
 public class LoginCommand extends ApplicationCommand {
 
@@ -49,25 +47,20 @@ public class LoginCommand extends ApplicationCommand {
 			// ID/password取得クラス
 			this.user = new User(this.inputName, this.inputPass);
 
-			// SQL情報Map
-			Map<String, Object> sqlInfo = new HashMap<String, Object>();
-			// SELECT情報格納
-			List<String> colum = new ArrayList<>();
 			// WHERE情報格納
 			List<String> sInfo = new ArrayList<>();
-			// SELECT情報格納
-			colum.add(KEY_USERPASS);
-			colum.add(KEY_USERPERMISS);
-			colum.add(KEY_PASS_EXPIRATION);
-			sqlInfo.put(DaoPart.KOMOKU_INFO.SELECT_INFO, colum);
-			// WHERE情報格納
 			sInfo.add(KEY_QERYNAME);
-			sqlInfo.put(DaoPart.KOMOKU_INFO.WHERE_INFO, sInfo);
-			// Table Name
-			String table = "users_info";
+
+			// Query情報格納
+			Query query = Query.builder()
+                    .sqlType(SqlType.SELECT)
+                    .tableName("users_info")
+                    .selectColumns(List.of(KEY_USERPASS, KEY_USERPERMISS, KEY_PASS_EXPIRATION))
+					.conditions(Map.of(KEY_QERYNAME, user.getName()))
+                    .build();
 
 			LoginLogic loginLogic = new LoginLogic();
-			Map<String, Object> isLogin = loginLogic.execute(user, sqlInfo, table);
+			Map<String, Object> isLogin = loginLogic.execute(user, query);
 
 			// ユーザー情報の有無チェック
 			if (!loginLogic.loginCheck(user, isLogin)) {

@@ -38,9 +38,7 @@ public class DBBase {
 			// Connection生成
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			this.con = DriverManager.getConnection(URL, USER, PASSWORD);
-			System.out.println(">>> DB接続成功");
 		} catch (Exception e) {
-			System.out.println(">>> DB接続失敗！！！！");
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
@@ -58,22 +56,23 @@ public class DBBase {
 	 * @param tableName   テーブル名
 	 * @return Map SQL実行結果
 	 */
-	public Map<String, Object> userInfoSql(Map<String, Object> sqlWardInfo, Map<String, Object> searchInfo,
-			String tableName) {
-
+	public Map<String, Object> userInfoSql(Query query) {
 		try {
 			// Map初期化
 			resultMap = new HashMap<String, Object>();
 			dupliMap = new HashMap<String, Map<String, Object>>();
 
 			// 一時退避領域へ各パラメータを格納
-			this.selectInfo = (List<String>) sqlWardInfo.get(DaoPart.KOMOKU_INFO.SELECT_INFO);
-			this.whereInfo = (List<String>) sqlWardInfo.get(DaoPart.KOMOKU_INFO.WHERE_INFO);
+			this.selectInfo = query.getSelectColumns();
+			this.whereInfo = new ArrayList<String>();
+			for(String key : query.getConditions().keySet()) {
+				this.whereInfo.add(key);
+			}
 
 			// 検索情報一括取得
 			List<String> searchInfoList = new ArrayList<String>();
-			for (String key : searchInfo.keySet()) {
-				searchInfoList.add((String) searchInfo.get(key));
+			for(String key : this.whereInfo) {
+				searchInfoList.add((String) query.getConditions().get(key));
 			}
 
 			// SQL発行
@@ -81,44 +80,18 @@ public class DBBase {
 			sb.append(DaoPart.SQL.SELECT);
 			sb.append(DaoPart.SQL.SPACE);
 
-			for (int i = 0; i < this.selectInfo.size(); i++) {
-				sb.append(this.selectInfo.get(i));
-				sb.append(",");
-			}
-			// 末尾のカンマを削除
-			sb.setLength(sb.length() - 1);
-
-			sb.append(DaoPart.SQL.SPACE);
-			sb.append(DaoPart.SQL.FROM);
-			sb.append(DaoPart.SQL.SPACE);
-			if (tableName != null || tableName != "") {
-				sb.append(tableName);
-			}
-			sb.append(DaoPart.SQL.SPACE);
-			sb.append(DaoPart.SQL.WHEHE);
-			sb.append(DaoPart.SQL.SPACE);
-
-			for (int i = 0; i < whereInfo.size(); i++) {
-				sb.append(whereInfo.get(i));
-				sb.append(DaoPart.SQL.SPACE);
-				sb.append(DaoPart.SQL.EQUARL);
-				sb.append(DaoPart.SQL.SPACE);
-				sb.append("?");
-				sb.append(",");
-			}
-			// 末尾のカンマを削除
-			sb.setLength(sb.length() - 1);
+			// 取得情報の構築
+			sb.append(createColumnInfo(this.selectInfo));
+			// テーブル情報の設定
+			sb.append(createFromInfo(query.getTableName()));
+			// 条件句の構築
+			sb.append(createWhereInfo(this.whereInfo));
 
 			// 結果加工条件
-			boolean prcInfo = sqlWardInfo.containsKey(DaoPart.KOMOKU_INFO.PROCESS_INFO);
+			boolean prcInfo = query.getConditions().containsKey(DaoPart.KOMOKU_INFO.PROCESS_INFO);
 			// 条件句が存在するかチェック
 			if (prcInfo) {
-				String prcRs = (String) sqlWardInfo.get(DaoPart.KOMOKU_INFO.PROCESS_INFO);
-				String[] info = prcRs.split(";");
-				for (int j = 0; j < info.length; j++) {
-					sb.append(DaoPart.SQL.SPACE);
-					sb.append(info[j]);
-				}
+				sb.append(createProcessInfo(query.getConditions()));
 			}
 
 			// バインド変数定義
@@ -126,25 +99,15 @@ public class DBBase {
 
 			// バインド変数設定
 			int cnt = 1;
-			for (int j = 0; j < searchInfo.size(); j++) {
+			for (int j = 0; j < searchInfoList.size(); j++) {
 				ps.setString(cnt, searchInfoList.get(j));
+				cnt++;
 			}
 			// SQL実行
 			ResultSet result = ps.executeQuery();
 
-			while (result.next()) {
-				for (int k = 0; k < this.selectInfo.size(); k++) {
-					// Key重複チェック
-					if (resultMap.containsKey(this.selectInfo.get(k))) {
-						Integer i = Integer.valueOf(k);
-						String str = i.toString();
-						deuliKey = "DKEY".concat(str);
-						dupliMap.put(deuliKey, resultMap);
-					} else {
-						resultMap.put(this.selectInfo.get(k), result.getString(this.selectInfo.get(k)));
-					}
-				}
-			}
+			// 取得結果Mapの取得
+			resultMap = getResultMap(result);
 		} catch (SQLException e) {
 			// Error処理
 			e.printStackTrace();
@@ -255,4 +218,77 @@ public class DBBase {
 	public boolean updateSQL(String tableName, List<String> columnInfo, List<String> columnVal) {
 		return true;
 	}
+
+
+	private String createColumnInfo(List<String> columnInfo) {
+		StringBuilder sb = new StringBuilder();
+		for (String colum : columnInfo) {
+			sb.append(colum);
+			sb.append(",");
+		}
+		// 末尾のカンマを削除
+		sb.setLength(sb.length() - 1);
+		sb.append(DaoPart.SQL.SPACE);
+		return sb.toString();
+	}
+
+	private String createFromInfo(String tableName) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(DaoPart.SQL.FROM);
+		sb.append(DaoPart.SQL.SPACE);
+		if (tableName != null && !tableName.isEmpty()) {
+			sb.append(tableName);
+		}
+		return sb.toString();
+	}
+
+	private String createWhereInfo(List<String> whereInfo) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(DaoPart.SQL.SPACE);
+		sb.append(DaoPart.SQL.WHEHE);
+		sb.append(DaoPart.SQL.SPACE);
+
+		for (int i = 0; i < whereInfo.size(); i++) {
+			sb.append(whereInfo.get(i));
+			sb.append(DaoPart.SQL.SPACE);
+			sb.append(DaoPart.SQL.EQUARL);
+			sb.append(DaoPart.SQL.SPACE);
+			sb.append("?");
+			sb.append(",");
+		}
+		// 末尾のカンマを削除
+		sb.setLength(sb.length() - 1);
+		return sb.toString();
+	}
+
+	private String createProcessInfo(Map<String, Object> sqlWardInfo) {
+		StringBuilder sb = new StringBuilder();
+		String prcRs = (String) sqlWardInfo.get(DaoPart.KOMOKU_INFO.PROCESS_INFO);
+		String[] info = prcRs.split(";");
+		for (int j = 0; j < info.length; j++) {
+			sb.append(DaoPart.SQL.SPACE);
+			sb.append(info[j]);
+		}
+		return sb.toString();
+	}
+
+	private Map<String, Object> getResultMap(ResultSet result) throws SQLException {
+		Map<String, Object> resultMap = new HashMap<>();
+		while (result.next()) {
+			for (int k = 0; k < this.selectInfo.size(); k++) {
+				// Key重複チェック
+				if (resultMap.containsKey(this.selectInfo.get(k))) {
+					Integer i = Integer.valueOf(k);
+					String str = i.toString();
+					deuliKey = "DKEY".concat(str);
+					dupliMap.put(deuliKey, resultMap);
+				} else {
+					resultMap.put(this.selectInfo.get(k), result.getString(this.selectInfo.get(k)));
+				}
+			}
+		}
+		return resultMap;
+	}
+
 }

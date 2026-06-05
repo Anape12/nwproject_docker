@@ -1,25 +1,20 @@
 package jp.nw.model;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jp.nw.parts.DBBase;
+import jp.nw.parts.Query;
 
 public class LoginLogic {
 
 	// ログインパラメータ
 	private Map<String, Object> param = null;
-	// SELECT情報抽出
-	private List<String> selectInfo = null;
-	// WHERE情報抽出
-	private Map<String, String> whereInfo = null;
 	// SQL発行オブジェクト
 	private DBBase dbCon = null;
 	// SQL結果格納Map
@@ -28,19 +23,13 @@ public class LoginLogic {
 	// パスワード整合
 	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-	public Map<String, Object> execute(User user, Map<String, Object> sqlinfo, String table) {
+	public Map<String, Object> execute(User user, Query query) {
 
 		try {
 
-			// 各パラメータ格納オブジェクト初期化
-			this.param = new HashMap<>();
-			this.selectInfo = new ArrayList<String>();
-			this.whereInfo = new HashMap<String, String>();
-
 			// SQL SELECT共通部品実行
 			dbCon = new DBBase();
-			this.param.put("userid", user.getName());
-			this.selectResultMap = dbCon.userInfoSql(sqlinfo, param, table);
+			this.selectResultMap = dbCon.userInfoSql(query);
 
 			// SQL実行結果を返却Mapへ格納(もっとスマートなやり方に追々修正)
 			for (String key : this.selectResultMap.keySet()) {
