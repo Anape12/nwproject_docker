@@ -32,6 +32,7 @@ pageEncoding="UTF-8"%> <% %>
       </div>
       <div class="search-box" style="top: 190px">
         <input
+          id="userId"
           class="search-txt"
           type="text"
           name="userId"
@@ -50,6 +51,7 @@ pageEncoding="UTF-8"%> <% %>
       </div>
       <div style="padding-top: 70px">
         <input
+          id="loginBtn"
           type="submit"
           class="search-btn2"
           value="ログイン"

@@ -7,7 +7,6 @@ import java.util.Map;
 import jp.nw.base.ApplicationCommand;
 import jp.nw.model.LoginLogic;
 import jp.nw.model.User;
-import jp.nw.parts.DaoPart;
 import jp.nw.parts.Query;
 import jp.nw.parts.SqlType;
 
@@ -55,7 +54,7 @@ public class LoginCommand extends ApplicationCommand {
 			Query query = Query.builder()
                     .sqlType(SqlType.SELECT)
                     .tableName("users_info")
-                    .selectColumns(List.of(KEY_USERPASS, KEY_USERPERMISS, KEY_PASS_EXPIRATION))
+                    .selectColumns(List.of("name", KEY_USERPASS, KEY_USERPERMISS, KEY_PASS_EXPIRATION))
 					.conditions(Map.of(KEY_QERYNAME, user.getName()))
                     .build();
 

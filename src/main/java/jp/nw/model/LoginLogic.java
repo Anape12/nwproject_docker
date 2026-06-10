@@ -30,6 +30,7 @@ public class LoginLogic {
 			// SQL SELECT共通部品実行
 			dbCon = new DBBase();
 			this.selectResultMap = dbCon.userInfoSql(query);
+			param = new HashMap<>();
 
 			// SQL実行結果を返却Mapへ格納(もっとスマートなやり方に追々修正)
 			for (String key : this.selectResultMap.keySet()) {
@@ -38,6 +39,9 @@ public class LoginLogic {
 
 			// パスワード整合性チェック
 			if (this.passwordEncoder.matches(user.getPass(), (String) selectResultMap.get("password"))) {
+				param.put("userid", this.selectResultMap.get("userid"));
+				param.put("permission", this.selectResultMap.get("permission"));
+				param.put("password_expiration", this.selectResultMap.get("password_expiration"));
 				param.put("result", true);
 				return param;
 			} else {
@@ -66,7 +70,7 @@ public class LoginLogic {
 
 	// ユーザー情報の有無
 	private boolean userInfoCheck(Map<String, Object> selectResultMap) {
-		if (selectResultMap.get("userid") != null) {
+		if (selectResultMap.get("name") != null) {
 			return true;
 		} else {
 			return false;
