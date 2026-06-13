@@ -39,7 +39,7 @@ public class LoginLogic {
 
 			// パスワード整合性チェック
 			if (this.passwordEncoder.matches(user.getPass(), (String) selectResultMap.get("password"))) {
-				param.put("userid", this.selectResultMap.get("userid"));
+				param.put("userid", this.selectResultMap.get("user_id"));
 				param.put("permission", this.selectResultMap.get("permission"));
 				param.put("password_expiration", this.selectResultMap.get("password_expiration"));
 				param.put("result", true);
@@ -70,7 +70,7 @@ public class LoginLogic {
 
 	// ユーザー情報の有無
 	private boolean userInfoCheck(Map<String, Object> selectResultMap) {
-		if (selectResultMap.get("name") != null) {
+		if (selectResultMap.get("user_id") != null) {
 			return true;
 		} else {
 			return false;
