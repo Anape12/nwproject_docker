@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import jp.nw.entity.UserEntity;
 import jp.nw.parts.DBBase;
 import jp.nw.parts.Query;
 
@@ -23,7 +24,7 @@ public class LoginLogic {
 	// パスワード整合
 	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-	public Map<String, Object> execute(User user, Query query) {
+	public Map<String, Object> execute(UserEntity userEntity, Query query) {
 
 		try {
 
@@ -38,7 +39,7 @@ public class LoginLogic {
 			}
 
 			// パスワード整合性チェック
-			if (this.passwordEncoder.matches(user.getPass(), (String) selectResultMap.get("password"))) {
+			if (this.passwordEncoder.matches(userEntity.getPassword(), (String) selectResultMap.get("password"))) {
 				param.put("userid", this.selectResultMap.get("user_id"));
 				param.put("permission", this.selectResultMap.get("permission"));
 				param.put("password_expiration", this.selectResultMap.get("password_expiration"));
@@ -56,34 +57,30 @@ public class LoginLogic {
 	}
 
 	// 対象ユーザーのログイン要件を一括チェック
-	public boolean loginCheck(User user, Map<String, Object> loginInfo) {
-		boolean chkResult = false;
-
-		if (userInfoCheck(loginInfo) && passwordCheck(user, loginInfo) && passwordExpireCheck(loginInfo)) {
-			chkResult = true;
-		} else {
-			chkResult = false;
+	public boolean loginCheck(UserEntity userEntity, Map<String, Object> loginInfo) {
+		if (userInfoCheck(loginInfo) && passwordCheck(userEntity, loginInfo) && passwordExpireCheck(loginInfo)) {
+			return true;
 		}
-
-		return chkResult;
+		
+		return false;
 	}
 
 	// ユーザー情報の有無
 	private boolean userInfoCheck(Map<String, Object> selectResultMap) {
 		if (selectResultMap.get("user_id") != null) {
 			return true;
-		} else {
-			return false;
 		}
+
+		return false;		
 	}
 
 	// パスワードの整合性
-	private boolean passwordCheck(User user, Map<String, Object> selectResultMap) {
-		if (this.passwordEncoder.matches(user.getPass(), (String) selectResultMap.get("password"))) {
+	private boolean passwordCheck(UserEntity userEntity, Map<String, Object> selectResultMap) {
+		if (this.passwordEncoder.matches(userEntity.getPassword(), (String) selectResultMap.get("password"))) {
 			return true;
-		} else {
-			return false;
 		}
+
+		return false;
 	}
 	// パスワード有効期限
 	private boolean passwordExpireCheck(Map<String, Object> selectResultMap) { 
@@ -96,8 +93,8 @@ public class LoginLogic {
 
 		if (Integer.parseInt(str) <= Integer.parseInt((String) selectResultMap.get("password_expiration"))) {
 			return true;
-		} else {
-			return false;
 		}
+
+		return false;
 	}
 }

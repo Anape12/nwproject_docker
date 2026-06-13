@@ -13,7 +13,7 @@ import javax.servlet.http.HttpSession;
 import jp.nw.application.LoginCommand;
 import jp.nw.base.BaseModel;
 import jp.nw.base.CommandData;
-import jp.nw.model.User;
+import jp.nw.entity.UserEntity;
 
 /**
  * Servlet implementation class Login
@@ -63,7 +63,7 @@ public class Login extends HttpServlet {
 		// コマンド処理の実行
 		CommandData output = command.execute();
 		// Outputよりユーザー情報を取得する
-		User user = (User) output.getValue("userobj");
+		UserEntity userEntity = (UserEntity) output.getValue("userobj");
 
 		// ログイン処理失敗の場合、エラー画面へ
 		if (output.getValue("permission").equals("99")) {
@@ -77,7 +77,7 @@ public class Login extends HttpServlet {
 			this.baseModel.writeInfo("ログイン成功（管理者）");
 			// ログイン成功（管理者画面）
 			HttpSession session = request.getSession();
-			session.setAttribute("loginUser", user);
+			session.setAttribute("loginUser", userEntity);
 			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/Menu/perMenu.jsp");
 			dispatcher.forward(request, response);
 		} else {
@@ -85,7 +85,7 @@ public class Login extends HttpServlet {
 			this.baseModel.writeInfo("ログイン成功（一般）");
 			// ログイン成功（一般）
 			HttpSession session = request.getSession();
-			session.setAttribute("loginUser", user);
+			session.setAttribute("loginUser", userEntity);
 			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/Menu/genMenu.jsp");
 			dispatcher.forward(request, response);
 		}

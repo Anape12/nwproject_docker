@@ -5,18 +5,16 @@ import java.util.List;
 import java.util.Map;
 
 import jp.nw.base.ApplicationCommand;
+import jp.nw.entity.UserEntity;
 import jp.nw.model.LoginLogic;
-import jp.nw.model.User;
 import jp.nw.parts.Query;
 import jp.nw.parts.SqlType;
 
 public class LoginCommand extends ApplicationCommand {
 
-	private String inputName = null;
-	private String inputPass = null;
 	private String permisson = null;
 	private boolean loginChkF = false;
-	private User user = null;
+	private UserEntity userEntity = null;
 
 	private static final String KEY_USERID = "userId";
 	private static final String KEY_USERPASS = "password";
@@ -29,8 +27,10 @@ public class LoginCommand extends ApplicationCommand {
 	public boolean setCommandData(Map<String, Object> loginParam) {
 
 		try {
-			this.inputName = (String) loginParam.get(KEY_USERID);
-			this.inputPass = (String) loginParam.get(KEY_USERPASS);
+			this.userEntity = UserEntity.builder()
+					.userId((String) loginParam.get(KEY_USERID))
+					.password((String) loginParam.get(KEY_USERPASS))
+					.build();
 		} catch (Exception e) {
 			e.toString();
 			return false;
@@ -42,10 +42,6 @@ public class LoginCommand extends ApplicationCommand {
 	public boolean doCommandData() {
 
 		try {
-
-			// ID/password取得クラス
-			this.user = new User(this.inputName, this.inputPass);
-
 			// WHERE情報格納
 			List<String> sInfo = new ArrayList<>();
 			sInfo.add(KEY_QERYNAME);
@@ -55,14 +51,14 @@ public class LoginCommand extends ApplicationCommand {
                     .sqlType(SqlType.SELECT)
                     .tableName("users_info")
                     .selectColumns(List.of(KEY_QERYNAME, KEY_USERPASS, KEY_USERPERMISS, KEY_PASS_EXPIRATION))
-					.conditions(Map.of(KEY_QERYNAME, user.getName()))
+					.conditions(Map.of(KEY_QERYNAME, userEntity.getUserId()))
                     .build();
 
 			LoginLogic loginLogic = new LoginLogic();
-			Map<String, Object> isLogin = loginLogic.execute(user, query);
+			Map<String, Object> isLogin = loginLogic.execute(userEntity, query);
 
 			// ユーザー情報の有無チェック
-			if (!loginLogic.loginCheck(user, isLogin)) {
+			if (!loginLogic.loginCheck(userEntity, isLogin)) {
 				this.logger.writeInfo("ユーザー情報が存在しません。");
 				return false;
 			}
@@ -113,7 +109,7 @@ public class LoginCommand extends ApplicationCommand {
 	public boolean commandOutput() {
 
 		this.output.setValue(KEY_USERPERMISS, this.permisson);
-		this.output.setValue(KEY_USEROBJ, this.user);
+		this.output.setValue(KEY_USEROBJ, this.userEntity);
 
 		return true;
 	}
