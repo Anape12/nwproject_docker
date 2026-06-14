@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import jp.nw.base.BaseAppLogic;
-import jp.nw.model.User;
+import jp.nw.entity.UserEntity;
 
 /**
  * Servlet implementation class UserUpdate
@@ -23,28 +23,31 @@ public class UserInsert extends HttpServlet {
 
 	private BaseAppLogic baseApplogic = null;
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public UserInsert() {
-        super();
-        baseApplogic = new BaseAppLogic();
-    }
-
 	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 * @see HttpServlet#HttpServlet()
 	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-		RequestDispatcher dispatcher =
-				request.getRequestDispatcher("WEB-INF/jsp/RegUser/userInsert.jsp");
-		dispatcher.forward(request,response);
+	public UserInsert() {
+		super();
+		baseApplogic = new BaseAppLogic();
 	}
 
 	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+	 *      response)
 	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		RequestDispatcher dispatcher = request.getRequestDispatcher("WEB-INF/jsp/RegUser/userInsert.jsp");
+		dispatcher.forward(request, response);
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		request.setCharacterEncoding("UTF-8");
 
@@ -63,16 +66,17 @@ public class UserInsert extends HttpServlet {
 		sb.append(month);
 		sb.append("-");
 		sb.append(date);
-		// 権限レベルをint型へ
-		String userPermis = (String)userMap.get("userpermis");
-		int figPermis = Integer.parseInt(userPermis);
 
-		User user = new User(userId,userPass,sb.toString(),figPermis);
+		UserEntity user = UserEntity.builder()
+				.userId(userId)
+				.password(userPass)
+				.birthDate(sb.toString())
+				.permission((String) userMap.get("userpermis"))
+				.build();
 
 		HttpSession session = request.getSession();
-		session.setAttribute("loginUser",user);
-		RequestDispatcher dispatcher =
-				request.getRequestDispatcher("WEB-INF/jsp/RegUser/userInsertCheck.jsp");
+		session.setAttribute("loginUser", user);
+		RequestDispatcher dispatcher = request.getRequestDispatcher("WEB-INF/jsp/RegUser/userInsertCheck.jsp");
 		dispatcher.forward(request, response);
 
 	}

@@ -1,16 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ page import="jp.nw.model.User" %>
+<%@ page import="jp.nw.entity.UserEntity" %>
 <%@page import="java.util.*, java.io.*" %>
 <%
-User loginUser = (User) session.getAttribute("loginUser");
+UserEntity loginUser = (UserEntity) session.getAttribute("loginUser");
 %>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style11.css">
-<title><%= loginUser.getName() %>さん　ログイン中</title>
+<title><%= loginUser.getUserId() %>さん　ログイン中</title>
 </head>
 <body style="background:#9ad468;">
 	<form action="${pageContext.request.contextPath}/UserInsert" method="post">

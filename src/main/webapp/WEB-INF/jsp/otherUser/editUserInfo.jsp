@@ -1,9 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ page import="jp.nw.model.User,java.util.List" %>
+<%@ page import="jp.nw.entity.UserEntity,java.util.List" %>
  <%
-User loginUser = (User) session.getAttribute("loginUser");
-List<User> userList = (List<User>) request.getAttribute("userList");
+UserEntity loginUser = (UserEntity) session.getAttribute("loginUser");
+List<UserEntity> userList = (List<UserEntity>) request.getAttribute("userList");
 String errorMsg = (String) request.getAttribute("errorMsg");
 %>
 <!DOCTYPE html>
@@ -18,7 +18,7 @@ jQuery(window).on('load', function() {
 });
 </script>
 <title>ユーザ－情報編集(管理者モード)</title>
-<%= loginUser.getName() %>さん、ログイン中
+<%= loginUser.getUserId() %>さん、ログイン中
 </head>
 <body>
 	<div style="width:200px"></div>
@@ -35,11 +35,11 @@ jQuery(window).on('load', function() {
 	      <th>変更後パスワード</th>
 	      <th>変更後権限レベル（1:管理者/2:通常）</th>
 	  </tr>
-		<% for(User userinfo:userList) { %>
+		<% for(UserEntity userinfo:userList) { %>
 		<tr>
-		  <th><input type="text" name="nowID" value=<%=userinfo.getName() %> readonly style="background-color:#e9e9e9"></th>
-		  <th><input type="text" name="editID" value=<%=userinfo.getName() %>></th>
-		  <th><input type="text" name="editPass" value=<%=userinfo.getPass() %>></th>
+		  <th><input type="text" name="nowID" value=<%=userinfo.getUserId() %> readonly style="background-color:#e9e9e9"></th>
+		  <th><input type="text" name="editID" value=<%=userinfo.getUserId() %>></th>
+		  <th><input type="text" name="editPass" value=<%=userinfo.getPassword() %>></th>
 		  <th><input type="text" name="editPermission" value=<%=userinfo.getPermission() %>></th>
 		</tr>
 

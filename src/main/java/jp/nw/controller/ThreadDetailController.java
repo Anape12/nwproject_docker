@@ -3,14 +3,18 @@ package jp.nw.controller;
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.*;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import jp.nw.dao.ThreadDao;
 import jp.nw.dto.ThreadCommentDto;
 import jp.nw.dto.ThreadDto;
-import jp.nw.model.User;
+import jp.nw.entity.UserEntity;
 
 @WebServlet("/ThreadDetailController")
 public class ThreadDetailController extends HttpServlet {
@@ -32,11 +36,11 @@ public class ThreadDetailController extends HttpServlet {
 
                 // ログインユーザーのセット
                 HttpSession session = request.getSession();
-                User loginUser = (User) session.getAttribute(
+                UserEntity loginUser = (UserEntity) session.getAttribute(
                                 "loginUser");
                 request.setAttribute(
                                 "loginUserId",
-                                loginUser.getName());
+                                loginUser.getUserId());
 
                 request.setAttribute("thread", thread);
                 request.setAttribute("commentList", commentList);

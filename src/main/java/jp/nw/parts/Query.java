@@ -1,5 +1,6 @@
 package jp.nw.parts;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,5 +18,9 @@ public class Query {
 
     private Map<String, Object> values;
 
-    private Map<String, Object> conditions;
+    private LinkedHashMap<String, Object> conditions;
+
+    private Map<String,Object> bindValues;
+
+    private Map<String, List<String>> querySub;
 }

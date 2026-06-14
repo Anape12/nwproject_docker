@@ -1,6 +1,7 @@
 package jp.nw.application;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,27 +47,35 @@ public class LoginCommand extends ApplicationCommand {
 			List<String> sInfo = new ArrayList<>();
 			sInfo.add(KEY_QERYNAME);
 
+			LinkedHashMap<String, Object> conditions = new LinkedHashMap<>();
+			conditions.put(KEY_QERYNAME, this.userEntity.getUserId());
+
 			// Query情報格納
 			Query query = Query.builder()
-                    .sqlType(SqlType.SELECT)
-                    .tableName("users_info")
-                    .selectColumns(List.of(KEY_QERYNAME, KEY_USERPASS, KEY_USERPERMISS, KEY_PASS_EXPIRATION))
-					.conditions(Map.of(KEY_QERYNAME, userEntity.getUserId()))
-                    .build();
+					.sqlType(SqlType.SELECT)
+					.tableName("users_info")
+					.selectColumns(List.of(KEY_QERYNAME, KEY_USERPASS, KEY_USERPERMISS, KEY_PASS_EXPIRATION))
+					.conditions(conditions)
+					.build();
 
 			LoginLogic loginLogic = new LoginLogic();
-			Map<String, Object> isLogin = loginLogic.execute(userEntity, query);
+			Map<String, Object> result = loginLogic.execute(userEntity, query);
 
 			// ユーザー情報の有無チェック
-			if (!loginLogic.loginCheck(userEntity, isLogin)) {
+			// if (!loginLogic.loginCheck(userEntity, isLogin)) {
+			// this.logger.writeInfo("ユーザー情報が存在しません。");
+			// return false;
+			// }
+			if (result.isEmpty()) {
 				this.logger.writeInfo("ユーザー情報が存在しません。");
 				return false;
+
 			}
 
 			// SQL実行結果を取得
-			this.loginChkF = (boolean) isLogin.get(KEY_QERYRESULT);
+			this.loginChkF = (boolean) result.get(KEY_QERYRESULT);
 			// 権限レベルを取得
-			this.permisson = (String) isLogin.get(KEY_USERPERMISS);
+			this.permisson = (String) result.get(KEY_USERPERMISS);
 
 			return true;
 		} catch (Exception e) {

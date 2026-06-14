@@ -3,6 +3,7 @@ package jp.nw.model;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,7 +20,8 @@ public class LoginLogic {
 	// SQL発行オブジェクト
 	private DBBase dbCon = null;
 	// SQL結果格納Map
-	private Map<String, Object> selectResultMap = null;
+	// private Map<String, Object> selectResultMap = null;
+	private List<Map<String, Object>> resultList = null;
 
 	// パスワード整合
 	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -30,26 +32,44 @@ public class LoginLogic {
 
 			// SQL SELECT共通部品実行
 			dbCon = new DBBase();
-			this.selectResultMap = dbCon.userInfoSql(query);
+			// this.selectResultMap = (Map<String, Object>) dbCon.execute(query);
+			this.resultList = (List<Map<String, Object>>) dbCon.execute(query);
+
+			// 取得結果Mapの取得
 			param = new HashMap<>();
 
 			// SQL実行結果を返却Mapへ格納(もっとスマートなやり方に追々修正)
-			for (String key : this.selectResultMap.keySet()) {
-				param.put(key, this.selectResultMap.get(key));
+			// for (String key : this.selectResultMap.keySet()) {
+			// param.put(key, this.selectResultMap.get(key));
+			// }
+			if (!this.resultList.isEmpty()) {
+				for (String key : this.resultList.get(0).keySet()) {
+					param.put(key, this.resultList.get(0).get(key));
+				}
 			}
 
 			// パスワード整合性チェック
-			if (this.passwordEncoder.matches(userEntity.getPassword(), (String) selectResultMap.get("password"))) {
-				param.put("userid", this.selectResultMap.get("user_id"));
-				param.put("permission", this.selectResultMap.get("permission"));
-				param.put("password_expiration", this.selectResultMap.get("password_expiration"));
+			// if (this.passwordEncoder.matches(userEntity.getPassword(), (String)
+			// selectResultMap.get("password"))) {
+			// param.put("userid", this.selectResultMap.get("user_id"));
+			// param.put("permission", this.selectResultMap.get("permission"));
+			// param.put("password_expiration",
+			// this.selectResultMap.get("password_expiration"));
+			// param.put("result", true);
+			// return param;
+			if (loginCheck(userEntity, param)) {
+				// param.put("userid", param.get("user_id"));
+				// param.put("permission", param.get("permission"));
+				// param.put("password_expiration", param.get("password_expiration"));
 				param.put("result", true);
 				return param;
 			} else {
 				param.put("result", false);
 				return param;
 			}
-		} catch (Exception e) {
+		} catch (
+
+		Exception e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
@@ -61,7 +81,7 @@ public class LoginLogic {
 		if (userInfoCheck(loginInfo) && passwordCheck(userEntity, loginInfo) && passwordExpireCheck(loginInfo)) {
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -71,7 +91,7 @@ public class LoginLogic {
 			return true;
 		}
 
-		return false;		
+		return false;
 	}
 
 	// パスワードの整合性
@@ -82,12 +102,13 @@ public class LoginLogic {
 
 		return false;
 	}
+
 	// パスワード有効期限
-	private boolean passwordExpireCheck(Map<String, Object> selectResultMap) { 
+	private boolean passwordExpireCheck(Map<String, Object> selectResultMap) {
 		// 現在日付を取得
 		Calendar cl = Calendar.getInstance();
 
-		//日付をyyyyMMddの形で出力する
+		// 日付をyyyyMMddの形で出力する
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		String str = sdf.format(cl.getTime());
 

@@ -6,6 +6,9 @@ import lombok.Data;
 @Data
 @Builder
 public class UserEntity {
+
+    private int id;
+
     private String userId;
 
     private String password;
@@ -15,6 +18,6 @@ public class UserEntity {
     private String permission;
 
     private String passwordExpiration;
-    
+
     private String deleteFlag;
 }

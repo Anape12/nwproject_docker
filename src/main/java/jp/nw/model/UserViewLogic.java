@@ -5,49 +5,54 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import jp.nw.base.BaseModel;
+import jp.nw.entity.UserEntity;
 import jp.nw.parts.DBBase;
+import jp.nw.parts.Query;
+import jp.nw.parts.SqlType;
 
-public class UserViewLogic extends BaseModel{
+public class UserViewLogic extends BaseModel {
 
 	// SQL発行オブジェクト
 	private DBBase dbCon = null;
 
 	// 返却情報格納List
 	private List<List<String>> retList = null;
-	
+
 	// ユーザー名
 	private static String USER_NAME = "name";
-	
+
 	// ユーザーパスワード
 	private static String USER_PASS = "password";
-	
+
 	// ユーザー権限
 	private static String USER_PERMS = "permission";
 
 	/**
 	 * ユーザ―情報一覧表示
-	 * */
-	public List<User> findAll(){
-		List<User> userList = new ArrayList<>();
+	 */
+	public List<UserEntity> findAll() {
+		List<UserEntity> userList = new ArrayList<>();
 
 		BaseModel.logger.writeInfo("UsreViewLogic-findAll");
-		
+
 		// Connection取得
 		dbCon = new DBBase();
 
-		try(Connection conn = dbCon.getConnection()){
+		try (Connection conn = dbCon.getConnection()) {
 
 			// テーブル名
 			String trgTable = "users_info";
 			// カラム情報
 			List<String> colList = new ArrayList<String>();
 			colList.add("id");
-			colList.add("name");
+			colList.add("user_id");
 			colList.add("password");
 			colList.add("permission");
 			// 検索条件
@@ -55,80 +60,106 @@ public class UserViewLogic extends BaseModel{
 			whereInfo.put("delete_flg", "0");
 			whereInfo.put("PROCESS_INFO", "ORDER BY id");
 
+			LinkedHashMap<String, Object> conditions = new LinkedHashMap<>();
+			conditions.put("delete_flg", "0");
+
+			Map<String, List<String>> querySub = new HashMap<>();
+			querySub.put("PROCESS_INFO", Arrays.asList("ORDER BY id"));
+
 			retList = new ArrayList<List<String>>();
 
 			// 要動作チェック(DBでint型のカラムは失敗するはず)
-			retList = dbCon.selectSql(trgTable, colList, whereInfo);
+			Query query = Query.builder()
+					.sqlType(SqlType.SELECT)
+					.tableName(trgTable)
+					.selectColumns(colList)
+					.conditions(conditions)
+					.querySub(querySub)
+					.build();
 
-			for(List<String> rowInfo : retList) {
-				int num = Integer.parseInt(rowInfo.get(0));
-				String name = rowInfo.get(1);
-				String pass = rowInfo.get(2);
-				int permission = Integer.parseInt(rowInfo.get(3));
-				User mutter = new User(num, name, pass, permission);
-				userList.add(mutter);
+			List<Map<String, Object>> result = (List<Map<String, Object>>) dbCon.execute(query);
+
+			for (Map<String, Object> rowInfo : result) {
+				int id = (int) rowInfo.get("id");
+				String name = (String) rowInfo.get("user_id");
+				String pass = (String) rowInfo.get("password");
+				String permission = (String) rowInfo.get("permission");
+				UserEntity userEntity = UserEntity.builder()
+						.id(id)
+						.userId(name)
+						.password(pass)
+						.permission(permission)
+						.build();
+				userList.add(userEntity);
 			}
-		}catch(SQLException e) {
+
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
 		}
 		return userList;
 	}
+
 	/**
 	 * 編集ユーザ－情報取得
-	 * */
-	public List<User> editUserInfo(String userId){
-		List<User> userList = new ArrayList<>();
+	 */
+	public List<UserEntity> editUserInfo(String userId) {
+		List<UserEntity> userList = new ArrayList<>();
 
 		// Connection取得
 		dbCon = new DBBase();
 
-		try(Connection conn = dbCon.getConnection()){
+		try (Connection conn = dbCon.getConnection()) {
 			String sql = "SELECT name,password,permission FROM users_info where name =? ORDER BY id";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, userId);
 
 			ResultSet rs = ps.executeQuery();
 
-			while(rs.next()) {
+			while (rs.next()) {
 				String name = rs.getString(USER_NAME);
 				String pass = rs.getString(USER_PASS);
-				int permission = rs.getInt(USER_PERMS);
-				User mutter = new User(name,pass,permission);
-				userList.add(mutter);
+				String permission = rs.getString(USER_PERMS);
+				UserEntity userEntity = UserEntity.builder()
+						.userId(name)
+						.password(pass)
+						.permission(permission)
+						.build();
+				userList.add(userEntity);
 			}
 
-		}catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
 		}
 		return userList;
 	}
+
 	/**
 	 * ユーザー情報変更確定処理
-	 * */
-	public List<User> confirUserInfo(String nowId, String userId, String userPass, String userPermission) {
-		List<User> userList = new ArrayList<>();
+	 */
+	public List<UserEntity> confirUserInfo(String nowId, String userId, String userPass, String userPermission) {
+		List<UserEntity> userList = new ArrayList<>();
 
 		// Connection取得
 		dbCon = new DBBase();
 
-		try(Connection conn = dbCon.getConnection()){
+		try (Connection conn = dbCon.getConnection()) {
 			// ユーザー情報編集チェック処理
-			if(!userInfoCheck(userId, userPass, userPermission)) {
-//				JFrame frame = new JFrame();
-//				JOptionPane.showMessageDialog(frame, "値を更新してください");
+			if (!userInfoCheck(userId, userPass, userPermission)) {
+				// JFrame frame = new JFrame();
+				// JOptionPane.showMessageDialog(frame, "値を更新してください");
 			} else {
 				String sql = "UPDATE users_info Set name = ?, password = ?, permission = ? where name=?";
 				PreparedStatement ps = conn.prepareStatement(sql);
-				int permission = Integer.parseInt(userPermission) ;
+				int permission = Integer.parseInt(userPermission);
 				ps.setString(1, userId);
 				ps.setString(2, userPass);
 				ps.setInt(3, permission);
 				ps.setString(4, nowId);
 				// 更新処理
-				int num =ps.executeUpdate();
-				if(num == 0) {
+				int num = ps.executeUpdate();
+				if (num == 0) {
 					userList = findAll();
 					return userList;
 				} else {
@@ -137,13 +168,15 @@ public class UserViewLogic extends BaseModel{
 				}
 			}
 			return userList;
-		}catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
+
 	/**
 	 * ユーザー情報更新チェック処理
+	 * 
 	 * @param user
 	 * @return boolean
 	 */
@@ -162,7 +195,7 @@ public class UserViewLogic extends BaseModel{
 
 			ResultSet rs = ps.executeQuery();
 
-			while(rs.next()) {
+			while (rs.next()) {
 				name = rs.getString("name");
 				pass = rs.getString("password");
 				permiss = rs.getInt("permission");
@@ -170,7 +203,7 @@ public class UserViewLogic extends BaseModel{
 			Integer i = Integer.valueOf(permiss);
 			String perm = i.toString();
 
-			if(name.equals(nowId) && pass.equals(nowPass) && permisstion.equals(perm)) {
+			if (name.equals(nowId) && pass.equals(nowPass) && permisstion.equals(perm)) {
 				return false;
 			}
 		} catch (SQLException e) {
@@ -191,15 +224,14 @@ public class UserViewLogic extends BaseModel{
 		String userPermission = postMap.get("userPerm");
 		// ユーザー情報編集
 		UserViewLogic userview = new UserViewLogic();
-		List<User> userList = userview.confirUserInfo(nowUserId,userId,userPass,userPermission);
+		List<UserEntity> userList = userview.confirUserInfo(nowUserId, userId, userPass, userPermission);
 
-		if(userList.size() == 0) {
+		if (userList.size() == 0) {
 			// エラー
 			return false;
 		} else {
 			return true;
 		}
-
 
 	}
 }

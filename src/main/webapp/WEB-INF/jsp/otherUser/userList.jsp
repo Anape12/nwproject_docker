@@ -1,13 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ page import="jp.nw.model.User,java.util.List" %>
+<%@ page import="jp.nw.entity.UserEntity,java.util.List" %>
 <%-- <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> --%>
 <%
-User loginUser = (User) session.getAttribute("loginUser");
-List<User> userList = (List<User>) request.getAttribute("userList");
+UserEntity loginUser = (UserEntity) session.getAttribute("loginUser");
+List<UserEntity> userList = (List<UserEntity>) request.getAttribute("userList");
 String errorMsg = (String) request.getAttribute("errorMsg");
-String userInfo = loginUser.getName();
-userInfo = userInfo + ":" +loginUser.getPass();
+String userInfo = loginUser.getUserId();
+userInfo = userInfo + ":" +loginUser.getPassword();
 %>
 <!DOCTYPE html>
 <script src='http://ajax.aspnetcdn.com/ajax/modernizr/modernizr-2.8.3.js'></script>
@@ -31,7 +31,7 @@ jQuery(window).on('load', function() {
 });
 </script>
 <title>ユーザー一覧(管理者モード)</title>
-<%= loginUser.getName() %>さん、ログイン中
+<%= loginUser.getUserId() %>さん、ログイン中
 </head>
 <body>
 	<div style="width:200px"></div>
@@ -49,12 +49,12 @@ jQuery(window).on('load', function() {
 	      <th>パスワード</th>
 	      <th>権限レベル（1:管理者/2:通常）</th>
 	  </tr>
-		<% for(User userinfo:userList) { %>
+		<% for(UserEntity userinfo:userList) { %>
 		<tr>
-			<th><input type="radio" name="radiobutton" value=<%=userinfo.getName() %>></th>
-		  <th><%=userinfo.getNum() %></th>
-		  <th><%=userinfo.getName() %></th>
-		  <th><%=userinfo.getPass() %></th>
+		  <th><input type="radio" name="radiobutton" value=<%=userinfo.getUserId() %>></th>
+		  <th><%=userinfo.getId() %></th>
+		  <th><%=userinfo.getUserId() %></th>
+		  <th><%=userinfo.getPassword() %></th>
 		  <th><%=userinfo.getPermission() %></th>
 	  </tr>
 	  <%} %>
