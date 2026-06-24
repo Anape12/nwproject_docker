@@ -41,25 +41,29 @@ jQuery(window).on('load', function() {
 	<p><%= errorMsg %></p>
 	<% } %>
 	<form method="post" action="${pageContext.request.contextPath}/UserView" name="form1">
-	<table border="7" style="margin-left:450px">
-	  <tr class="tr-back">
-	      <th>選択</th>
-	      <th>No</th>
-	      <th>ユーザーID</th>
-	      <th>パスワード</th>
-	      <th>権限レベル（1:管理者/2:通常）</th>
-	  </tr>
-		<% for(UserEntity userinfo:userList) { %>
-		<tr>
-		  <th><input type="radio" name="radiobutton" value=<%=userinfo.getUserId() %>></th>
-		  <th><%=userinfo.getId() %></th>
-		  <th><%=userinfo.getUserId() %></th>
-		  <th><%=userinfo.getPassword() %></th>
-		  <th><%=userinfo.getPermission() %></th>
-	  </tr>
-	  <%} %>
-	  </table>
-	<input class="search-btn3" style="margin-left:570px; margin-top:30px" type="submit" name="change" value="変更画面へ"  onclick="return checkForm();">
+		<table border="7" style="margin-left:450px">
+		<tr class="tr-back">
+			<th>選択</th>
+			<th>No</th>
+			<th>ユーザーID</th>
+			<th>権限レベル（1:管理者/2:通常）</th>
+		</tr>
+			<% for(UserEntity userinfo:userList) { %>
+			<tr>
+			<th><input type="radio" name="radiobutton" value=<%=userinfo.getUserId() %>></th>
+			<th><%=userinfo.getId() %></th>
+			<th><%=userinfo.getUserId() %></th>
+			<th><%=userinfo.getPermission() %></th>
+		</tr>
+		<%} %>
+		</table>
+		<button class="search-btn3" style="margin-left:570px; margin-top:30px" type="submit" name="action" value="change" onclick="return checkForm();">
+			変更画面へ
+		</button>
+		<br/>
+		<button class="search-btn3" style="margin-left:570px; margin-top:30px" type="submit" name="action" value="reset" onclick="return checkForm();">
+			パスワードを初期化
+		</button>
 	</form>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/UserListCheck.js"></script>
 </body>

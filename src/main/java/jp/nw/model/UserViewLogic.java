@@ -110,18 +110,18 @@ public class UserViewLogic extends BaseModel {
 		dbCon = new DBBase();
 
 		try (Connection conn = dbCon.getConnection()) {
-			String sql = "SELECT name,password,permission FROM users_info where name =? ORDER BY id";
+			String sql = "SELECT user_id,password,permission FROM users_info where user_id =? ORDER BY id";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, userId);
 
 			ResultSet rs = ps.executeQuery();
 
 			while (rs.next()) {
-				String name = rs.getString(USER_NAME);
-				String pass = rs.getString(USER_PASS);
-				String permission = rs.getString(USER_PERMS);
+				String id = rs.getString("user_id");
+				String pass = rs.getString("password");
+				String permission = rs.getString("permission");
 				UserEntity userEntity = UserEntity.builder()
-						.userId(name)
+						.userId(id)
 						.password(pass)
 						.permission(permission)
 						.build();
@@ -150,7 +150,7 @@ public class UserViewLogic extends BaseModel {
 				// JFrame frame = new JFrame();
 				// JOptionPane.showMessageDialog(frame, "値を更新してください");
 			} else {
-				String sql = "UPDATE users_info Set name = ?, password = ?, permission = ? where name=?";
+				String sql = "UPDATE users_info Set user_id = ?, password = ?, permission = ? where user_id=?";
 				PreparedStatement ps = conn.prepareStatement(sql);
 				int permission = Integer.parseInt(userPermission);
 				ps.setString(1, userId);
@@ -189,14 +189,14 @@ public class UserViewLogic extends BaseModel {
 
 		try {
 			Connection con = dbCon.getConnection();
-			String sql = "SELECT name, password, permission FROM users_info WHERE name = ?";
+			String sql = "SELECT user_id, password, permission FROM users_info WHERE user_id = ?";
 			PreparedStatement ps = con.prepareStatement(sql);
 			ps.setString(1, nowId);
 
 			ResultSet rs = ps.executeQuery();
 
 			while (rs.next()) {
-				name = rs.getString("name");
+				name = rs.getString("user_id");
 				pass = rs.getString("password");
 				permiss = rs.getInt("permission");
 			}

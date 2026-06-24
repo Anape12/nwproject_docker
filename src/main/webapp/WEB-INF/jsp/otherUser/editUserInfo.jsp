@@ -32,14 +32,12 @@ jQuery(window).on('load', function() {
 	  <tr>
 	      <th>変更前ユーザーID</th>
 	      <th>変更後ユーザーID</th>
-	      <th>変更後パスワード</th>
 	      <th>変更後権限レベル（1:管理者/2:通常）</th>
 	  </tr>
 		<% for(UserEntity userinfo:userList) { %>
 		<tr>
 		  <th><input type="text" name="nowID" value=<%=userinfo.getUserId() %> readonly style="background-color:#e9e9e9"></th>
 		  <th><input type="text" name="editID" value=<%=userinfo.getUserId() %>></th>
-		  <th><input type="text" name="editPass" value=<%=userinfo.getPassword() %>></th>
 		  <th><input type="text" name="editPermission" value=<%=userinfo.getPermission() %>></th>
 		</tr>
 
@@ -47,8 +45,9 @@ jQuery(window).on('load', function() {
 		</table>
 		<input class="search-btn3" style="margin-left:570px; margin-top:30px" type="submit" name="change" value="変更確定">
 	</form>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/UserListCheck.js"></script>
-		<input class="search-btn3" style="margin-left:570px; margin-top:30px" type="submit" name="change" value="削除確定(工事中)">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/UserListCheck.js"></script>
+	<input class="search-btn3" style="margin-left:570px; margin-top:30px" type="submit" name="change" value="削除確定(工事中)">
+	<br/>
 	<button class="search-btn2" style="margin-left:570px; margin-top:30px" name="userInfo" onclick="window.close();">ウィンドウを閉じる</button>
 </body>
 </html>

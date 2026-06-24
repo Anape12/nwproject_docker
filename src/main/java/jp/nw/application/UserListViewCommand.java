@@ -35,14 +35,12 @@ public class UserListViewCommand extends ApplicationCommand {
 	protected boolean doCommandData() {
 
 		try {
-
 			// ユーザー情報一覧取得処理
 			UserViewLogic userview = new UserViewLogic();
 			this.userList = userview.findAll();
 			this.request.setAttribute("userList", this.userList);
 
 			return true;
-
 		} catch (Exception e) {
 			this.logger.writeInfo("SQL Error");
 			return false;

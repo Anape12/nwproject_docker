@@ -116,8 +116,31 @@ public class DBBase {
 	}
 
 	private Object executeUpdate(Query query) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+
+			String sql = createUpdateSql(query);
+
+			PreparedStatement ps = con.prepareStatement(sql);
+
+			int index = 1;
+
+			// SET句
+			for (Object value : query.getValues().values()) {
+
+				ps.setObject(index++, value);
+			}
+
+			// WHERE句
+			for (Object value : query.getConditions().values()) {
+
+				ps.setObject(index++, value);
+			}
+
+			return ps.executeUpdate();
+
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private Object executeDelete(Query query) {
@@ -208,4 +231,24 @@ public class DBBase {
 		return resultList;
 	}
 
+	private String createUpdateSql(Query query) {
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("UPDATE ");
+		sb.append(query.getTableName());
+
+		sb.append(" SET ");
+
+		for (String key : query.getValues().keySet()) {
+			sb.append(key);
+			sb.append(" = ?,");
+		}
+
+		sb.setLength(sb.length() - 1);
+
+		sb.append(createWhereInfo(query.getConditions()));
+
+		return sb.toString();
+	}
 }
