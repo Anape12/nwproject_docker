@@ -1,20 +1,32 @@
 name: Deploy to Raspberry Pi
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main   # mainならmainに変更
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: SSH Test
+      - uses: actions/checkout@v4
+
+      - name: Connect Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Deploy
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            hostname
-            whoami
-            pwd
+            cd ~/workspace/nwproject_docker
+            git pull
+            chmod +x mvnw
+            ./mvnw clean install
+            cd .devcontainer
+            docker compose up -d --build
