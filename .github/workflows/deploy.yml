@@ -28,18 +28,18 @@ jobs:
           oauth-secret: ${{ secrets.TAILSCALE_CLIENT_SECRET }}
           tags: tag:ci
 
-      # 疎通確認
+      # Tailscale疎通確認
       - name: Check Tailscale
         run: |
           tailscale status
           ping -c 3 ${{ secrets.HOST }}
 
-      # SSH確認
+      # SSH疎通確認
       - name: Check SSH Port
         run: |
           nc -zv ${{ secrets.HOST }} 22
 
-      # デプロイ
+      # テスト・ビルド・デプロイ
       - name: Test & Deploy
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -70,12 +70,12 @@ jobs:
             echo "===== Container Status ====="
             docker compose ps
 
-            echo "===== Waiting for Tomcat ====="
+            echo "===== Health Check ====="
 
             READY=false
 
             for i in {1..30}; do
-              if curl -fs http://localhost:8080 >/dev/null 2>&1; then
+              if curl -fsL http://localhost:8080/Login >/dev/null 2>&1; then
                 READY=true
                 break
               fi
