@@ -10,14 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ソース取得
       - uses: actions/checkout@v4
 
+      # Javaセットアップ
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
           cache: maven
 
+      # Tailscale接続
       - name: Connect Tailscale
         uses: tailscale/github-action@v3
         with:
@@ -25,15 +28,18 @@ jobs:
           oauth-secret: ${{ secrets.TAILSCALE_CLIENT_SECRET }}
           tags: tag:ci
 
+      # 疎通確認
       - name: Check Tailscale
         run: |
           tailscale status
           ping -c 3 ${{ secrets.HOST }}
 
+      # SSH確認
       - name: Check SSH Port
         run: |
           nc -zv ${{ secrets.HOST }} 22
 
+      # テスト・ビルド・デプロイ
       - name: Test & Deploy
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -46,6 +52,7 @@ jobs:
 
             cd ~/workspace/nwproject_docker
 
+            echo "===== Git Pull ====="
             git pull
 
             chmod +x mvnw
@@ -61,6 +68,17 @@ jobs:
             docker compose up -d --build
 
             echo "===== Health Check ====="
-            curl -f http://localhost:8080 || exit 1
+
+            for i in {1..30}; do
+              if curl -fs http://localhost:8080 >/dev/null; then
+                echo "Application is ready."
+                break
+              fi
+
+              echo "Waiting for application... ($i/30)"
+              sleep 2
+            done
+
+            curl -fs http://localhost:8080
 
             echo "===== Deploy Complete ====="
