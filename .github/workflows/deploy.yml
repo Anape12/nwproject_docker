@@ -39,7 +39,7 @@ jobs:
         run: |
           nc -zv ${{ secrets.HOST }} 22
 
-      # テスト・ビルド・デプロイ
+      # デプロイ
       - name: Test & Deploy
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -67,18 +67,31 @@ jobs:
             cd .devcontainer
             docker compose up -d --build
 
-            echo "===== Health Check ====="
+            echo "===== Container Status ====="
+            docker compose ps
+
+            echo "===== Waiting for Tomcat ====="
+
+            READY=false
 
             for i in {1..30}; do
-              if curl -fs http://localhost:8080 >/dev/null; then
-                echo "Application is ready."
+              if curl -fs http://localhost:8080 >/dev/null 2>&1; then
+                READY=true
                 break
               fi
 
-              echo "Waiting for application... ($i/30)"
+              echo "Waiting... ($i/30)"
               sleep 2
             done
 
-            curl -fs http://localhost:8080
+            if [ "$READY" = false ]; then
+              echo "===== Tomcat Logs ====="
+              docker logs my-tomcat --tail 200
+
+              echo "===== Flyway Logs ====="
+              docker logs devcontainer-flyway-1 --tail 100 || true
+
+              exit 1
+            fi
 
             echo "===== Deploy Complete ====="
