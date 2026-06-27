@@ -12,6 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
       - name: Connect Tailscale
         uses: tailscale/github-action@v3
         with:
@@ -22,7 +28,11 @@ jobs:
       - name: Check Tailscale
         run: |
           tailscale status
-          ping -c 3 100.114.148.123
+          ping -c 3 ${{ secrets.HOST }}
+
+      - name: Check SSH Port
+        run: |
+          nc -zv ${{ secrets.HOST }} 22
 
       - name: Deploy
         uses: appleboy/ssh-action@v1.2.0
