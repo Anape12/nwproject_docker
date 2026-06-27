@@ -3,7 +3,7 @@ name: Deploy to Raspberry Pi
 on:
   push:
     branches:
-      - main   # mainならmainに変更
+      - main
 
 jobs:
   deploy:
@@ -34,16 +34,33 @@ jobs:
         run: |
           nc -zv ${{ secrets.HOST }} 22
 
-      - name: Deploy
+      - name: Test & Deploy
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 20m
           script: |
+            set -e
+
             cd ~/workspace/nwproject_docker
+
             git pull
+
             chmod +x mvnw
-            ./mvnw clean install
+
+            echo "===== Unit Test ====="
+            ./mvnw test
+
+            echo "===== Build ====="
+            ./mvnw clean install -DskipTests
+
+            echo "===== Docker Deploy ====="
             cd .devcontainer
             docker compose up -d --build
+
+            echo "===== Health Check ====="
+            curl -f http://localhost:8080 || exit 1
+
+            echo "===== Deploy Complete ====="
