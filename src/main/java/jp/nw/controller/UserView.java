@@ -22,6 +22,8 @@ public class UserView extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private BaseModel logger = null;
 
+	private CommandData commandOutput;
+
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -79,29 +81,19 @@ public class UserView extends HttpServlet {
 			case "reset":
 				InitializeUserCommand initializeCmd = new InitializeUserCommand();
 				initializeCmd.setCommandData(request, response);
-				initializeCmd.execute();
+				this.commandOutput = initializeCmd.execute();
 				break;
 		}
-		// // ユーザ情報取得処理
-		// UserListViewCommand command = new UserListViewCommand();
-		// command.setCommandData(request, response);
-		// // 処理を実行
-		// CommandData output = command.postExec();
 
-		// if (output.getValue("loginUser") == null) {
-		// ((HttpServletResponse)
-		// output.getValue("response")).sendRedirect("/nwproject/");
-		// ((HttpServletRequest)
-		// output.getValue("request")).setCharacterEncoding("UTF-8");
-		// ((HttpServletRequest) output.getValue("request")).setAttribute("errorMsg",
-		// "エラー");
-		// } else {
-		// RequestDispatcher dispatcher = ((HttpServletRequest)
-		// output.getValue("request"))
-		// .getRequestDispatcher("/WEB-INF/jsp/otherUser/editUserInfo.jsp");
-		// dispatcher.forward(((HttpServletRequest) output.getValue("request")),
-		// ((HttpServletResponse) output.getValue("response")));
-		// }
+		// 初期化完了後、ユーザ一覧画面に遷移する
+		boolean finshFlg = (Boolean) this.commandOutput.getValue("finshFlg");
+		if (finshFlg) {
+			request.setAttribute("successMsg", "パスワードを初期化しました。");
+			this.doGet(request, response);
+		}
+
+		// 失敗時は？
+
 	}
 
 }

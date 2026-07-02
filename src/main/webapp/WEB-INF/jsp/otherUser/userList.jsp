@@ -7,6 +7,7 @@ UserEntity loginUser = (UserEntity) session.getAttribute("loginUser");
 List<UserEntity> userList = (List<UserEntity>) request.getAttribute("userList");
 String errorMsg = (String) request.getAttribute("errorMsg");
 String userInfo = loginUser.getUserId();
+String successMsg = (String) request.getAttribute("successMsg");
 userInfo = userInfo + ":" +loginUser.getPassword();
 %>
 <!DOCTYPE html>
@@ -40,23 +41,28 @@ jQuery(window).on('load', function() {
 	<% if(errorMsg != null) { %>
 	<p><%= errorMsg %></p>
 	<% } %>
+	<% if(successMsg != null) { %>
+		<p style="margin-left:450px; color:#14df5e; font-weight:bold;">
+			<%= successMsg %>
+		</p>
+	<% } %>
 	<form method="post" action="${pageContext.request.contextPath}/UserView" name="form1">
-		<table border="7" style="margin-left:450px">
-		<tr class="tr-back">
-			<th>選択</th>
-			<th>No</th>
-			<th>ユーザーID</th>
-			<th>権限レベル（1:管理者/2:通常）</th>
-		</tr>
-			<% for(UserEntity userinfo:userList) { %>
-			<tr>
+	<table border="7" style="margin-left:450px">
+	  <tr class="tr-back">
+	      <th>選択</th>
+	      <th>No</th>
+	      <th>ユーザーID</th>
+	      <th>権限レベル（1:管理者/2:通常）</th>
+	  </tr>
+		<% for(UserEntity userinfo:userList) { %>
+		<tr>
 			<th><input type="radio" name="radiobutton" value=<%=userinfo.getUserId() %>></th>
-			<th><%=userinfo.getId() %></th>
-			<th><%=userinfo.getUserId() %></th>
-			<th><%=userinfo.getPermission() %></th>
-		</tr>
-		<%} %>
-		</table>
+		  <th><%=userinfo.getId() %></th>
+		  <th><%=userinfo.getUserId() %></th>
+		  <th><%=userinfo.getPermission() %></th>
+	  </tr>
+	  <%} %>
+	  </table>
 		<button class="search-btn3" style="margin-left:570px; margin-top:30px" type="submit" name="action" value="change" onclick="return checkForm();">
 			変更画面へ
 		</button>
