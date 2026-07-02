@@ -28,19 +28,31 @@ jobs:
           oauth-secret: ${{ secrets.TAILSCALE_CLIENT_SECRET }}
           tags: tag:ci
 
-      # Tailscale疎通確認
+      # Tailscale状態確認（参考情報）
       - name: Check Tailscale
-        run: |
-          tailscale status
-          ping -c 3 ${{ secrets.HOST }}
+        run: tailscale status
 
-      # SSH疎通確認
+      # Raspberry Pi疎通確認
+      - name: Check Raspberry Pi
+        id: check_pi
+        run: |
+          if ping -c 3 ${{ secrets.HOST }} >/dev/null 2>&1; then
+            echo "online=true" >> $GITHUB_OUTPUT
+            echo "Raspberry Pi is ONLINE"
+          else
+            echo "online=false" >> $GITHUB_OUTPUT
+            echo "Raspberry Pi is OFFLINE"
+          fi
+
+      # SSHポート確認
       - name: Check SSH Port
+        if: steps.check_pi.outputs.online == 'true'
         run: |
           nc -zv ${{ secrets.HOST }} 22
 
       # テスト・ビルド・デプロイ
       - name: Test & Deploy
+        if: steps.check_pi.outputs.online == 'true'
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOST }}
@@ -95,3 +107,12 @@ jobs:
             fi
 
             echo "===== Deploy Complete ====="
+
+      # Pi停止時のメッセージ
+      - name: Skip Deploy
+        if: steps.check_pi.outputs.online != 'true'
+        run: |
+          echo "======================================="
+          echo " Raspberry Pi is offline."
+          echo " Deploy has been skipped."
+          echo "======================================="
