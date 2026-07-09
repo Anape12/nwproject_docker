@@ -28,7 +28,8 @@
         "vscjava.vscode-java-pack",
         "adashen.vscode-tomcat",
         "redhat.vscode-xml",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "cweijan.dbclient-jdbc"
       ]
     }
   },

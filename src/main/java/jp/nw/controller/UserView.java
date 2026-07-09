@@ -14,9 +14,6 @@ import jp.nw.application.UserListViewCommand;
 import jp.nw.base.BaseModel;
 import jp.nw.base.CommandData;
 
-/**
- * Servlet implementation class UserView
- */
 @WebServlet("/UserView")
 public class UserView extends HttpServlet {
 	private static final long serialVersionUID = 1L;

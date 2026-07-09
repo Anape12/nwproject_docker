@@ -1,11 +1,21 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%
+String errorMsg = (String) request.getAttribute("errorMsg");
+%>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
+<meta charset="UTF-8">
+<title>エラー</title>
 </head>
 <body style="background:#deafd3;">
-<div>エラーが発生しました</div>
+
+<h2>エラーが発生しました</h2>
+
+<% if (errorMsg != null) { %>
+    <p style="color:red;"><%= errorMsg %></p>
+<% } %>
+
 </body>
 </html>

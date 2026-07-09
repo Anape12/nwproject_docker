@@ -19,7 +19,7 @@ import jp.nw.entity.UserEntity;
  * Servlet implementation class Login
  */
 @WebServlet("/Login")
-public class Login extends HttpServlet {
+public class LoginController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private BaseModel baseModel = null;
@@ -30,7 +30,7 @@ public class Login extends HttpServlet {
 	 *
 	 *      HttpServlet()
 	 */
-	public Login() {
+	public LoginController() {
 		super();
 		this.baseModel = new BaseModel();
 	}

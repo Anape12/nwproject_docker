@@ -22,7 +22,7 @@ import jp.nw.model.UserViewLogic;
  * Servlet implementation class UserView
  */
 @WebServlet("/EditUserView")
-public class EditUserView extends HttpServlet {
+public class EditUserViewController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Map<String, String> postMap;
 	private BaseModel logger = null;
@@ -30,7 +30,7 @@ public class EditUserView extends HttpServlet {
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
-	public EditUserView() {
+	public EditUserViewController() {
 		super();
 		// TODO Auto-generated constructor stub
 		this.logger = new BaseModel();
@@ -90,14 +90,19 @@ public class EditUserView extends HttpServlet {
 			throws ServletException, IOException {
 		response.setContentType("text/html; charset=Shift_JIS");
 		// 編集されたユーザ情報（ID,パスワード,権限レベル）を取得
-		String nowUserId = postMap.get("nowId");
-		String userId = postMap.get("userId");
-		String userPass = postMap.get("userPass");
-		String userPermission = postMap.get("userPerm");
+		// String nowUserId = postMap.get("nowId");
+		// String userId = postMap.get("userId");
+		// String userPass = postMap.get("userPass");
+		// String userPermission = postMap.get("userPerm");
+
+		String nowID = (String) request.getAttribute("nowID");
+		String editID = (String) request.getAttribute("editID");
+		String editPassword = (String) request.getAttribute("editPassword");
+		String editPermission = (String) request.getAttribute("editPermission");
 
 		// ユーザー情報編集
 		UserViewLogic userview = new UserViewLogic();
-		List<UserEntity> userList = userview.confirUserInfo(nowUserId, userId, userPass, userPermission);
+		List<UserEntity> userList = userview.confirUserInfo(nowID, editID, editPassword, editPermission);
 
 		if (userList.size() == 0) {
 			// エラー処理もしくはエラー画面を導入予定

@@ -19,3 +19,6 @@
 1. cd nwproject_docker
 1. mvnw package
 1. ブラウザ super reload
+
+# VSCodeキャッシュ先
+    * %APPDATA%\Code\User\workspaceStorage

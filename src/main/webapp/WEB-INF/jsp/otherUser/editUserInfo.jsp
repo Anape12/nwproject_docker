@@ -27,21 +27,24 @@ jQuery(window).on('load', function() {
 	<% if(errorMsg != null) { %>
 	<p><%= errorMsg %></p>
 	<% } %>
-	<form method="post" action="${pageContext.request.contextPath}/EditUserView" name="form1" onsubmit="event.preventDefault(); checkUserInfo();">
+	<form method="post" action="${pageContext.request.contextPath}/UpdateUserInfo" name="form1" onsubmit="return checkUserInfo();">
 		<table border="1" style="margin-left:350px">
 	  <tr>
 	      <th>変更前ユーザーID</th>
 	      <th>変更後ユーザーID</th>
+		  <th>変更後パスワード</th>
 	      <th>変更後権限レベル（1:管理者/2:通常）</th>
 	  </tr>
 		<% for(UserEntity userinfo:userList) { %>
 		<tr>
 		  <th><input type="text" name="nowID" value=<%=userinfo.getUserId() %> readonly style="background-color:#e9e9e9"></th>
 		  <th><input type="text" name="editID" value=<%=userinfo.getUserId() %>></th>
+		  <th><input type="text" name="editPassword" value="" placeholder="変更後パスワードを入力"></th>
 		  <th><input type="text" name="editPermission" value=<%=userinfo.getPermission() %>></th>
 		</tr>
 
 		<% } %>
+		<p style="color: red;">※パスワードは半角英数字で入力してください</p>
 		</table>
 		<input class="search-btn3" style="margin-left:570px; margin-top:30px" type="submit" name="change" value="変更確定">
 	</form>

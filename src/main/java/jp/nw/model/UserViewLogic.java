@@ -14,6 +14,7 @@ import java.util.Map;
 import jp.nw.base.BaseModel;
 import jp.nw.entity.UserEntity;
 import jp.nw.parts.DBBase;
+import jp.nw.parts.PasswordUtil;
 import jp.nw.parts.Query;
 import jp.nw.parts.SqlType;
 
@@ -154,7 +155,7 @@ public class UserViewLogic extends BaseModel {
 				PreparedStatement ps = conn.prepareStatement(sql);
 				int permission = Integer.parseInt(userPermission);
 				ps.setString(1, userId);
-				ps.setString(2, userPass);
+				ps.setString(2, PasswordUtil.encode(userPass));
 				ps.setInt(3, permission);
 				ps.setString(4, nowId);
 				// 更新処理

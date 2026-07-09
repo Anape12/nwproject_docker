@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jp.nw.entity.UserEntity;
 import jp.nw.parts.DBBase;
+import jp.nw.parts.PasswordUtil;
 import jp.nw.parts.Query;
 
 public class LoginLogic {
@@ -32,16 +33,12 @@ public class LoginLogic {
 
 			// SQL SELECT共通部品実行
 			dbCon = new DBBase();
-			// this.selectResultMap = (Map<String, Object>) dbCon.execute(query);
 			this.resultList = (List<Map<String, Object>>) dbCon.execute(query);
 
 			// 取得結果Mapの取得
 			param = new HashMap<>();
 
 			// SQL実行結果を返却Mapへ格納(もっとスマートなやり方に追々修正)
-			// for (String key : this.selectResultMap.keySet()) {
-			// param.put(key, this.selectResultMap.get(key));
-			// }
 			if (!this.resultList.isEmpty()) {
 				for (String key : this.resultList.get(0).keySet()) {
 					param.put(key, this.resultList.get(0).get(key));
@@ -49,18 +46,7 @@ public class LoginLogic {
 			}
 
 			// パスワード整合性チェック
-			// if (this.passwordEncoder.matches(userEntity.getPassword(), (String)
-			// selectResultMap.get("password"))) {
-			// param.put("userid", this.selectResultMap.get("user_id"));
-			// param.put("permission", this.selectResultMap.get("permission"));
-			// param.put("password_expiration",
-			// this.selectResultMap.get("password_expiration"));
-			// param.put("result", true);
-			// return param;
 			if (loginCheck(userEntity, param)) {
-				// param.put("userid", param.get("user_id"));
-				// param.put("permission", param.get("permission"));
-				// param.put("password_expiration", param.get("password_expiration"));
 				param.put("result", true);
 				return param;
 			} else {
@@ -96,7 +82,7 @@ public class LoginLogic {
 
 	// パスワードの整合性
 	private boolean passwordCheck(UserEntity userEntity, Map<String, Object> selectResultMap) {
-		if (this.passwordEncoder.matches(userEntity.getPassword(), (String) selectResultMap.get("password"))) {
+		if (PasswordUtil.matches(userEntity.getPassword(), (String) selectResultMap.get("password"))) {
 			return true;
 		}
 
