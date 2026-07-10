@@ -9,10 +9,11 @@ UserEntity loginUser = (UserEntity) session.getAttribute("loginUser");
 <html>
 <head>
 <meta charset="UTF-8">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style11.css">
-<title><%= loginUser.getUserId() %>さん　ログイン中</title>
 </head>
 <body style="background:#9ad468;">
+	<jsp:include page="/WEB-INF/jsp/common/header.jsp"/>
 	<form action="${pageContext.request.contextPath}/UserInsert" method="post">
 		<div style="text-align:center;">
 		<table border="1" align="center">

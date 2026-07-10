@@ -32,7 +32,7 @@ public class UserView extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		// ユーザ所法取得処理
+		// ユーザ情報取得処理
 		UserListViewCommand command = new UserListViewCommand();
 		command.setCommandData(request, response);
 		// 処理を実行

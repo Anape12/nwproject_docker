@@ -10,6 +10,7 @@ String errorMsg = (String) request.getAttribute("errorMsg");
 <html>
 <head>
 <meta charset="UTF-8">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style11.css">
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script>
@@ -18,9 +19,9 @@ jQuery(window).on('load', function() {
 });
 </script>
 <title>ユーザ－情報編集(管理者モード)</title>
-<%= loginUser.getUserId() %>さん、ログイン中
 </head>
 <body>
+	<jsp:include page="/WEB-INF/jsp/common/header.jsp"/>
 	<div style="width:200px"></div>
 	<h1 style="margin-left:550px">ユーザー情報変更</h1>
 	<div style="width:200px"></div>

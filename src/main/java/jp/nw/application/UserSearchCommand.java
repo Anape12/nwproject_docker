@@ -9,9 +9,8 @@ import javax.servlet.http.HttpSession;
 import jp.nw.base.ApplicationCommand;
 import jp.nw.entity.UserEntity;
 import jp.nw.model.UserViewLogic;
-import jp.nw.util.RequestUtil;
 
-public class UserListViewCommand extends ApplicationCommand {
+public class UserSearchCommand extends ApplicationCommand {
 
 	private HttpServletRequest request = null;
 	private HttpServletResponse response = null;
@@ -25,12 +24,9 @@ public class UserListViewCommand extends ApplicationCommand {
 	private static final String KEY_RES = "response";
 
 	public boolean setCommandData(HttpServletRequest request, HttpServletResponse response) {
-
 		this.request = request;
 		this.response = response;
-
 		return true;
-
 	}
 
 	protected boolean doCommandData() {
@@ -38,9 +34,8 @@ public class UserListViewCommand extends ApplicationCommand {
 		try {
 			// ユーザー情報一覧取得処理
 			UserViewLogic userview = new UserViewLogic();
-			this.userList = userview.findAll();
+			this.userList = userview.editUserInfo(this.request.getParameter("userId"));
 			this.request.setAttribute("userList", this.userList);
-
 			return true;
 		} catch (Exception e) {
 			this.logger.writeInfo("SQL Error");
@@ -73,36 +68,4 @@ public class UserListViewCommand extends ApplicationCommand {
 
 		return true;
 	}
-
-	protected boolean postCommandData() {
-		this.response.setContentType("text/html; charset=Shift_JIS");
-		return true;
-	}
-
-	protected boolean postExeCommand() {
-		// 選択されたユーザーIDを取得
-		String userId = RequestUtil.getValue(this.request, "radiobutton", "userId");
-		if (userId == null || userId.trim().isEmpty()) {
-			this.logger.writeInfo("ユーザーIDが選択されていません。");
-			return false;
-		}
-
-		// ユーザー情報編集
-		UserViewLogic userview = new UserViewLogic();
-		List<UserEntity> userList = userview.editUserInfo(userId);
-		this.request.setAttribute("userList", userList);
-		HttpSession session = this.request.getSession();
-		this.loginUser = (UserEntity) session.getAttribute("loginUser");
-
-		return true;
-	}
-
-	protected boolean postCommandOutput() {
-		this.output.setValue(KEY_USER, this.loginUser);
-		this.output.setValue(KEY_REQ, this.request);
-		this.output.setValue(KEY_RES, this.response);
-
-		return true;
-	}
-
 }

@@ -111,20 +111,22 @@ public class UserViewLogic extends BaseModel {
 		dbCon = new DBBase();
 
 		try (Connection conn = dbCon.getConnection()) {
-			String sql = "SELECT user_id,password,permission FROM users_info where user_id =? ORDER BY id";
+			String sql = "SELECT id, user_id,password,permission FROM users_info where user_id =? ORDER BY id";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, userId);
 
 			ResultSet rs = ps.executeQuery();
 
 			while (rs.next()) {
-				String id = rs.getString("user_id");
-				String pass = rs.getString("password");
-				String permission = rs.getString("permission");
+				int retId = rs.getInt("id");
+				String retUserId = rs.getString("user_id");
+				String retPassword = rs.getString("password");
+				String retPermission = rs.getString("permission");
 				UserEntity userEntity = UserEntity.builder()
-						.userId(id)
-						.password(pass)
-						.permission(permission)
+						.id(retId)
+						.userId(retUserId)
+						.password(retPassword)
+						.permission(retPermission)
 						.build();
 				userList.add(userEntity);
 			}

@@ -9,17 +9,22 @@ String userId = loginUser.getUserId();
 <html>
 <head>
 <meta charset="UTF-8">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style11.css">
 <title>メインメニュー（<%=userId %>）</title>
 </head>
 <body>
 <body style="background:#63515f;">
-	<div style="width:200px margin-top:30px;"></div>
+	<jsp:include page="/WEB-INF/jsp/common/header.jsp"/>
+	<div style="width:200px; margin-top:30px;"></div>
 	<div style="text-align:center; background:#d3adf0; width:400px; margin:0 auto;">
-		<div style="text-align:center; width:400px;">
-		<p>ようこそ<%=userId %>さん</p>
-		</div>
+		<!-- <div style="text-align:center; width:400px;"> -->
+		<!-- <p>ようこそ<%=userId %>さん</p> -->
+		<!-- </div> -->
 		<div style="margin-top:50px; padding-top:10px;"></div>
+		<form action="${pageContext.request.contextPath}/UserSearch" target="_blank"  method="get">
+			<p><button class="search-btn4" type="submit">ユーザー情報検索</button></p>
+		</form>
 		<form action="${pageContext.request.contextPath}/ThreadController" target="_blank"  method="get">
 			<p><button class="search-btn4" type="submit">スレッド</button></p>
 		</form>

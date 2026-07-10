@@ -12,6 +12,7 @@ User loginUser = (User) session.getAttribute("loginUser");
 <title>登録情報確認</title>
 </head>
 <body style="background:#9ad468;">
+	<jsp:include page="/WEB-INF/jsp/common/header.jsp"/>
 	<p style="text-align:center">登録が完了しました</p>
 	<div style="text-align:center;">
 		<p><button class="search-btn2" onclick="window.close();">ウィンドウを閉じる</button></p>

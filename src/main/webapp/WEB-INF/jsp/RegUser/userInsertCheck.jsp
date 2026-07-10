@@ -12,6 +12,7 @@ User loginUser = (User) session.getAttribute("loginUser");
 <title>登録情報確認</title>
 </head>
 <body style="background:#9ad468;">
+	<jsp:include page="/WEB-INF/jsp/common/header.jsp"/>
 	<form action="${pageContext.request.contextPath}/UserInsertResult" method="get">
 		<div style="text-align:center;">
 		<p style="text-align:center">以下の情報で登録します</p>
