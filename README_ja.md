@@ -12,7 +12,7 @@
     * docker compose run --rm flyway
 
 # Playwriteのテスト実行
-    * npx playwrite test
+    * npx playwright test
 
 # 修正後の資産適用
 
