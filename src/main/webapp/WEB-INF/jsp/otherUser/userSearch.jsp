@@ -35,6 +35,7 @@ jQuery(window).on('load', function() {
 	<div style="width:200px"></div>
 	<div class="search-form">
 		<h1>ユーザー情報検索</h1>
+		<p>※ユーザー情報未入力の場合、全件検索となるためご注意ください。</p>
 		<form method="post" action="${pageContext.request.contextPath}/UserSearch" name="form1">
 			<input type="text" name="userId" placeholder="ユーザーIDを入力してください">
 			<button class="search-btn" type="submit">検索</button>
