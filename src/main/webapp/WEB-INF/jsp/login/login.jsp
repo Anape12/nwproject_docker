@@ -26,12 +26,12 @@ pageEncoding="UTF-8"%> <% %>
       <form action="${pageContext.request.contextPath}/Login" method="post">
         <div class="form-group">
           <label>ユーザーID</label>
-          <input type="text" name="userId" autocomplete="username">
+          <input type="text" id="userId" name="userId" autocomplete="username">
         </div>
 
         <div class="form-group">
           <label>パスワード</label>
-          <input type="password" name="password" autocomplete="current-password">
+          <input type="password" id="password" name="password" autocomplete="current-password">
         </div>
 
         <input class="login-btn" id="loginBtn" type="submit" value="ログイン" onclick="return checkForm();">
