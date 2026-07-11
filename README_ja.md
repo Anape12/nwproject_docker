@@ -14,6 +14,10 @@
 # Playwriteのテスト実行
     * npx playwright test
 
+# Flyway実行
+    * cd .devcontainer
+    * docker compose up flyway
+
 # 修正後の資産適用
 
 1. cd nwproject_docker

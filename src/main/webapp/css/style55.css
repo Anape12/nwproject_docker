@@ -104,3 +104,65 @@ table a:hover{
     border-radius:5px;
     cursor:pointer;
 }
+
+.edit-container{
+    width:700px;
+    margin:40px auto;
+}
+
+.edit-card{
+    background:white;
+    border-radius:12px;
+    padding:30px;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+
+.form-row{
+    display:flex;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.form-row label{
+    width:180px;
+    font-weight:bold;
+    color:#2c3e50;
+}
+
+.form-row input,
+.form-row select{
+    flex:1;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+.button-area{
+    margin-top:35px;
+    display:flex;
+    justify-content:center;
+    gap:20px;
+}
+
+.login-btn{
+    width:160px;
+}
+
+.delete-btn{
+    background:#e74c3c;
+    color:white;
+    border:none;
+    border-radius:5px;
+    padding:12px 20px;
+    cursor:pointer;
+}
+
+.close-btn{
+    background:#7f8c8d;
+    color:white;
+    border:none;
+    border-radius:5px;
+    padding:12px 20px;
+    cursor:pointer;
+}
+

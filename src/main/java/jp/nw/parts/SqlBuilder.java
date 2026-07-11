@@ -9,21 +9,21 @@ public class SqlBuilder {
 
         switch (query.getSqlType()) {
 
-        case SELECT:
-            return buildSelect(query);
+            case SELECT:
+                return buildSelect(query);
 
-        case INSERT:
-            return buildInsert(query);
+            case INSERT:
+                return buildInsert(query);
 
-        case UPDATE:
-            return buildUpdate(query);
+            case UPDATE:
+                return buildUpdate(query);
 
-        case DELETE:
-            return buildDelete(query);
+            case DELETE:
+                return buildDelete(query);
 
-        default:
-            throw new IllegalArgumentException(
-                    "Unsupported SQL Type : " + query.getSqlType());
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported SQL Type : " + query.getSqlType());
         }
     }
 
@@ -130,6 +130,11 @@ public class SqlBuilder {
     private String createColumnInfo(List<String> columns) {
 
         StringBuilder sb = new StringBuilder();
+
+        if (columns == null || columns.isEmpty()) {
+            sb.append("* ");
+            return sb.toString();
+        }
 
         for (String column : columns) {
             sb.append(column);

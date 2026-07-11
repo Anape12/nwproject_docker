@@ -1,6 +1,7 @@
 package jp.nw.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -13,6 +14,8 @@ import jp.nw.application.UserListViewCommand;
 import jp.nw.application.UserSearchCommand;
 import jp.nw.base.BaseModel;
 import jp.nw.base.CommandData;
+import jp.nw.entity.PermissionMasterEntity;
+import jp.nw.util.PermissionGetUtil;
 
 @WebServlet("/UserSearch")
 public class UserSearchController extends HttpServlet {
@@ -44,6 +47,10 @@ public class UserSearchController extends HttpServlet {
 
 			// 処理を実行
 			CommandData output = command.postExec();
+
+			// 権限レベルますたを参照
+			List<PermissionMasterEntity> permissionLevels = PermissionGetUtil.getAllPermissionLevels();
+			request.setAttribute("permissionLevels", permissionLevels);
 
 			RequestDispatcher dispatcher = ((HttpServletRequest) output.getValue("request"))
 					.getRequestDispatcher("/WEB-INF/jsp/otherUser/editUserInfo.jsp");

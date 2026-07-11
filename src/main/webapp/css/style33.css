@@ -1,14 +1,98 @@
 @charset "UTF-8";
-body {
-  background: #7ce2d9;
-  margin: 0;
+body{
+    background:#eef2f7;
+    font-family:"Yu Gothic","Meiryo",sans-serif;
 }
-#container {
-  width: 1000px;
-  margin: 0 auto;
-  padding: 30px 0 60px;
-  font-family: "M PLUS Rounded 1c";
+
+#container{
+    width:900px;
+    margin:40px auto;
 }
+
+.page-title{
+    margin:0;
+    color:#2c3e50;
+    font-size:34px;
+}
+
+.page-header{
+    width:900px;
+    margin:40px auto 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.new-thread-link{
+    color:#3498db;
+    text-decoration:none;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.new-thread-link:hover{
+    text-decoration:underline;
+}
+
+.thread-card{
+    background:white;
+    border-radius:12px;
+    padding:25px;
+    margin-bottom:25px;
+    box-shadow:0 4px 12px rgba(0,0,0,.12);
+    transition:.2s;
+}
+
+.thread-card:hover{
+    transform:translateY(-4px);
+}
+
+.thread-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.thread-header h2{
+    color:#2c3e50;
+    margin:0;
+}
+
+.thread-author{
+    color:#777;
+    font-size:14px;
+}
+
+.thread-content{
+    color:#555;
+    line-height:1.8;
+    margin-bottom:25px;
+}
+
+.thread-footer{
+    text-align:right;
+}
+
+.thread-footer a{
+    color:#3498db;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.thread-footer a:hover{
+    text-decoration:underline;
+}
+
+.new-thread{
+    float:right;
+    background:#3498db;
+    color:white;
+    padding:10px 18px;
+    border-radius:6px;
+    text-decoration:none;
+}
+
 .thread-title {
   width: 80%;
   margin: 0 auto 30px;
