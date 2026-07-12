@@ -46,55 +46,12 @@ public class EditUserViewController extends HttpServlet {
 		command.setCommandData(request, response);
 		command.execute();
 		// **********************************************
-
-		// 受け渡しパラメータの取得
-		// String param = request.getQueryString();
-		// // パラメータ区切り処理
-		// String[] params = param.split("&");
-		// Map<String, String> map = new HashMap<String, String>();
-		// String[] parameter = new String[2];
-		// for(int i=0; i < params.length; i++) {
-		// String check = params[i];
-		// parameter = check.split("=");
-		// map.put(parameter[0], parameter[1]);
-		// }
-		// グローバルMapにユーザー情報保持
-		// postMap = new HashMap<>(map);
-		// // 各ユーザー情報の取得
-		// String userId = map.get("userId");
-		// String userpass = map.get("userPass");
-		// String userperm = map.get("userPerm");
-		// UserViewLogic userInfo = new UserViewLogic();
-		// boolean userFlg = userInfo.userInfoCheck(userId, userpass, userperm);
-		// if(!userFlg) {
-		// out.print("0");
-		// } else {
-		// out.print("1");
-		// UserViewLogic userview = new UserViewLogic();
-		// boolean checkAfter = userview.userInfoUpdate(map);
-		// if(checkAfter) {
-		// this.logger.writeInfo("ユーザー情報更新成功");
-		// RequestDispatcher dispatcher =
-		// request.getRequestDispatcher("/WEB-INF/jsp/otherUser/result.jsp");
-		// dispatcher.forward(request, response);
-		// }
-		// else {
-		// RequestDispatcher dispatcher =
-		// request.getRequestDispatcher("/WEB-INF/jsp/Error.jsp");
-		// dispatcher.forward(request, response);
-		// }
-		// }
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		response.setContentType("text/html; charset=Shift_JIS");
 		// 編集されたユーザ情報（ID,パスワード,権限レベル）を取得
-		// String nowUserId = postMap.get("nowId");
-		// String userId = postMap.get("userId");
-		// String userPass = postMap.get("userPass");
-		// String userPermission = postMap.get("userPerm");
-
 		String nowID = (String) request.getAttribute("nowID");
 		String editID = (String) request.getAttribute("editID");
 		String editPassword = (String) request.getAttribute("editPassword");

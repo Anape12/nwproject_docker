@@ -114,11 +114,12 @@ String userId = loginUser.getUserId();
 
         </div>
 
-        <button class="logout-btn"
-                onclick="history.back()">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            ログアウト
-        </button>
+        <form action="${pageContext.request.contextPath}/Logout" method="get">
+            <button class="logout-btn" type="submit">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                ログアウト
+            </button>
+        </form>
 
     </div>
 

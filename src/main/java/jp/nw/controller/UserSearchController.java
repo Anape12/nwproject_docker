@@ -48,7 +48,7 @@ public class UserSearchController extends HttpServlet {
 			// 処理を実行
 			CommandData output = command.postExec();
 
-			// 権限レベルますたを参照
+			// 権限レベルマスタを参照
 			List<PermissionMasterEntity> permissionLevels = PermissionGetUtil.getAllPermissionLevels();
 			request.setAttribute("permissionLevels", permissionLevels);
 

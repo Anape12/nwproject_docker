@@ -1,6 +1,7 @@
 package jp.nw.controller;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -14,6 +15,7 @@ import jp.nw.application.LoginCommand;
 import jp.nw.base.BaseModel;
 import jp.nw.base.CommandData;
 import jp.nw.entity.UserEntity;
+import jp.nw.util.SecurityToken;
 
 /**
  * Servlet implementation class Login
@@ -41,8 +43,8 @@ public class LoginController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		HttpSession session = request.getSession();
-		session.invalidate();
+		// HttpSession session = request.getSession();
+		// session.invalidate();
 
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/login/login.jsp");
 		dispatcher.forward(request, response);
@@ -72,20 +74,33 @@ public class LoginController extends HttpServlet {
 			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/login/loginMiss.jsp");
 			dispatcher.forward(request, response);
 		}
+
+		String token = UUID.randomUUID().toString();
+		boolean isTokenUpdated = SecurityToken.updateToken(userEntity.getUserId(), token);
+
+		// トークンの更新に失敗した場合もログイン不可
+		if (!isTokenUpdated) {
+			this.baseModel.writeInfo("トークン更新失敗");
+			// ログイン失敗
+			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/login/loginMiss.jsp");
+			dispatcher.forward(request, response);
+		}
+
+		// ログイン処理成功の場合、ユーザーID/トークンをセッションに保存
+		HttpSession session = request.getSession();
+		session.setAttribute("loginToken", token);
+		session.setAttribute("loginUser", userEntity);
+
 		// 管理者権限の場合
 		if (output.getValue("permission").equals("1")) {
 			this.baseModel.writeInfo("ログイン成功（管理者）");
 			// ログイン成功（管理者画面）
-			HttpSession session = request.getSession();
-			session.setAttribute("loginUser", userEntity);
 			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/Menu/perMenu.jsp");
 			dispatcher.forward(request, response);
 		} else {
 			// 権限なしの場合
 			this.baseModel.writeInfo("ログイン成功（一般）");
 			// ログイン成功（一般）
-			HttpSession session = request.getSession();
-			session.setAttribute("loginUser", userEntity);
 			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/Menu/genMenu.jsp");
 			dispatcher.forward(request, response);
 		}

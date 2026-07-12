@@ -21,7 +21,6 @@ public class LoginLogic {
 	// SQL発行オブジェクト
 	private DBBase dbCon = null;
 	// SQL結果格納Map
-	// private Map<String, Object> selectResultMap = null;
 	private List<Map<String, Object>> resultList = null;
 
 	// パスワード整合
@@ -53,9 +52,7 @@ public class LoginLogic {
 				param.put("result", false);
 				return param;
 			}
-		} catch (
-
-		Exception e) {
+		} catch (Exception e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
