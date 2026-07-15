@@ -21,8 +21,11 @@ jobs:
       - name: Authenticate
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+            workload_identity_provider: ${{ secrets.GCP_WORKLOAD_PROVIDER }}
+            service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+            token_format: access_token
+
+
 
       - name: Debug
         run: |
