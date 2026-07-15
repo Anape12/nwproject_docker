@@ -25,7 +25,11 @@ jobs:
             service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
             token_format: access_token
 
-
+      - name: Debug Auth
+        run: |
+            echo "SERVICE_ACCOUNT=${{ secrets.GCP_SERVICE_ACCOUNT }}"
+            echo "PROVIDER=${{ secrets.GCP_WORKLOAD_PROVIDER }}"
+            gcloud auth list || true
 
       - name: Debug
         run: |
