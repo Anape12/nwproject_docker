@@ -2,40 +2,42 @@
 
 set -e
 
-URL="http://localhost:8080/Login"
+PROJECT_DIR="$HOME/nwproject_docker"
 
-MAX_RETRY=60
-WAIT_SEC=2
+echo "Waiting for application..."
 
-for ((i=1; i<=MAX_RETRY; i++))
-do
-    STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || true)
+READY=false
 
-    if [ "$STATUS" = "200" ]; then
-        echo "Health Check OK"
-        exit 0
+for i in {1..60}; do
+    if curl -fs http://localhost:8080/Login >/dev/null 2>&1; then
+        READY=true
+        break
     fi
 
-    echo "Waiting... ($i/$MAX_RETRY)"
-
-    sleep $WAIT_SEC
+    echo "Waiting... ($i/60)"
+    sleep 2
 done
 
-echo ""
+if [ "$READY" = false ]; then
+
+    echo "========================================"
+    echo " Tomcat Logs"
+    echo "========================================"
+    docker logs my-tomcat --tail 200 || true
+
+    echo "========================================"
+    echo " MySQL Logs"
+    echo "========================================"
+    docker logs mysqldb --tail 100 || true
+
+    echo "========================================"
+    echo " Flyway Logs"
+    echo "========================================"
+    docker logs devcontainer-flyway-1 --tail 100 || true
+
+    exit 1
+fi
+
 echo "========================================"
-echo " Health Check Failed"
+echo " Application Started Successfully"
 echo "========================================"
-
-echo ""
-echo "===== Tomcat Logs ====="
-docker logs my-tomcat --tail 200 || true
-
-echo ""
-echo "===== MySQL Logs ====="
-docker logs mysqldb --tail 100 || true
-
-echo ""
-echo "===== Flyway Logs ====="
-docker logs devcontainer-flyway-1 --tail 100 || true
-
-exit 1

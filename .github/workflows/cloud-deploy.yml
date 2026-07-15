@@ -21,9 +21,9 @@ jobs:
       - name: Authenticate
         uses: google-github-actions/auth@v2
         with:
-            workload_identity_provider: ${{ secrets.GCP_WORKLOAD_PROVIDER }}
-            service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-            token_format: access_token
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
 
       # gcloudセットアップ
       - uses: google-github-actions/setup-gcloud@v2
@@ -37,4 +37,4 @@ jobs:
             ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} \
             --zone=${{ secrets.GCP_ZONE }} \
             --quiet \
-            --command="cd ~/nwproject_docker && chmod +x scripts/deploy.sh && ./scripts/deploy.sh"
+            --command="bash ~/nwproject_docker/scripts/deploy.sh"

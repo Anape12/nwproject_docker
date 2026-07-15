@@ -2,7 +2,9 @@
 
 set -e
 
-cd ~/nwproject_docker
+PROJECT_DIR="$HOME/nwproject_docker"
+
+cd "$PROJECT_DIR"
 
 echo "========================================"
 echo " Git Synchronize"
@@ -29,7 +31,7 @@ echo "========================================"
 echo " Docker Deploy"
 echo "========================================"
 
-cd .devcontainer
+cd "$PROJECT_DIR/.devcontainer"
 
 docker compose up -d --build
 
@@ -37,8 +39,7 @@ echo "========================================"
 echo " Health Check"
 echo "========================================"
 
-chmod +x ./healthcheck.sh
-bash ./healthcheck.sh
+bash "$PROJECT_DIR/scripts/healthcheck.sh"
 
 echo "========================================"
 echo " Deploy Complete"
