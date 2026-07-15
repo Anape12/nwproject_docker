@@ -37,7 +37,8 @@ echo "========================================"
 echo " Health Check"
 echo "========================================"
 
-../scripts/healthcheck.sh
+chmod +x ./healthcheck.sh
+bash ./healthcheck.sh
 
 echo "========================================"
 echo " Deploy Complete"
