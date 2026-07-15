@@ -25,18 +25,6 @@ jobs:
             service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
             token_format: access_token
 
-      - name: Debug Auth
-        run: |
-            echo "SERVICE_ACCOUNT=${{ secrets.GCP_SERVICE_ACCOUNT }}"
-            echo "PROVIDER=${{ secrets.GCP_WORKLOAD_PROVIDER }}"
-            gcloud auth list || true
-
-      - name: Debug
-        run: |
-            echo "PROJECT=${{ secrets.GCP_PROJECT_ID }}"
-            echo "SA=${{ secrets.GCP_SERVICE_ACCOUNT }}"
-            echo "PROVIDER=${{ secrets.GCP_WORKLOAD_PROVIDER }}"
-
       # gcloudセットアップ
       - uses: google-github-actions/setup-gcloud@v2
         with:
