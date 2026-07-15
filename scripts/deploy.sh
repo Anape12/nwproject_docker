@@ -6,13 +6,6 @@ PROJECT_DIR="$HOME/nwproject_docker"
 
 cd "$PROJECT_DIR"
 
-echo "========================================"
-echo " Git Synchronize"
-echo "========================================"
-
-git fetch origin
-git reset --hard origin/main
-
 chmod +x mvnw
 
 echo "========================================"

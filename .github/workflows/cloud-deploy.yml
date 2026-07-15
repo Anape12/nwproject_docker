@@ -37,4 +37,9 @@ jobs:
             ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} \
             --zone=${{ secrets.GCP_ZONE }} \
             --quiet \
-            --command="bash ~/nwproject_docker/scripts/deploy.sh"
+            --command="
+              cd ~/nwproject_docker &&
+              git fetch origin &&
+              git reset --hard origin/main &&
+              bash scripts/deploy.sh
+            "
