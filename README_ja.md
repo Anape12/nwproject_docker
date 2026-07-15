@@ -26,3 +26,13 @@
 
 # VSCodeキャッシュ先
     * %APPDATA%\Code\User\workspaceStorage
+
+# 技術スタック
+ * Java(Servlet/JSP)
+ * Docker
+ * Tomcat
+ * MySQL
+ * Flyway
+ * GitHub Actions(CI/CD)
+ * Playwright(E2E)
+ * Google Cloud Run

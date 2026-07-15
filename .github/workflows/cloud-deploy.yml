@@ -1,0 +1,115 @@
+name: Deploy to Google Cloud
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ソース取得
+      - uses: actions/checkout@v4
+
+      # Javaセットアップ
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      # Google Cloudへデプロイ
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USER }}
+          key: ${{ secrets.GCP_PRIVATE_KEY }}
+          command_timeout: 20m
+          script: |
+            set -e
+
+            cd ~/nwproject_docker
+
+            echo "========================================"
+            echo " Git Synchronize"
+            echo "========================================"
+
+            git fetch origin
+            git reset --hard origin/main
+
+            chmod +x mvnw
+
+            echo "========================================"
+            echo " Unit Test"
+            echo "========================================"
+
+            ./mvnw test
+
+            echo "========================================"
+            echo " Build"
+            echo "========================================"
+
+            ./mvnw clean install -DskipTests
+
+            echo "========================================"
+            echo " Docker Deploy"
+            echo "========================================"
+
+            cd .devcontainer
+
+            # 停止済みコンテナを掃除
+            docker container prune -f
+
+            docker compose up -d --build
+
+            echo "========================================"
+            echo " Container Status"
+            echo "========================================"
+
+            docker compose ps
+
+            echo "========================================"
+            echo " Health Check"
+            echo "========================================"
+
+            READY=false
+
+            for i in {1..60}; do
+              if curl -fs http://localhost:8080/Login >/dev/null; then
+                READY=true
+                break
+              fi
+
+              echo "Waiting... ($i/60)"
+              sleep 2
+            done
+
+            if [ "$READY" = false ]; then
+
+              echo "========================================"
+              echo " Tomcat Logs"
+              echo "========================================"
+
+              docker logs my-tomcat --tail 200
+
+              echo "========================================"
+              echo " MySQL Logs"
+              echo "========================================"
+
+              docker logs mysqldb --tail 100 || true
+
+              echo "========================================"
+              echo " Flyway Logs"
+              echo "========================================"
+
+              docker logs devcontainer-flyway-1 --tail 100 || true
+
+              exit 1
+            fi
+
+            echo "========================================"
+            echo " Deploy Complete"
+            echo "========================================"
