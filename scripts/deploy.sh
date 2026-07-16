@@ -26,7 +26,7 @@ echo "========================================"
 
 cd "$PROJECT_DIR/.devcontainer"
 
-docker compose up -d --build
+docker compose up -d --build --force-recreate
 
 echo "========================================"
 echo " Health Check"
