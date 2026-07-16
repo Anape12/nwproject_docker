@@ -7,7 +7,7 @@ echo "Waiting for application..."
 READY=false
 
 for i in {1..60}; do
-    if curl -kfs https://localhost/Login >/dev/null 2>&1; then
+    if curl -fs http://localhost:8080/Login >/dev/null 2>&1; then
         READY=true
         break
     fi
@@ -15,6 +15,8 @@ for i in {1..60}; do
     echo "Waiting... ($i/60)"
     sleep 2
 done
+
+echo "READY=$READY"
 
 if [ "$READY" = false ]; then
 
