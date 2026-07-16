@@ -2,14 +2,12 @@
 
 set -e
 
-PROJECT_DIR="$HOME/nwproject_docker"
-
 echo "Waiting for application..."
 
 READY=false
 
 for i in {1..60}; do
-    if curl -fs http://localhost:8080/Login >/dev/null 2>&1; then
+    if curl -kfs https://localhost/Login >/dev/null 2>&1; then
         READY=true
         break
     fi
@@ -19,6 +17,11 @@ for i in {1..60}; do
 done
 
 if [ "$READY" = false ]; then
+
+    echo "========================================"
+    echo " Nginx Logs"
+    echo "========================================"
+    docker logs nginx --tail 100 || true
 
     echo "========================================"
     echo " Tomcat Logs"

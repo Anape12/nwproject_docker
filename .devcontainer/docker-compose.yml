@@ -2,6 +2,24 @@ volumes:
   mysql-data:
 
 services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+
+    depends_on:
+      tomcat:
+        condition: service_started
+
+    ports:
+      - "80:80"
+      - "443:443"
+
+    volumes:
+      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+      - /home/kohei19931226/certs:/etc/nginx/certs:ro
+
+    networks:
+      - app-network
   tomcat:
     build:
       context: ..
