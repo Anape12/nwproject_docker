@@ -35,4 +35,6 @@
  * Flyway
  * GitHub Actions(CI/CD)
  * Playwright(E2E)
- * Google Cloud Run
+ * Google Compute Engine (GCE)
+ * Nginx (Reverse Proxy)
+ * HTTPS (TLS)
