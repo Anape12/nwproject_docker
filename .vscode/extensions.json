@@ -1,0 +1,24 @@
+{
+  "recommendations": [
+    "aprilandjan.ascii-tree-generator",
+    "asciidoctor.asciidoctor-vscode",
+    "dannyhw.ejs-extended-language-support",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "grapecity.gc-excelviewer",
+    "josevseb.google-java-format-for-vs-code",
+    "mechatroner.rainbow-csv",
+    "mhutchie.git-graph",
+    "ms-playwright.playwright",
+    "ms-vscode.vscode-chat-customizations-evaluation",
+    "mtxr.sqltools-driver-pg",
+    "mtxr.sqltools",
+    "ms-java.java-extension-pack",
+    "redhat.vscode-xml",
+    "redhat.vscode-yaml",
+    "github.copilot",
+    "github.copilot-chat",
+    "ms-azuretools.vscode-docker",
+    "eamodio.gitlens"
+  ]
+}

@@ -13,7 +13,9 @@ target/
 .DS_Store
 
 # IDE
-.vscode/
+.vscode/*
+!.vscode/
+!.vscode/extensions.json
 .idea/
 
 # Playwright
