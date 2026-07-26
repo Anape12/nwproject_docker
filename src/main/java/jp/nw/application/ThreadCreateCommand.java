@@ -1,7 +1,6 @@
 package jp.nw.application;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,14 +17,11 @@ public class ThreadCreateCommand extends ApplicationCommand {
 	private HttpServletRequest request = null;
 	private HttpServletResponse response = null;
 
-	// private Map<String, String> threadInfos = null;
 	private Map<String, Object> threadInfos = null;
 
 	private BaseModel baseModel = null;
 
-	private List<UserEntity> userList = null;
-
-	private UserEntity loginUser = null;
+	private long threadId = 0;
 
 	private static final String KEY_TITLE = "title";
 	private static final String KEY_TARGET_USER = "author_id";
@@ -70,7 +66,7 @@ public class ThreadCreateCommand extends ApplicationCommand {
 		try {
 			// ユーザー情報一覧取得処理
 			ThreadCreateLogic logic = new ThreadCreateLogic();
-			logic.insertThread(threadInfos);
+			this.threadId = logic.insertThread(threadInfos);
 			return true;
 		} catch (Exception e) {
 			this.logger.writeInfo("");
@@ -81,6 +77,8 @@ public class ThreadCreateCommand extends ApplicationCommand {
 	protected boolean commandOutput() {
 		this.output.setValue(KEY_REQ, this.request);
 		this.output.setValue(KEY_RES, this.response);
+
+		this.output.setValue("createId", this.threadId);
 
 		return true;
 	}

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +56,33 @@ public class DBBase {
 				default:
 					return ps.executeUpdate();
 			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public long executeInsert(Query query) {
+
+		try {
+			SqlBuilder builder = new SqlBuilder();
+			String sql = builder.build(query);
+
+			PreparedStatement ps = con.prepareStatement(
+					sql,
+					Statement.RETURN_GENERATED_KEYS);
+
+			bindParameter(ps, query);
+
+			ps.executeUpdate();
+
+			ResultSet rs = ps.getGeneratedKeys();
+
+			if (rs.next()) {
+				return rs.getLong(1);
+			}
+
+			throw new RuntimeException("Generated key not found.");
+
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

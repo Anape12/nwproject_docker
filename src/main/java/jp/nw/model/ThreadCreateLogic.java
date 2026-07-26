@@ -10,7 +10,7 @@ public class ThreadCreateLogic {
 
     DBBase dbBase = null;
 
-    public boolean insertThread(Map<String, Object> threadInfos) {
+    public long insertThread(Map<String, Object> threadInfos) {
 
         Query query = Query.builder()
                 .sqlType(SqlType.INSERT)
@@ -19,8 +19,6 @@ public class ThreadCreateLogic {
                 .build();
 
         dbBase = new DBBase();
-        dbBase.execute(query);
-
-        return false;
+        return dbBase.executeInsert(query);
     }
 }
