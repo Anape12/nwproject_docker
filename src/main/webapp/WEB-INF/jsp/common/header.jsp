@@ -13,7 +13,7 @@ UserEntity loginUser =
     </div>
     <div class="login-user">
         <% if(loginUser != null){ %>
-            <%=loginUser.getUserId()%> さん ログイン中
+            <%=loginUser.getLastName()%> <%=loginUser.getFirstName()%> さん ログイン中
         <% } %>
     </div>
 

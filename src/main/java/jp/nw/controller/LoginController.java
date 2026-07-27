@@ -43,9 +43,6 @@ public class LoginController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// HttpSession session = request.getSession();
-		// session.invalidate();
-
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/login/login.jsp");
 		dispatcher.forward(request, response);
 	}
@@ -68,7 +65,7 @@ public class LoginController extends HttpServlet {
 		UserEntity userEntity = (UserEntity) output.getValue("userobj");
 
 		// ログイン処理失敗の場合、エラー画面へ
-		if (output.getValue("permission").equals("99")) {
+		if (userEntity.getPermission().equals("99")) {
 			this.baseModel.writeInfo("ログイン失敗");
 			// ログイン失敗
 			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/login/loginMiss.jsp");
@@ -92,7 +89,7 @@ public class LoginController extends HttpServlet {
 		session.setAttribute("loginUser", userEntity);
 
 		// 管理者権限の場合
-		if (output.getValue("permission").equals("1")) {
+		if (userEntity.getPermission().equals("1")) {
 			this.baseModel.writeInfo("ログイン成功（管理者）");
 			// ログイン成功（管理者画面）
 			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/Menu/perMenu.jsp");

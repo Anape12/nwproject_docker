@@ -21,6 +21,8 @@ public class LoginCommand extends ApplicationCommand {
 	private static final String KEY_USERPASS = "password";
 	private static final String KEY_USERPERMISS = "permission";
 	private static final String KEY_PASS_EXPIRATION = "password_expiration";
+	private static final String KEY_FIRST_NAME = "first_name";
+	private static final String KEY_LAST_NAME = "last_name";
 	private static final String KEY_QERYNAME = "user_id";
 	private static final String KEY_QERYRESULT = "result";
 	private static final String KEY_USEROBJ = "userobj";
@@ -54,28 +56,26 @@ public class LoginCommand extends ApplicationCommand {
 			Query query = Query.builder()
 					.sqlType(SqlType.SELECT)
 					.tableName("users_info")
-					.selectColumns(List.of(KEY_QERYNAME, KEY_USERPASS, KEY_USERPERMISS, KEY_PASS_EXPIRATION))
+					.selectColumns(List.of(KEY_QERYNAME, KEY_USERPASS, KEY_USERPERMISS, KEY_PASS_EXPIRATION, KEY_FIRST_NAME, KEY_LAST_NAME))
 					.conditions(conditions)
 					.build();
 
 			LoginLogic loginLogic = new LoginLogic();
 			Map<String, Object> result = loginLogic.execute(userEntity, query);
 
-			// ユーザー情報の有無チェック
-			// if (!loginLogic.loginCheck(userEntity, isLogin)) {
-			// this.logger.writeInfo("ユーザー情報が存在しません。");
-			// return false;
-			// }
+			// ユーザー情報がなかった場合
 			if (result.isEmpty()) {
 				this.logger.writeInfo("ユーザー情報が存在しません。");
 				return false;
-
 			}
 
 			// SQL実行結果を取得
 			this.loginChkF = (boolean) result.get(KEY_QERYRESULT);
 			// 権限レベルを取得
-			this.permisson = (String) result.get(KEY_USERPERMISS);
+			// this.permisson = (String) result.get(KEY_USERPERMISS);
+			this.userEntity.setPermission((String) result.get(KEY_USERPERMISS));			
+			this.userEntity.setFirstName((String) result.get(KEY_FIRST_NAME));
+			this.userEntity.setLastName((String) result.get(KEY_LAST_NAME));
 
 			return true;
 		} catch (Exception e) {
@@ -116,10 +116,8 @@ public class LoginCommand extends ApplicationCommand {
 	}
 
 	public boolean commandOutput() {
-
-		this.output.setValue(KEY_USERPERMISS, this.permisson);
+		// this.output.setValue(KEY_USERPERMISS, this.permisson);
 		this.output.setValue(KEY_USEROBJ, this.userEntity);
-
 		return true;
 	}
 }

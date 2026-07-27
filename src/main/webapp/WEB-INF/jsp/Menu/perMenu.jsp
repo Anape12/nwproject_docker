@@ -22,6 +22,15 @@ String userId = loginUser.getUserId();
     <div class="menu-container">
         <h1>メインメニュー</h1>
         <div class="menu-grid">
+            <form action="${pageContext.request.contextPath}/StartChat"
+                  method="get"
+                  target="_blank">
+                <button class="menu-btn" type="submit">
+                    <i class="fa-solid fa-users"></i>
+                    <span>チャットを開始する</span>
+                </button>
+            </form>
+
             <form action="${pageContext.request.contextPath}/UserSearch"
                   method="get"
                   target="_blank">
