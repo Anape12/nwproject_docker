@@ -35,10 +35,15 @@ public class SqlBuilder {
         StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT ");
+        if(query.getSelectSub() != null && !query.getSelectSub().isBlank()){
+            sb.append(query.getSelectSub()).append(" ");
+        }
         sb.append(createColumnInfo(query.getSelectColumns()));
 
         sb.append("FROM ");
         sb.append(query.getTableName());
+
+        sb.append(createJoinInfo(query.getJoins()));
 
         if (!query.getConditions().isEmpty()) {
             sb.append(createWhereInfo(query.getConditions()));
@@ -190,6 +195,40 @@ public class SqlBuilder {
                 sb.append(" ");
             }
         }
+
+        return sb.toString();
+    }
+
+    private String createJoinInfo(List<JoinInfo> joins) {
+        if (joins == null || joins.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        for (JoinInfo join : joins) {
+
+            switch (join.getJoinType()) {
+
+            case INNER:
+                sb.append(" INNER JOIN ");
+                break;
+
+            case LEFT:
+                sb.append(" LEFT JOIN ");
+                break;
+
+            case RIGHT:
+                sb.append(" RIGHT JOIN ");
+                break;
+            }
+
+            sb.append(join.getTableName());
+            sb.append(" ON ");
+            sb.append(join.getCondition());
+        }
+
+        sb.append(" ");
 
         return sb.toString();
     }

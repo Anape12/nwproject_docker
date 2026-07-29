@@ -166,3 +166,43 @@ table a:hover{
     cursor:pointer;
 }
 
+.channel-list{
+    margin-top:20px;
+}
+
+.channel-item{
+    display:flex;
+    align-items:center;
+    gap:15px;
+
+    padding:15px;
+
+    border-bottom:1px solid #ddd;
+
+    text-decoration:none;
+    color:#333;
+}
+
+.channel-item:hover{
+    background:#f7f7f7;
+}
+
+.channel-icon{
+    font-size:30px;
+}
+
+.channel-info{
+    display:flex;
+    flex-direction:column;
+}
+
+.channel-name{
+    font-size:18px;
+    font-weight:bold;
+}
+
+.channel-type{
+    margin-top:4px;
+    color:#888;
+    font-size:13px;
+}

@@ -50,9 +50,7 @@ public class DBBase {
 			switch (query.getSqlType()) {
 				case SELECT:
 					ResultSet rs = ps.executeQuery();
-					return getResultList(
-							rs,
-							query.getSelectColumns());
+					return getResultList(rs);
 				default:
 					return ps.executeUpdate();
 			}
@@ -124,16 +122,11 @@ public class DBBase {
 	/**
 	 * ResultSet → List<Map>
 	 */
-	private List<Map<String, Object>> getResultList(
-			ResultSet rs,
-			List<String> columns) throws Exception {
+	private List<Map<String, Object>> getResultList(ResultSet rs) throws Exception {
 
 		ResultMapper mapper = new ResultMapper();
 
-		return mapper.toList(
-				rs,
-				columns);
-
+		return mapper.toList(rs);
 	}
 
 }

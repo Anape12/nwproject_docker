@@ -10,9 +10,13 @@ import lombok.Data;
 @Data
 @Builder
 public class Query {
+    private String selectSub;
+    
     private SqlType sqlType;
 
     private String tableName;
+
+    private List<JoinInfo> joins;
 
     private List<String> selectColumns;
 

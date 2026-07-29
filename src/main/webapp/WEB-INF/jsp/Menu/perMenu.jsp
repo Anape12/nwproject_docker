@@ -22,7 +22,7 @@ String userId = loginUser.getUserId();
     <div class="menu-container">
         <h1>メインメニュー</h1>
         <div class="menu-grid">
-            <form action="${pageContext.request.contextPath}/StartChat"
+            <form action="${pageContext.request.contextPath}/ChatChanelList"
                   method="get"
                   target="_blank">
                 <button class="menu-btn" type="submit">

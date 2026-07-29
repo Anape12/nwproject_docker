@@ -8,6 +8,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import jp.nw.entity.UserEntity;
 
 /**
  * Servlet implementation class UserView
@@ -30,6 +33,14 @@ public class StartChatController extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+		request.setCharacterEncoding("UTF-8");
+		String comment = request.getParameter("commentText");
+
+		HttpSession session = request.getSession();
+		UserEntity userEntity = (UserEntity)session.getAttribute("loginUser");
+
+		System.out.println(comment);
+		System.out.println(userEntity);
 	}
 
 }
