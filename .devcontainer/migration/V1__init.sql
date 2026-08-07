@@ -27,7 +27,7 @@ VALUES (
         'a0002',
         '$2a$10$Fi4YRJ0ONJB3/8S8pWhmdOkZLDwipULqyd5k7BXRnoXbDT.10/aAe',
         '1956-05-26',
-        '2',
+        '1',
         '99999999',
         '0'
     ),

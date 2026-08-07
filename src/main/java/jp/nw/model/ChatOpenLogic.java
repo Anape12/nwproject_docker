@@ -1,16 +1,12 @@
 package jp.nw.model;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import jp.nw.entity.ChatMessageEntity;
-import jp.nw.entity.UserEntity;
 import jp.nw.parts.DBBase;
 import jp.nw.parts.JoinInfo;
 import jp.nw.parts.JoinType;
@@ -51,33 +47,7 @@ public class ChatOpenLogic {
             .build();
 
         dbBase = new DBBase();
-        List<Map<String, Object>> result = (List<Map<String, Object>>) dbBase.execute(query);
 
-        List<ChatMessageEntity> retList = new ArrayList<>();
-        for (Map<String, Object> rowInfo : result) {
-            int messageId = (int) rowInfo.get("message_id");
-            String room_Id = (String) rowInfo.get("room_id");
-            String postedById = (String) rowInfo.get("posted_by_id");
-            String message = (String) rowInfo.get("message");
-            LocalDateTime createdAt = (LocalDateTime) rowInfo.get("m.created_at");
-            String postedByName = (String) rowInfo.get("posted_by_name");
-
-
-            HttpSession session = request.getSession();
-
-            retList.add(
-                ChatMessageEntity.builder()
-                    .messageId(messageId)
-                    .roomId(room_Id)
-                    .postedById(postedById)
-                    .message(message)
-                    .postedByName(postedByName)
-                    .userEntity((UserEntity)session.getAttribute("loginUser"))
-                    .createdAt(createdAt)
-                    .build()
-            );
-        }
-
-        return retList;
+        return dbBase.execute(query, ChatMessageEntity.class);
     }
 }

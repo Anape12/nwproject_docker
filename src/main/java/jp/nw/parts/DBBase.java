@@ -14,7 +14,11 @@ public class DBBase {
 	String db = System.getenv("DB_NAME");
 
 	String URL = "jdbc:mysql://" + host + ":3306/" + db
-			+ "?serverTimezone=Asia/Tokyo&allowPublicKeyRetrieval=true&useSSL=false";
+			+ "?connectionTimeZone=LOCAL" +
+			"&forceConnectionTimeZoneToSession=true" +
+			"&preserveInstants=false" +
+			"&allowPublicKeyRetrieval=true" +
+			"&useSSL=false";
 
 	private final String USER = "root";
 	private final String PASSWORD = "root";
@@ -28,6 +32,11 @@ public class DBBase {
 					URL,
 					USER,
 					PASSWORD);
+
+			try (Statement st = con.createStatement()) {
+            	st.execute("SET time_zone = '+09:00'");
+        	}
+
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -45,6 +54,10 @@ public class DBBase {
 
 			PreparedStatement ps = con.prepareStatement(sql);
 
+			this.con = DriverManager.getConnection(URL, USER, PASSWORD);
+
+
+
 			bindParameter(ps, query);
 
 			switch (query.getSqlType()) {
@@ -54,6 +67,32 @@ public class DBBase {
 				default:
 					return ps.executeUpdate();
 			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public <T> List<T> execute(Query query, Class<T> clazz) {
+
+		try {
+			SqlBuilder builder = new SqlBuilder();
+			String sql = builder.build(query);
+
+			PreparedStatement ps = con.prepareStatement(sql);
+
+			bindParameter(ps, query);
+
+			ResultSet rs = ps.executeQuery();
+
+			ResultMapper resultMapper = new ResultMapper();
+
+			List<Map<String, Object>> rows =
+					resultMapper.toList(rs);
+
+			EntityMapper entityMapper = new EntityMapper();
+
+			return entityMapper.toEntityList(rows, clazz);
+
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

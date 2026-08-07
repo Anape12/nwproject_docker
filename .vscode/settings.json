@@ -25,5 +25,8 @@
             "database": "nwproject_db",
             "password": "root"
         }
-    ]
+    ],
+    "files.watcherExclude": {
+        "**/target/**": true
+    }
 }

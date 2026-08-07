@@ -1,10 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8" import="jp.nw.entity.UserEntity,jp.nw.entity.ChatMessageEntity,java.util.List" %>
+    pageEncoding="UTF-8" import="jp.nw.entity.UserEntity,jp.nw.entity.ChatMessageEntity,java.util.List,jp.nw.util.DateFormatUtil" %>
 <%@ taglib prefix="c"
     uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!DOCTYPE html>
 <html lang="ja">
+<script>
+    const loginUserId = "${loginUser.userId}";
+</script>
 <head>
   <meta charset="utf-8">
   <title>チャット</title>
@@ -31,7 +34,7 @@
                                 ${message.message}
                             </div>
                             <span class="message-time">
-                                ${message.createdAt}
+                                ${DateFormatUtil.format(message.createdAt)}
                             </span>                        
                         </div>
                     </c:when>
@@ -59,6 +62,7 @@
         </div>
 
         <form id="chat-form" class="comment-form">
+            <input type="hidden" id="roomId" name="roomId" value="${RoomId}"/>
             <input id="commentText" type="text" name="commentText" maxlength="500" required placeholder="コメントを入力してください"/>
             <button type="submit">送信</button>
         </form>
