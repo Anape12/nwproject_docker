@@ -61,21 +61,21 @@ public class LoginCommand extends ApplicationCommand {
 					.build();
 
 			LoginLogic loginLogic = new LoginLogic();
-			Map<String, Object> result = loginLogic.execute(userEntity, query);
+			List<UserEntity> userResults = loginLogic.execute(userEntity, query);
 
 			// ユーザー情報がなかった場合
-			if (result.isEmpty()) {
+			if (userResults.isEmpty()) {
 				this.logger.writeInfo("ユーザー情報が存在しません。");
 				return false;
 			}
 
 			// SQL実行結果を取得
-			this.loginChkF = (boolean) result.get(KEY_QERYRESULT);
+			this.loginChkF = (boolean) userResults.isEmpty() ? false : true;
 			// 権限レベルを取得
-			// this.permisson = (String) result.get(KEY_USERPERMISS);
-			this.userEntity.setPermission((String) result.get(KEY_USERPERMISS));			
-			this.userEntity.setFirstName((String) result.get(KEY_FIRST_NAME));
-			this.userEntity.setLastName((String) result.get(KEY_LAST_NAME));
+			// this.permisson = (String) userResults.get(0).get(KEY_USERPERMISS);
+			this.userEntity.setPermission((String) userResults.get(0).getPermission());
+			this.userEntity.setFirstName((String) userResults.get(0).getFirstName());
+			this.userEntity.setLastName((String) userResults.get(0).getLastName());
 
 			return true;
 		} catch (Exception e) {

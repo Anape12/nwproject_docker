@@ -63,23 +63,7 @@ public class ChatChanelListLogic {
         .build();
 
         dbBase = new DBBase();
-        List<Map<String, Object>> result = (List<Map<String, Object>>) dbBase.execute(query);
 
-        List<ChatRoomEntity> retList = new ArrayList<>();
-        for (Map<String, Object> rowInfo : result) {
-            String id = (String) rowInfo.get("room_id");
-            String type = (String) rowInfo.get("room_type");
-            String displayName = (String) rowInfo.get("display_name");
-
-            retList.add(
-                ChatRoomEntity.builder()
-                    .roomId(id)
-                    .roomType(type)
-                    .displayName(displayName)
-                    .build()
-            );
-        }
-
-        return retList;
+        return dbBase.execute(query, ChatRoomEntity.class);
     }
 }
