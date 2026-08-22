@@ -13,7 +13,6 @@ import jp.nw.parts.SqlType;
 
 public class LoginCommand extends ApplicationCommand {
 
-	private String permisson = null;
 	private boolean loginChkF = false;
 	private UserEntity userEntity = null;
 
@@ -24,7 +23,6 @@ public class LoginCommand extends ApplicationCommand {
 	private static final String KEY_FIRST_NAME = "first_name";
 	private static final String KEY_LAST_NAME = "last_name";
 	private static final String KEY_QERYNAME = "user_id";
-	private static final String KEY_QERYRESULT = "result";
 	private static final String KEY_USEROBJ = "userobj";
 
 	public boolean setCommandData(Map<String, Object> loginParam) {
@@ -88,15 +86,6 @@ public class LoginCommand extends ApplicationCommand {
 	public boolean executeCommand() {
 
 		try {
-
-			// ユーザー情報の有無
-
-			// パスワードの整合性
-
-			// パスワード有効期限
-
-			// これらを以ってログイン成功とする
-
 			// ログイン後の遷移先画面を選択
 			if (this.loginChkF) {
 				/**
@@ -116,7 +105,6 @@ public class LoginCommand extends ApplicationCommand {
 	}
 
 	public boolean commandOutput() {
-		// this.output.setValue(KEY_USERPERMISS, this.permisson);
 		this.output.setValue(KEY_USEROBJ, this.userEntity);
 		return true;
 	}

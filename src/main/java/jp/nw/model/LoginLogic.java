@@ -4,10 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jp.nw.entity.UserEntity;
 import jp.nw.parts.DBBase;
@@ -16,15 +12,8 @@ import jp.nw.parts.Query;
 
 public class LoginLogic {
 
-	// ログインパラメータ
-	private Map<String, Object> param = null;
 	// SQL発行オブジェクト
 	private DBBase dbCon = null;
-	// SQL結果格納Map
-	private List<Map<String, Object>> resultList = null;
-
-	// パスワード整合
-	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 	public List<UserEntity> execute(UserEntity userEntity, Query query) {
 
@@ -41,7 +30,7 @@ public class LoginLogic {
 			}
 
 			if(userList.size() > 1) {
-				// 複数件ヒットはありえないので、エラーとして扱う
+				// 複数件ヒットはありえないので、エラーとして扱う(追々拡張)
 				return new ArrayList<>();
 			}
 
@@ -52,7 +41,6 @@ public class LoginLogic {
 				return new ArrayList<>();
 			}
 		} catch (Exception e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
 		return userList;
