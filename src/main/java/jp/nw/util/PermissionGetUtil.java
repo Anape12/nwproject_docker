@@ -34,6 +34,7 @@ public class PermissionGetUtil {
                 .selectColumns(colList)
                 .tableName("permission_mst")
                 .conditions(conditions)
+                .querySub(Map.of("PROCESS_INFO", List.of("ORDER BY display_order")))
                 .build();
 
         dbCon = new DBBase();

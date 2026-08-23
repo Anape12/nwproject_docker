@@ -13,6 +13,10 @@ UPDATE users_info
 SET first_name = '一郎',
     last_name = '鈴木'
 WHERE id = 3;
+UPDATE users_info
+SET first_name = '次郎',
+    last_name = '田中'
+WHERE id = 4;
 ALTER TABLE users_info
 MODIFY COLUMN first_name VARCHAR(36) NOT NULL,
     MODIFY COLUMN last_name VARCHAR(36) NOT NULL;

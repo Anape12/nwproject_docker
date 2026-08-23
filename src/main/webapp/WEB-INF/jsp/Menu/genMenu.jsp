@@ -1,22 +1,10 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-<title>メインメニュー（管理者モード）</title>
-</head>
-<body>
-<body style="background:#63515f;">
-	<div style="width:200px margin-top:30px;"></div>
-	<div style="text-align:center; background:#d3adf0; width:400px; margin-left:450px">
-		<div style="margin-top:50px; padding-top:10px;"></div>
-		<form action="/example/DairyWrite" method="get">
-			<p><button class="search-btn3" type="submit">日記投稿</button></p>
-		</form>
-	<p><button class="search-btn2" onclick="history.back()">戻る</button></p>
-	</div>
-	<div style="width:200px"></div>
-</body>
-</html>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="jp.nw.entity.UserEntity" %>
+<% UserEntity loginUser=(UserEntity)session.getAttribute("loginUser"); %>
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>メインメニュー（<%=loginUser.getUserId()%>）</title><link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css"><link rel="stylesheet" href="${pageContext.request.contextPath}/css/style11.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"></head><body>
+<jsp:include page="/WEB-INF/jsp/common/header.jsp"/><div class="menu-container"><h1>メインメニュー</h1><div class="menu-grid">
+<form action="${pageContext.request.contextPath}/DairyWrite" method="get" target="_blank"><button class="menu-btn" type="submit"><i class="fa-solid fa-file-pen"></i><span>報告書作成</span></button></form>
+<form action="${pageContext.request.contextPath}/OpenCalender" method="get" target="_blank"><button class="menu-btn" type="submit"><i class="fa-solid fa-calendar-days"></i><span>スケジュール表</span></button></form>
+<form action="${pageContext.request.contextPath}/ChatChanelList" method="get" target="_blank"><button class="menu-btn" type="submit"><i class="fa-solid fa-comments"></i><span>チャット</span></button></form>
+<form action="${pageContext.request.contextPath}/ThreadController" method="get" target="_blank"><button class="menu-btn" type="submit"><i class="fa-solid fa-users"></i><span>スレッド</span></button></form>
+</div><form action="${pageContext.request.contextPath}/Logout" method="get"><button class="logout-btn" type="submit"><i class="fa-solid fa-right-from-bracket"></i> ログアウト</button></form></div><jsp:include page="/WEB-INF/jsp/login/footer.jsp"/></body></html>

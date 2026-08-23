@@ -4,76 +4,60 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.security.core.userdetails.User;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import jp.nw.entity.UserEntity;
 import jp.nw.parts.DBBase;
+import jp.nw.parts.PasswordUtil;
 
 public class UserInsertLogic {
 
-	/**
-	 * ユーザ―情報一覧表示
-	 */
-	public boolean insertProcess(UserEntity user) {
-		List<User> userList = new ArrayList<>();
-		Connection conn = null;
-		try {
-			DBBase dbBase = new DBBase();
-			conn = dbBase.getConnection();
-			String sql = "INSERT INTO users (name,password,birthday,permission_level,削除フラグ) values (?,?,?,?,0);";
-			PreparedStatement ps = conn.prepareStatement(sql);
+    public void insert(UserEntity user, LocalDate passwordExpiration) {
+        if (!permissionExists(user.getPermission())) {
+            throw new IllegalArgumentException("指定した権限は利用できません。");
+        }
 
-			ps.setString(1, user.getUserId());
-			ps.setString(2, user.getPassword());
-			ps.setString(3, user.getBirthDate());
-			ps.setString(4, user.getPermission());
+        String sql = "INSERT INTO users_info "
+                + "(user_id, password, birthday, permission, password_expiration, delete_flg, first_name, last_name) "
+                + "VALUES (?, ?, ?, ?, ?, '0', ?, ?)";
+        DBBase db = new DBBase();
+        try (Connection connection = db.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, user.getUserId());
+            statement.setString(2, PasswordUtil.encode(user.getPassword()));
+            statement.setObject(3, LocalDate.parse(user.getBirthDate()));
+            statement.setString(4, user.getPermission());
+            statement.setString(5, passwordExpiration.format(DateTimeFormatter.BASIC_ISO_DATE));
+            statement.setString(6, user.getFirstName());
+            statement.setString(7, user.getLastName());
+            statement.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException e) {
+            throw new IllegalArgumentException("このユーザーIDは既に登録されています。");
+        } catch (SQLException e) {
+            throw new RuntimeException("ユーザー情報の登録に失敗しました。", e);
+        }
+    }
 
-			int num = ps.executeUpdate();
-			if (num == 0) {
-				return false;
-			} else {
-				return true;
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
+    public boolean userIdExists(String userId) {
+        String sql = "SELECT 1 FROM users_info WHERE user_id = ?";
+        DBBase db = new DBBase();
+        try (Connection connection = db.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, userId);
+            try (ResultSet result = statement.executeQuery()) { return result.next(); }
+        } catch (SQLException e) {
+            throw new RuntimeException("ユーザーIDの確認に失敗しました。", e);
+        }
+    }
 
-	/**
-	 * 編集ユーザ－情報取得
-	 */
-	public List<UserEntity> editUserInfo(String userId) {
-		List<UserEntity> userList = new ArrayList<>();
-		Connection conn = null;
-		try {
-			DBBase dbBase = new DBBase();
-			conn = dbBase.getConnection();
-			String sql = "SELECT name,password,permission_level from users_info where name =? ORDER BY id";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, userId);
-
-			ResultSet rs = ps.executeQuery();
-
-			while (rs.next()) {
-				String name = rs.getString("name");
-				String pass = rs.getString("password");
-				int permission = rs.getInt("permission_level");
-				UserEntity userEntity = UserEntity.builder()
-						.userId(name)
-						.password(pass)
-						.permission(String.valueOf(permission))
-						.build();
-
-				userList.add(userEntity);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
-		}
-		return userList;
-	}
+    private boolean permissionExists(String permission) {
+        String sql = "SELECT 1 FROM permission_mst WHERE permission_id = ? AND delete_flg = '0'";
+        DBBase db = new DBBase();
+        try (Connection connection = db.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, permission);
+            try (ResultSet result = statement.executeQuery()) { return result.next(); }
+        } catch (SQLException e) {
+            throw new RuntimeException("権限情報の確認に失敗しました。", e);
+        }
+    }
 }

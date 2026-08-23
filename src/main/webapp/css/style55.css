@@ -206,3 +206,94 @@ table a:hover{
     color:#888;
     font-size:13px;
 }
+
+.chat-list-heading,
+.chat-create-heading{
+    max-width:800px;
+    margin:32px auto 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+}
+
+.chat-list-heading h1,
+.chat-create-heading h1{
+    margin:0;
+    text-align:left;
+}
+
+.chat-create-heading p{
+    margin:8px 0 0;
+    color:#667085;
+}
+
+.channel-list,
+.chat-user-list{
+    max-width:800px;
+    margin:0 auto;
+    background:white;
+    border-radius:10px;
+    box-shadow:0 3px 8px rgba(0,0,0,.1);
+    overflow:hidden;
+}
+
+.chat-create-container{
+    padding:0 20px 40px;
+}
+
+.chat-user-item{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:15px;
+    border-bottom:1px solid #ddd;
+}
+
+.chat-user-info{
+    display:flex;
+    flex:1;
+    flex-direction:column;
+}
+
+.chat-user-info span{
+    margin-top:4px;
+    color:#888;
+    font-size:13px;
+}
+
+.chat-start-btn,
+.chat-secondary-btn{
+    display:inline-block;
+    border:0;
+    border-radius:6px;
+    padding:10px 16px;
+    color:white;
+    background:#3498db;
+    text-decoration:none;
+    font:inherit;
+    cursor:pointer;
+}
+
+.chat-start-btn:hover{
+    background:#2980b9;
+}
+
+.chat-secondary-btn{
+    background:#7f8c8d;
+}
+
+.chat-empty,
+.chat-error{
+    padding:20px;
+    text-align:center;
+}
+
+.chat-error{
+    max-width:760px;
+    margin:0 auto 16px;
+    border:1px solid #e7a5a5;
+    border-radius:6px;
+    color:#b42318;
+    background:#fff1f0;
+}

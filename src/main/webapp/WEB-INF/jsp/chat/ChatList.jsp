@@ -18,6 +18,10 @@ List<ChatRoomEntity> chatRoomList = (List<ChatRoomEntity>) session.getAttribute(
 </head>
 <body>
     <jsp:include page="/WEB-INF/jsp/common/header.jsp"/>
+    <div class="chat-list-heading">
+        <h1>チャット</h1>
+        <a class="chat-start-btn" href="${pageContext.request.contextPath}/ChatRoomCreate">＋ 個別チャットを作成</a>
+    </div>
     <div class="channel-list">
 
         <c:forEach var="room" items="${chatRooms}">
@@ -55,5 +59,8 @@ List<ChatRoomEntity> chatRoomList = (List<ChatRoomEntity>) session.getAttribute(
             </a>
 
         </c:forEach>
+        <c:if test="${empty chatRooms}">
+            <p class="chat-empty">参加中のチャットはありません。</p>
+        </c:if>
     </div>
 </body>

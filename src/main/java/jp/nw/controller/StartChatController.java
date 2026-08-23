@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jp.nw.application.RegistrationChatCommand;
 import jp.nw.base.CommandData;
@@ -25,6 +27,9 @@ import jp.nw.entity.UserEntity;
 public class StartChatController extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
+	private static final ObjectMapper JSON_MAPPER = new ObjectMapper()
+			.registerModule(new JavaTimeModule())
+			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -57,8 +62,7 @@ public class StartChatController extends HttpServlet {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.writeValue(response.getWriter(), chatMessageList);
+		JSON_MAPPER.writeValue(response.getWriter(), chatMessageList);
 	}
 
 }

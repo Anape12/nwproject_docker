@@ -85,7 +85,7 @@ String userId = loginUser.getUserId();
                 </button>
             </form>
 
-            <form action="${pageContext.request.contextPath}/DairyWrite"
+            <form action="${pageContext.request.contextPath}/ReportApproval"
                   method="get"
                   target="_blank">
                 <button class="menu-btn" type="submit">
@@ -94,14 +94,14 @@ String userId = loginUser.getUserId();
                 </button>
             </form>
 
-            <form action="${pageContext.request.contextPath}/UserView"
+            <!-- <form action="${pageContext.request.contextPath}/UserView"
                   method="get"
                   target="_blank">
                 <button class="menu-btn" type="submit">
                     <i class="fa-solid fa-list"></i>
                     <span>ユーザー一覧</span>
                 </button>
-            </form>
+            </form> -->
 
             <form action="${pageContext.request.contextPath}/SelectApp?AppName=NC30001"
                   method="post"

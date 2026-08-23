@@ -5,6 +5,11 @@
 1. コンテナ構築
    - docker compose up -d --build
 
+# コンテナ削除→再生成
+
+    * docker compose -f .devcontainer/docker-compose.yml down -v
+    * docker compose -f .devcontainer/docker-compose.yml up -d --build
+
 # Java資産の反映
 
     * docker restart my-tomcat

@@ -38,6 +38,14 @@ VALUES (
         '2',
         '99999999',
         '0'
+    ),
+    (
+        'a0004',
+        '$2a$10$Fi4YRJ0ONJB3/8S8pWhmdOkZLDwipULqyd5k7BXRnoXbDT.10/aAe',
+        '1971-03-15',
+        '2',
+        '99999999',
+        '0'
     );
 CREATE TABLE thread_info (
     thread_id INT AUTO_INCREMENT PRIMARY KEY,
