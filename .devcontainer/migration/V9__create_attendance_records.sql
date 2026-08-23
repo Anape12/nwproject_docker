@@ -1,0 +1,20 @@
+CREATE TABLE attendance_record (
+    attendance_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(20) NOT NULL,
+    work_date DATE NOT NULL,
+    clock_in TIME,
+    clock_out TIME,
+    break_minutes INT NOT NULL DEFAULT 0,
+    work_type VARCHAR(12) NOT NULL DEFAULT 'OFFICE',
+    note VARCHAR(500),
+    report_id BIGINT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_attendance_user FOREIGN KEY (user_id) REFERENCES users_info(user_id),
+    CONSTRAINT fk_attendance_report FOREIGN KEY (report_id) REFERENCES work_report(report_id) ON DELETE SET NULL,
+    CONSTRAINT uq_attendance_user_date UNIQUE (user_id, work_date),
+    CONSTRAINT uq_attendance_report UNIQUE (report_id),
+    CONSTRAINT chk_attendance_break CHECK (break_minutes BETWEEN 0 AND 1440),
+    CONSTRAINT chk_attendance_type CHECK (work_type IN ('OFFICE', 'REMOTE', 'LEAVE', 'HOLIDAY')),
+    INDEX idx_attendance_user_month (user_id, work_date)
+);

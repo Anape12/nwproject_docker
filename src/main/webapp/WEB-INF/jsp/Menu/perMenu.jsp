@@ -90,7 +90,7 @@ String userId = loginUser.getUserId();
                   target="_blank">
                 <button class="menu-btn" type="submit">
                     <i class="fa-solid fa-circle-check"></i>
-                    <span>報告書承認</span>
+                    <span>承認管理</span>
                 </button>
             </form>
 

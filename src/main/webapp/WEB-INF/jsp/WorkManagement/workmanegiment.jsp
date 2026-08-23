@@ -1,85 +1,14 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"  import="jp.nw.model.MyCalendar, java.util.Date, java.util.Calendar, java.util.List, java.util.Map, java.util.HashMap,java.util.ArrayList"%>
-<%
-	String userid =(String)request.getAttribute("USER_ID");
-  int month = (int)request.getAttribute("MONTH");
-  int firstDate = (Integer)request.getAttribute("FIRSTDATE");
-	Map<Integer,String> weekMap = (Map<Integer, String>)request.getAttribute("WEEK");
-%>
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta http-equiv="Content-Type" Content="text/html;charset=Shift_JIS">
-<meta http-equiv="Content-Style-Type" content="text/css">
-<meta http-equiv="Content-Script-Type" content="text/javascript">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-
-
-<title><%=month %>月勤怠表(<%=userid %>)</title>
-<style>
-table.sche{border:1px solid #a9a9a9;padding:0px;margin:0px;border-collapse:collapse;}
-td{vertical-align:top;margin:0px;padding:2px;font-size:0.75em;height:20px;}
-td.top{border-bottom:1px solid #a9a9a9;text-align:center;}
-td.time{background-color:#f0f8ff;text-align:right;border-right:1px double #a9a9a9;padding-right:5px;}
-td.timeb{background-color:#f0f8ff;border-bottom:1px solid #a9a9a9;border-right:1px double #a9a9a9;}
-td.contents{backgrou
-nd-color:#ffffff;border-bottom:1px dotted #a9a9a9;}
-td.contentsb{background-color:#ffffff;border-bottom:1px solid #a9a9a9;}
-td.ex{background-color:#ffebcd;border:1px solid #8b0000;}
-img{border:0px;}
-p{font-size:0.75em;}
-#contents{margin:0;padding:0;width:710px;}
-#left{margin:0;padding:0;float:left;width:400px;}
-#right{margin:0;padding:0;float:right;width:300px;background-color:#ffffff;}
-#contents:after{content:".";display:block;height:0;clear:both;visibility:hidden;}
-</style>
-</head>
-<body>
-<form action="${pageContext.request.contextPath}/WorkManagement?<%=userid %>" method="post">
-
-<div style="text-align:center;">
-		<table border="1" align="left">
-		  <tr>
-		      <th>日</th>
-		      <th>曜日</th>
-		      <th>始業時間</th>
-		      <th>就業時間</th>
-		      <th>備考</th>
-	  	</tr>
-	  	<tr>
-	  		<th width="80">例</th>
-	  		<th width="80">月</th>
-	  		<th><input class="title-txt" type="text" name="starthour" placeholder="09" size=5> :
-	  			  	<input class="title-txt" type="text" name="startminuts" placeholder="00" size=5>
-	  		</th>
-	  		<th><input class="title-txt" type="text" name="endhour" placeholder="18" size=5> :
-	  			  	<input class="title-txt" type="text" name="endminuts" placeholder="00" size=5>
-	  		</th>
-	  		<th><input class="title-txt" type="text" name="info" size=120></th>
-	  	</tr>
-	  	<%for(int i=1; i<32;i++){ %>
-	  	<tr>
-	  		<th width="80"><%=i %></th>
-	  		<%if(firstDate > 7){ %>
-	  		<%firstDate = 1; %>
-	  		<%} %>
-	  		<th width="80"><%=weekMap.get(firstDate) %></th>
-	  		<%++firstDate; %>
-	  		<th><input class="title-txt" type="text" name="starthour<%=i %>" placeholder="09" size=5> :
-	  			  	<input class="title-txt" type="text" name="startminuts<%=i %>" placeholder="00" size=5>
-	  		</th>
-	  		<th><input class="title-txt" type="text" name="endhour<%=i %>" placeholder="18" size=5> :
-	  			  	<input class="title-txt" type="text" name="endminuts<%=i %>" placeholder="00" size=5>
-	  		</th>
-	  		<th><input class="title-txt" type="text" name="info" size=120>
-	  	<%} %>
-	  	</th>
-	  </table>
-</div>
-</form>
-	<div style="text-align:center;">
-		<p><button class="search-btn2" onclick="window.close();">ウィンドウを閉じる</button></p>
-	</div>
-
-</body>
-</html>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %><%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${displayMonth.year}年${displayMonth.monthValue}月 勤怠表</title><link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css"><link rel="stylesheet" href="${pageContext.request.contextPath}/css/attendance.css"><link rel="stylesheet" href="${pageContext.request.contextPath}/css/attendance-approval.css"></head><body><jsp:include page="/WEB-INF/jsp/common/header.jsp"/>
+<main class="attendance-page"><div class="attendance-heading"><div><p class="eyebrow">ATTENDANCE</p><h1>勤怠表入力</h1><p>勤務実績を日付単位または月単位で管理者へ申請できます。</p></div><div class="attendance-heading-actions"><div class="month-navigation"><a href="${pageContext.request.contextPath}/WorkManagement?year=${previousMonth.year}&amp;month=${previousMonth.monthValue}">‹</a><strong>${displayMonth.year}年 ${displayMonth.monthValue}月</strong><a href="${pageContext.request.contextPath}/WorkManagement?year=${nextMonth.year}&amp;month=${nextMonth.monthValue}">›</a></div><form method="post" action="${pageContext.request.contextPath}/WorkManagement" onsubmit="return confirm('${displayMonth.monthValue}月の未申請勤怠をすべて申請しますか？');"><input type="hidden" name="csrfToken" value="${csrfToken}"><input type="hidden" name="year" value="${displayMonth.year}"><input type="hidden" name="month" value="${displayMonth.monthValue}"><input type="hidden" name="action" value="submitMonth"><button class="month-submit" type="submit">この月を一括申請</button></form></div></div>
+<c:if test="${not empty flashMessage}"><div class="notice ${flashType}"><c:out value="${flashMessage}"/></div></c:if>
+<div class="attendance-layout"><section class="attendance-table-card"><table><thead><tr><th>日付</th><th>勤務区分</th><th>出勤</th><th>退勤</th><th>休憩</th><th>実働</th><th>報告書</th><th>承認状態</th><th>操作</th></tr></thead><tbody>
+<c:forEach var="day" items="${attendanceDays}"><tr class="${day.weekend ? 'weekend' : ''} ${day.today ? 'today' : ''}"><td><strong>${day.day}日</strong><span>（${day.weekday}）</span></td><c:choose><c:when test="${not empty day.attendance}"><td>${day.attendance.workTypeLabel}</td><td>${day.attendance.clockInValue}</td><td>${day.attendance.clockOutValue}</td><td>${day.attendance.breakMinutes}分</td><td>${day.attendance.workingTimeLabel}</td><td><c:choose><c:when test="${not empty day.attendance.reportId}"><a class="report-link" href="${pageContext.request.contextPath}/DairyWrite?edit=${day.attendance.reportId}"><c:out value="${day.attendance.reportTitle}"/></a></c:when><c:otherwise><span class="no-report">未設定</span></c:otherwise></c:choose></td><td><span class="approval-status ${day.attendance.approvalStatus}">${day.attendance.approvalStatusLabel}</span></td><td><div class="row-actions"><a class="edit-link" href="${pageContext.request.contextPath}/WorkManagement?year=${displayMonth.year}&amp;month=${displayMonth.monthValue}&amp;edit=${day.attendance.attendanceId}">${day.attendance.editable?'編集':'詳細'}</a><c:if test="${day.attendance.editable}"><form method="post" action="${pageContext.request.contextPath}/WorkManagement" onsubmit="return confirm('この勤怠を管理者へ申請しますか？');"><input type="hidden" name="csrfToken" value="${csrfToken}"><input type="hidden" name="year" value="${displayMonth.year}"><input type="hidden" name="month" value="${displayMonth.monthValue}"><input type="hidden" name="action" value="submit"><input type="hidden" name="attendanceId" value="${day.attendance.attendanceId}"><button class="row-submit" type="submit">申請</button></form></c:if></div></td></c:when><c:otherwise><td colspan="5" class="unregistered">未入力</td><td><a class="create-report-link" href="${pageContext.request.contextPath}/DairyWrite?date=${day.dateValue}">報告書作成</a></td><td>-</td><td><a class="edit-link" href="${pageContext.request.contextPath}/WorkManagement?year=${displayMonth.year}&amp;month=${displayMonth.monthValue}&amp;date=${day.dateValue}">入力</a></td></c:otherwise></c:choose></tr></c:forEach>
+</tbody></table></section>
+<aside class="attendance-form-card"><h2>${empty selected ? '勤怠を入力' : '勤怠を編集'}</h2><form method="post" action="${pageContext.request.contextPath}/WorkManagement" id="attendance-form"><input type="hidden" name="csrfToken" value="${csrfToken}"><input type="hidden" name="year" value="${displayMonth.year}"><input type="hidden" name="month" value="${displayMonth.monthValue}"><input type="hidden" name="action" value="${empty selected ? 'create' : 'update'}"><c:if test="${not empty selected}"><input type="hidden" name="attendanceId" value="${selected.attendanceId}"></c:if><fieldset ${not empty selected && not selected.editable ? 'disabled' : ''}>
+<label>勤務日<span>必須</span><input id="workDate" type="date" name="workDate" required value="${empty selected ? selectedDate : selected.workDate}"></label><label>勤務区分<span>必須</span><select id="workType" name="workType" required><option value="OFFICE" ${empty selected || selected.workType=='OFFICE'?'selected':''}>出社</option><option value="REMOTE" ${selected.workType=='REMOTE'?'selected':''}>リモート</option><option value="LEAVE" ${selected.workType=='LEAVE'?'selected':''}>休暇</option><option value="HOLIDAY" ${selected.workType=='HOLIDAY'?'selected':''}>休日</option></select></label>
+<div class="time-grid"><label>出勤時刻<input class="working-input" type="time" name="clockIn" value="${empty selected ? '09:00' : selected.clockInValue}"></label><label>退勤時刻<input class="working-input" type="time" name="clockOut" value="${empty selected ? '18:00' : selected.clockOutValue}"></label></div><label>休憩時間（分）<input class="working-input" type="number" name="breakMinutes" min="0" max="1440" value="${empty selected ? '60' : selected.breakMinutes}"></label>
+<label>関連する報告書（任意）<select id="reportId" name="reportId"><option value="">関連付けなし（勤怠のみ申請）</option><c:forEach var="report" items="${reports}"><option data-date="${report.reportDate}" value="${report.reportId}" ${selected.reportId==report.reportId?'selected':''}><c:out value="${report.title}"/>（${report.statusLabel}）</option></c:forEach></select><small>報告書を設定しなくても勤怠単体で申請できます。関連付ける場合は勤務日と報告日が同じ報告書を選択してください。</small></label><a id="new-report-link" class="new-report" href="${pageContext.request.contextPath}/DairyWrite?date=${empty selected ? selectedDate : selected.workDate}">この日の報告書を作成</a>
+<label>備考<textarea name="note" maxlength="500" rows="4"><c:out value="${selected.note}"/></textarea></label><c:if test="${empty selected || selected.editable}"><button class="primary" type="submit">保存</button></c:if></fieldset></form>
+<c:if test="${not empty selected && selected.editable}"><form method="post" action="${pageContext.request.contextPath}/WorkManagement" onsubmit="return confirm('この勤怠情報を削除しますか？')"><input type="hidden" name="csrfToken" value="${csrfToken}"><input type="hidden" name="year" value="${displayMonth.year}"><input type="hidden" name="month" value="${displayMonth.monthValue}"><input type="hidden" name="action" value="delete"><input type="hidden" name="attendanceId" value="${selected.attendanceId}"><button class="danger" type="submit">勤怠情報を削除</button></form></c:if></aside></div></main>
+<script>const dateInput=document.getElementById('workDate'),typeInput=document.getElementById('workType'),reportSelect=document.getElementById('reportId'),reportLink=document.getElementById('new-report-link');function sync(){const nonWorking=['LEAVE','HOLIDAY'].includes(typeInput.value);document.querySelectorAll('.working-input').forEach(i=>{i.disabled=nonWorking;i.required=!nonWorking});Array.from(reportSelect.options).forEach((o,i)=>{if(i)o.hidden=o.dataset.date!==dateInput.value});if(reportSelect.selectedOptions[0]?.hidden)reportSelect.value='';reportLink.href='${pageContext.request.contextPath}/DairyWrite?date='+encodeURIComponent(dateInput.value)}dateInput.addEventListener('change',sync);typeInput.addEventListener('change',sync);sync();</script></body></html>

@@ -16,6 +16,7 @@ import javax.servlet.http.HttpSession;
 import jp.nw.entity.UserEntity;
 import jp.nw.entity.WorkReportEntity;
 import jp.nw.model.WorkReportLogic;
+import jp.nw.model.ApprovalLogic;
 
 @WebServlet("/DairyWrite")
 public class DairyWrite extends HttpServlet {
@@ -26,7 +27,8 @@ public class DairyWrite extends HttpServlet {
         HttpSession session=request.getSession();UserEntity user=(UserEntity)session.getAttribute("loginUser");WorkReportLogic logic=new WorkReportLogic();
         String token=(String)session.getAttribute("reportCsrfToken");if(token==null){token=UUID.randomUUID().toString();session.setAttribute("reportCsrfToken",token);}
         WorkReportEntity selected=parseReport(request.getParameter("edit"),user.getUserId(),logic);
-        request.setAttribute("reports",logic.findOwn(user.getUserId()));request.setAttribute("selectedReport",selected);request.setAttribute("today",LocalDate.now());request.setAttribute("csrfToken",token);
+        LocalDate initialDate=LocalDate.now();try{if(request.getParameter("date")!=null)initialDate=LocalDate.parse(request.getParameter("date"));}catch(Exception ignored){}
+        request.setAttribute("reports",logic.findOwn(user.getUserId()));request.setAttribute("selectedReport",selected);request.setAttribute("today",initialDate);request.setAttribute("csrfToken",token);
         request.setAttribute("flashMessage",session.getAttribute("reportFlash"));request.setAttribute("flashType",session.getAttribute("reportFlashType"));session.removeAttribute("reportFlash");session.removeAttribute("reportFlashType");
         request.getRequestDispatcher("/WEB-INF/jsp/report/reportWrite.jsp").forward(request,response);
     }
@@ -38,7 +40,7 @@ public class DairyWrite extends HttpServlet {
         WorkReportLogic logic=new WorkReportLogic();
         try{
             String action=request.getParameter("action");
-            if("submit".equals(action)){if(!logic.submit(id(request),user.getUserId()))throw new IllegalArgumentException("提出できる報告書が見つかりません。");flash(session,"報告書を提出しました。","success");}
+            if("submit".equals(action)){new ApprovalLogic().submit("REPORT",id(request),user.getUserId());flash(session,"報告書を承認申請しました。","success");}
             else if("delete".equals(action)){if(!logic.delete(id(request),user.getUserId()))throw new IllegalArgumentException("削除できる報告書が見つかりません。");flash(session,"下書きを削除しました。","success");}
             else{
                 WorkReportEntity report=build(request,user.getUserId());

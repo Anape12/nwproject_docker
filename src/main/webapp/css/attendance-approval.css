@@ -1,0 +1,17 @@
+.attendance-form-card fieldset{margin:0;padding:0;border:0}
+.attendance-form-card fieldset:disabled{opacity:.65}
+.submit-approval{width:100%;margin-top:12px;border:0;border-radius:8px;padding:11px;color:#fff;background:#188038;font:inherit;font-weight:700;cursor:pointer}
+.approval-status{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700}
+.approval-status.DRAFT{background:#f2f4f7;color:#475467}
+.approval-status.SUBMITTED{background:#eff8ff;color:#175cd3}
+.approval-status.APPROVED{background:#ecfdf3;color:#067647}
+.approval-status.REJECTED{background:#fef3f2;color:#b42318}
+.row-actions{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.row-actions form{margin:0}
+.row-submit{border:0;border-radius:6px;padding:6px 10px;color:#fff;background:#188038;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.row-submit:hover{background:#137333}
+.no-report{color:#98a2b3}
+.attendance-heading-actions{display:flex;align-items:flex-end;flex-direction:column;gap:10px}
+.attendance-heading-actions form{margin:0}
+.month-submit{border:0;border-radius:8px;padding:10px 16px;color:#fff;background:#188038;font:inherit;font-weight:700;cursor:pointer}
+.month-submit:hover{background:#137333}
