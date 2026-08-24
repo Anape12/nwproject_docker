@@ -18,7 +18,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jp.nw.application.RegistrationChatCommand;
 import jp.nw.base.CommandData;
 import jp.nw.entity.ChatMessageEntity;
-import jp.nw.entity.UserEntity;
 
 /**
  * Servlet implementation class UserView
@@ -51,8 +50,6 @@ public class StartChatController extends HttpServlet {
 		HttpSession session = request.getSession();
 		session.setAttribute("roomId", roomId);
 		session.setAttribute("comment", comment);
-
-		UserEntity userEntity = (UserEntity)session.getAttribute("loginUser");
 
 		RegistrationChatCommand command = new RegistrationChatCommand();
 		command.setCommandData(request, response);

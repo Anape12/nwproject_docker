@@ -6,14 +6,14 @@ echo "Waiting for application..."
 
 READY=false
 
-for i in {1..60}; do
-    if curl -fs http://localhost:8080/Login >/dev/null 2>&1; then
+for i in {1..90}; do
+    if curl --connect-timeout 1 --max-time 2 -fs http://localhost:8080/Login >/dev/null 2>&1; then
         READY=true
         break
     fi
 
-    echo "Waiting... ($i/60)"
-    sleep 2
+    echo "Waiting... ($i/90)"
+    sleep 1
 done
 
 echo "READY=$READY"
