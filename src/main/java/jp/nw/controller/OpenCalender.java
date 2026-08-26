@@ -55,6 +55,9 @@ public class OpenCalender extends HttpServlet {
         request.setAttribute("nextMonth", month.plusMonths(1));
         request.setAttribute("selectedDate", selectedDate);
         request.setAttribute("editEvent", editEvent);
+        request.setAttribute("eventOwner",editEvent==null||loginUser.getUserId().equals(editEvent.getUserId()));request.setAttribute("eventParticipant",editEvent!=null&&logic.isParticipant(editEvent.getEventId(),loginUser.getUserId()));
+        if(editEvent!=null)request.setAttribute("attachments",new jp.nw.model.AttachmentLogic().find("SCHEDULE",String.valueOf(editEvent.getEventId())));
+        request.setAttribute("scheduleUsers",logic.users(loginUser.getUserId()));
         request.setAttribute("flashMessage", session.getAttribute("scheduleFlash"));
         request.setAttribute("flashType", session.getAttribute("scheduleFlashType"));
         request.setAttribute("csrfToken", csrfToken);
@@ -90,8 +93,8 @@ public class OpenCalender extends HttpServlet {
                     if (!logic.update(event)) throw new IllegalArgumentException("更新対象の予定が見つかりません。");
                     setFlash(session, "予定を更新しました。", "success");
                 } else {
-                    logic.create(event);
-                    setFlash(session, "予定を登録しました。", "success");
+                    int count=createRecurring(logic,event,request.getParameterValues("participantIds"));
+                    setFlash(session, count==1?"予定を登録しました。":"繰り返し予定を"+count+"件登録しました。", "success");
                 }
             }
         } catch (IllegalArgumentException | DateTimeParseException e) {
@@ -122,9 +125,12 @@ public class OpenCalender extends HttpServlet {
         }
         String color = request.getParameter("color");
         if (!COLORS.contains(color)) color = "#1a73e8";
+        String visibility="SHARED".equals(request.getParameter("visibility"))?"SHARED":"PRIVATE";String recurrence=Set.of("DAILY","WEEKLY","MONTHLY").contains(request.getParameter("recurrence"))?request.getParameter("recurrence"):null;LocalDate until=recurrence==null?null:parseDate(request.getParameter("recurrenceUntil"),startDate);if(until!=null&&until.isBefore(startDate))throw new IllegalArgumentException("繰り返し終了日は開始日以降にしてください。");
         return ScheduleEventEntity.builder().userId(userId).title(title).description(description)
-                .startAt(startAt).endAt(endAt).allDay(allDay).color(color).build();
+                .startAt(startAt).endAt(endAt).allDay(allDay).color(color).visibility(visibility).recurrenceRule(recurrence).recurrenceUntil(until).build();
     }
+
+    private int createRecurring(ScheduleEventLogic logic,ScheduleEventEntity source,String[] participants){int count=0;LocalDateTime start=source.getStartAt(),end=source.getEndAt();while(true){ScheduleEventEntity e=ScheduleEventEntity.builder().userId(source.getUserId()).title(source.getTitle()).description(source.getDescription()).startAt(start).endAt(end).allDay(source.isAllDay()).color(source.getColor()).visibility(source.getVisibility()).recurrenceRule(source.getRecurrenceRule()).recurrenceUntil(source.getRecurrenceUntil()).build();long eventId=logic.create(e);logic.invite(eventId,participants);count++;if(source.getRecurrenceRule()==null||source.getRecurrenceUntil()==null||count>=366)break;LocalDateTime nextStart=switch(source.getRecurrenceRule()){case "DAILY"->start.plusDays(1);case "WEEKLY"->start.plusWeeks(1);default->start.plusMonths(1);};LocalDateTime nextEnd=end.plus(java.time.Duration.between(start,nextStart));if(nextStart.toLocalDate().isAfter(source.getRecurrenceUntil()))break;start=nextStart;end=nextEnd;}return count;}
 
     private List<ScheduleCalendarDay> createDays(YearMonth month, LocalDate start, LocalDate end, List<ScheduleEventEntity> events) {
         List<ScheduleCalendarDay> days = new ArrayList<>();

@@ -39,6 +39,7 @@ public class ChatChanelRoomController extends HttpServlet {
 		session.setAttribute("chatDetail", (List<ChatMessageEntity>)output.getValue("chatDetail"));
 		session.setAttribute("RoomName", (String)request.getParameter("displayName"));
 		session.setAttribute("RoomId", roomId);
+		request.setAttribute("attachments",new jp.nw.model.AttachmentLogic().find("CHAT",roomId));
 
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/chat/ChatWindow.jsp");
 

@@ -18,6 +18,8 @@
         <a class="today-button" href="${pageContext.request.contextPath}/OpenCalender">今日</a>
         <a class="nav-button" href="${pageContext.request.contextPath}/OpenCalender?year=${nextMonth.year}&amp;month=${nextMonth.monthValue}">›</a>
         <h1>${displayMonth.year}年 ${displayMonth.monthValue}月</h1>
+        <a class="today-button" href="${pageContext.request.contextPath}/CalendarExchange">iCalendar出力</a>
+        <form method="post" enctype="multipart/form-data" action="${pageContext.request.contextPath}/CalendarExchange"><input type="file" name="calendarFile" accept=".ics,text/calendar" required><button class="today-button">取込</button></form>
       </div>
       <c:if test="${not empty flashMessage}"><div class="flash ${flashType}"><c:out value="${flashMessage}"/></div></c:if>
       <div class="calendar-grid weekday-row">
@@ -42,6 +44,7 @@
 
     <aside class="event-panel">
       <h2>${empty editEvent ? '予定を追加' : '予定を編集'}</h2>
+      <c:if test="${not empty editEvent && eventParticipant}"><form method="post" action="${pageContext.request.contextPath}/ScheduleResponse"><input type="hidden" name="eventId" value="${editEvent.eventId}"><button name="status" value="ACCEPTED">参加する</button><button name="status" value="DECLINED">辞退する</button></form></c:if>
       <form method="post" action="${pageContext.request.contextPath}/OpenCalender" id="event-form">
         <input type="hidden" name="csrfToken" value="${csrfToken}">
         <input type="hidden" name="year" value="${displayMonth.year}"><input type="hidden" name="month" value="${displayMonth.monthValue}">
@@ -69,12 +72,16 @@
             <option value="#5f6368" ${editEvent.color == '#5f6368' ? 'selected' : ''}>グレー</option>
           </select>
         </label>
+        <label>公開範囲<select name="visibility"><option value="PRIVATE" ${empty editEvent || editEvent.visibility == 'PRIVATE' ? 'selected' : ''}>自分のみ</option><option value="SHARED" ${editEvent.visibility == 'SHARED' ? 'selected' : ''}>全員に共有</option></select></label>
+        <div class="date-row"><label>繰り返し<select name="recurrence"><option value="">なし</option><option value="DAILY" ${editEvent.recurrenceRule=='DAILY'?'selected':''}>毎日</option><option value="WEEKLY" ${editEvent.recurrenceRule=='WEEKLY'?'selected':''}>毎週</option><option value="MONTHLY" ${editEvent.recurrenceRule=='MONTHLY'?'selected':''}>毎月</option></select></label><label>繰り返し終了日<input type="date" name="recurrenceUntil" value="${editEvent.recurrenceUntil}"></label></div>
         <label>詳細<textarea name="description" maxlength="1000" rows="5"><c:out value="${editEvent.description}"/></textarea></label>
+        <label>参加者（複数選択可）<select name="participantIds" multiple size="5"><c:forEach var="u" items="${scheduleUsers}"><option value="${u.id}"><c:out value="${u.name}"/></option></c:forEach></select></label>
         <div class="form-actions"><button class="primary-button" type="submit">${empty editEvent ? '登録' : '更新'}</button>
           <c:if test="${not empty editEvent}"><a class="cancel-button" href="${pageContext.request.contextPath}/OpenCalender?year=${displayMonth.year}&amp;month=${displayMonth.monthValue}">キャンセル</a></c:if>
         </div>
       </form>
       <c:if test="${not empty editEvent}">
+        <div class="attachments"><h3>関連資料</h3><c:forEach var="f" items="${attachments}"><a href="${pageContext.request.contextPath}/Attachment?id=${f.attachment_id}"><c:out value="${f.original_name}"/></a></c:forEach><form method="post" enctype="multipart/form-data" action="${pageContext.request.contextPath}/Attachment"><input type="hidden" name="ownerType" value="SCHEDULE"><input type="hidden" name="ownerId" value="${editEvent.eventId}"><input type="file" name="file" required><button>添付</button></form></div>
         <form method="post" action="${pageContext.request.contextPath}/OpenCalender" onsubmit="return confirm('この予定を削除しますか？');">
           <input type="hidden" name="csrfToken" value="${csrfToken}"><input type="hidden" name="year" value="${displayMonth.year}"><input type="hidden" name="month" value="${displayMonth.monthValue}">
           <input type="hidden" name="action" value="delete"><input type="hidden" name="eventId" value="${editEvent.eventId}">

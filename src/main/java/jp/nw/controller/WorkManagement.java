@@ -30,13 +30,14 @@ import jp.nw.model.WorkReportLogic;
 public class WorkManagement extends HttpServlet {
     private static final long serialVersionUID=1L;
     private static final Set<String> WORK_TYPES=Set.of("OFFICE","REMOTE","LEAVE","HOLIDAY");
+    private static final Set<String> ATTENDANCE_TYPES=Set.of("NORMAL","LATE","EARLY","ABSENT","PAID_LEAVE","COMP_LEAVE","HOLIDAY_WORK");
     @Override protected void doGet(HttpServletRequest request,HttpServletResponse response)throws ServletException,IOException{
         HttpSession session=request.getSession();UserEntity user=(UserEntity)session.getAttribute("loginUser");YearMonth month=month(request);AttendanceLogic logic=new AttendanceLogic();
         List<AttendanceEntity> records=logic.findMonth(user.getUserId(),month);Map<LocalDate,AttendanceEntity> byDate=new HashMap<>();for(AttendanceEntity record:records)byDate.put(record.getWorkDate(),record);
         List<AttendanceDay> days=new ArrayList<>();for(int day=1;day<=month.lengthOfMonth();day++){LocalDate date=month.atDay(day);days.add(new AttendanceDay(date,byDate.get(date)));}
         AttendanceEntity selected=selected(request.getParameter("edit"),user.getUserId(),logic);LocalDate selectedDate=parseDate(request.getParameter("date"),LocalDate.now());
         String token=(String)session.getAttribute("attendanceCsrfToken");if(token==null){token=UUID.randomUUID().toString();session.setAttribute("attendanceCsrfToken",token);}
-        request.setAttribute("attendanceDays",days);request.setAttribute("displayMonth",month);request.setAttribute("previousMonth",month.minusMonths(1));request.setAttribute("nextMonth",month.plusMonths(1));request.setAttribute("selected",selected);request.setAttribute("selectedDate",selectedDate);request.setAttribute("reports",new WorkReportLogic().findOwn(user.getUserId()));request.setAttribute("csrfToken",token);
+        request.setAttribute("attendanceDays",days);request.setAttribute("attendanceSummary",logic.summary(user.getUserId(),month));request.setAttribute("monthClosed",logic.isClosed(user.getUserId(),month));request.setAttribute("displayMonth",month);request.setAttribute("previousMonth",month.minusMonths(1));request.setAttribute("nextMonth",month.plusMonths(1));request.setAttribute("selected",selected);request.setAttribute("selectedDate",selectedDate);request.setAttribute("reports",new WorkReportLogic().findOwn(user.getUserId()));request.setAttribute("csrfToken",token);
         request.setAttribute("flashMessage",session.getAttribute("attendanceFlash"));request.setAttribute("flashType",session.getAttribute("attendanceFlashType"));session.removeAttribute("attendanceFlash");session.removeAttribute("attendanceFlashType");
         request.getRequestDispatcher("/WEB-INF/jsp/WorkManagement/workmanegiment.jsp").forward(request,response);
     }
@@ -56,7 +57,8 @@ public class WorkManagement extends HttpServlet {
         boolean nonWorking="LEAVE".equals(type)||"HOLIDAY".equals(type);LocalTime in=null,out=null;int breakMinutes=0;
         if(!nonWorking){in=LocalTime.parse(request.getParameter("clockIn"));out=LocalTime.parse(request.getParameter("clockOut"));if(!out.isAfter(in))throw new IllegalArgumentException("退勤時刻は出勤時刻より後にしてください。");try{breakMinutes=Integer.parseInt(request.getParameter("breakMinutes"));}catch(Exception e){throw new IllegalArgumentException("休憩時間を正しく入力してください。");}long duration=java.time.temporal.ChronoUnit.MINUTES.between(in,out);if(breakMinutes<0||breakMinutes>=duration)throw new IllegalArgumentException("休憩時間は勤務時間より短くしてください。");}
         String note=trim(request.getParameter("note"));if(note.length()>500)throw new IllegalArgumentException("備考は500文字以内で入力してください。");String reportValue=request.getParameter("reportId");Long reportId=reportValue==null||reportValue.isBlank()?null:Long.valueOf(reportValue);
-        return AttendanceEntity.builder().userId(userId).workDate(date).clockIn(in).clockOut(out).breakMinutes(breakMinutes).workType(type).note(note).reportId(reportId).build();
+        String attendanceType=request.getParameter("attendanceType");if(!ATTENDANCE_TYPES.contains(attendanceType))attendanceType="NORMAL";int overtime=0;if(in!=null&&out!=null)overtime=(int)Math.max(0,java.time.temporal.ChronoUnit.MINUTES.between(in,out)-breakMinutes-480);
+        return AttendanceEntity.builder().userId(userId).workDate(date).clockIn(in).clockOut(out).breakMinutes(breakMinutes).workType(type).attendanceType(attendanceType).overtimeMinutes(overtime).note(note).reportId(reportId).build();
     }
     private YearMonth month(HttpServletRequest request){try{String y=request.getParameter("year"),m=request.getParameter("month");return y==null||m==null?YearMonth.now():YearMonth.of(Integer.parseInt(y),Integer.parseInt(m));}catch(Exception e){return YearMonth.now();}}
     private LocalDate parseDate(String value,LocalDate fallback){try{return value==null?fallback:LocalDate.parse(value);}catch(Exception e){return fallback;}}

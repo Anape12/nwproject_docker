@@ -1,30 +1,5 @@
 package jp.nw.model;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import jp.nw.entity.UserEntity;
-import jp.nw.parts.DBBase;
-import jp.nw.parts.Query;
-import jp.nw.parts.SqlType;
-
-public class RegistrationChatLogic {
-     DBBase dbBase = null;
-
-    public long register(UserEntity loginUser, String roomId, String comment){
-
-        Map<String, Object> threadInfos = new HashMap<String, Object>();
-        threadInfos.put("room_id" , roomId);
-        threadInfos.put("message", comment);
-        threadInfos.put("posted_by_id", loginUser.getUserId());
-
-        Query query = Query.builder()
-                    .sqlType(SqlType.INSERT)
-                    .tableName("chat_message")
-                    .values(threadInfos)
-                    .build();
-
-        dbBase = new DBBase();
-        return dbBase.executeInsert(query);
-    }
+import java.sql.*;import jp.nw.entity.UserEntity;import jp.nw.parts.DBBase;
+public class RegistrationChatLogic{
+ public long register(UserEntity user,String roomId,String comment){if(comment==null||comment.isBlank()||comment.length()>500)throw new IllegalArgumentException("メッセージを1～500文字で入力してください。");DBBase db=new DBBase();try(Connection c=db.getConnection()){c.setAutoCommit(false);try{long id;try(PreparedStatement p=c.prepareStatement("INSERT INTO chat_message(room_id,message,posted_by_id) VALUES(?,?,?)",Statement.RETURN_GENERATED_KEYS)){p.setString(1,roomId);p.setString(2,comment.trim());p.setString(3,user.getUserId());p.executeUpdate();try(ResultSet r=p.getGeneratedKeys()){if(!r.next())throw new SQLException("Message key not found");id=r.getLong(1);}}try(PreparedStatement p=c.prepareStatement("UPDATE chat_room SET updated_at=NOW() WHERE room_id=?")){p.setString(1,roomId);p.executeUpdate();}try(PreparedStatement p=c.prepareStatement("INSERT INTO notification(user_id,category,title,message,link_url) SELECT user_id,'CHAT','新着チャット',?,CONCAT('/ChatChanelRoom?roomId=',room_id) FROM chat_room_member WHERE room_id=? AND user_id<>?")){p.setString(1,comment.length()>80?comment.substring(0,80)+"…":comment);p.setString(2,roomId);p.setString(3,user.getUserId());p.executeUpdate();}c.commit();return id;}catch(Exception e){c.rollback();throw e;}}catch(Exception e){throw new RuntimeException("チャットの送信に失敗しました。",e);}}
 }

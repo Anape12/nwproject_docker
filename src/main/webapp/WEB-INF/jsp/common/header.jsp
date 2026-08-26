@@ -8,9 +8,13 @@ UserEntity loginUser =
 %>
 
 <div class="header">
-    <div class="logo">
-        NW Project
-    </div>
+    <a class="logo" href="<%=request.getContextPath()%>/Portal">NW Project</a>
+    <nav class="header-nav">
+        <a href="<%=request.getContextPath()%>/Portal">ホーム</a>
+        <a href="<%=request.getContextPath()%>/WorkManagement">勤怠</a>
+        <a href="<%=request.getContextPath()%>/OpenCalender">予定</a>
+        <a href="<%=request.getContextPath()%>/ChatChanelList">チャット</a>
+    </nav>
     <div class="login-user">
         <% if(loginUser != null){ %>
             <%=loginUser.getLastName()%> <%=loginUser.getFirstName()%> さん ログイン中

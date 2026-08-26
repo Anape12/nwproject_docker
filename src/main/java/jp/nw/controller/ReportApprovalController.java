@@ -1,33 +1,7 @@
 package jp.nw.controller;
-
-import java.io.IOException;
-import java.util.Objects;
-import java.util.UUID;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import jp.nw.entity.UserEntity;
-import jp.nw.model.ApprovalLogic;
-
-@WebServlet("/ReportApproval")
-public class ReportApprovalController extends HttpServlet {
-    private static final long serialVersionUID=1L;
-    @Override protected void doGet(HttpServletRequest request,HttpServletResponse response)throws ServletException,IOException{
-        HttpSession session=request.getSession();UserEntity user=(UserEntity)session.getAttribute("loginUser");if(!admin(user)){response.sendError(403,"承認処理は管理者のみ実施できます。");return;}
-        ApprovalLogic logic=new ApprovalLogic();String token=(String)session.getAttribute("approvalCsrfToken");if(token==null){token=UUID.randomUUID().toString();session.setAttribute("approvalCsrfToken",token);}
-        request.setAttribute("applications",logic.findAll());request.setAttribute("selected",selected(request.getParameter("id"),logic));request.setAttribute("csrfToken",token);
-        request.setAttribute("flashMessage",session.getAttribute("approvalFlash"));request.setAttribute("flashType",session.getAttribute("approvalFlashType"));session.removeAttribute("approvalFlash");session.removeAttribute("approvalFlashType");
-        request.getRequestDispatcher("/WEB-INF/jsp/report/reportApproval.jsp").forward(request,response);
-    }
-    @Override protected void doPost(HttpServletRequest request,HttpServletResponse response)throws ServletException,IOException{
-        request.setCharacterEncoding("UTF-8");HttpSession session=request.getSession(false);UserEntity user=(UserEntity)session.getAttribute("loginUser");if(!admin(user)){response.sendError(403,"承認処理は管理者のみ実施できます。");return;}
-        if(!Objects.equals(session.getAttribute("approvalCsrfToken"),request.getParameter("csrfToken"))){response.sendError(403,"不正なリクエストです。");return;}
-        try{long id=Long.parseLong(request.getParameter("approvalId"));String decision=request.getParameter("decision"),comment=trim(request.getParameter("comment"));if("REJECTED".equals(decision)&&comment.isBlank())throw new IllegalArgumentException("差戻し理由を入力してください。");if(comment.length()>1000)throw new IllegalArgumentException("コメントは1000文字以内で入力してください。");new ApprovalLogic().review(id,user.getUserId(),decision,comment);flash(session,"APPROVED".equals(decision)?"申請を承認しました。":"申請を差し戻しました。","success");}catch(IllegalArgumentException e){flash(session,e.getMessage(),"error");}
-        response.sendRedirect(request.getContextPath()+"/ReportApproval");
-    }
-    private Object selected(String value,ApprovalLogic logic){if(value==null)return null;try{return logic.findById(Long.parseLong(value));}catch(NumberFormatException e){return null;}}
-    private boolean admin(UserEntity user){return user!=null&&"1".equals(user.getPermission());}private String trim(String value){return value==null?"":value.trim();}private void flash(HttpSession s,String m,String t){s.setAttribute("approvalFlash",m);s.setAttribute("approvalFlashType",t);}
+import java.io.*;import java.time.LocalDate;import java.util.*;import javax.servlet.*;import javax.servlet.annotation.WebServlet;import javax.servlet.http.*;import jp.nw.entity.*;import jp.nw.model.ApprovalLogic;
+@WebServlet("/ReportApproval") public class ReportApprovalController extends HttpServlet{
+ protected void doGet(HttpServletRequest q,HttpServletResponse s)throws ServletException,IOException{HttpSession session=q.getSession();UserEntity u=(UserEntity)session.getAttribute("loginUser");if(!reviewer(u)){s.sendError(403);return;}ApprovalLogic l=new ApprovalLogic();String token=(String)session.getAttribute("approvalCsrfToken");if(token==null){token=UUID.randomUUID().toString();session.setAttribute("approvalCsrfToken",token);}q.setAttribute("applications",l.findAll());ApprovalRequestEntity selected=selected(q.getParameter("id"),l);q.setAttribute("selected",selected);if(selected!=null)q.setAttribute("approvalHistory",l.history(selected.getApprovalId()));q.setAttribute("csrfToken",token);q.setAttribute("flashMessage",session.getAttribute("approvalFlash"));q.setAttribute("flashType",session.getAttribute("approvalFlashType"));session.removeAttribute("approvalFlash");session.removeAttribute("approvalFlashType");q.getRequestDispatcher("/WEB-INF/jsp/report/reportApproval.jsp").forward(q,s);}
+ protected void doPost(HttpServletRequest q,HttpServletResponse s)throws IOException{q.setCharacterEncoding("UTF-8");HttpSession session=q.getSession(false);UserEntity u=(UserEntity)session.getAttribute("loginUser");if(!reviewer(u)){s.sendError(403);return;}if(!Objects.equals(session.getAttribute("approvalCsrfToken"),q.getParameter("csrfToken"))){s.sendError(403);return;}try{ApprovalLogic l=new ApprovalLogic();String action=q.getParameter("action");if("route".equals(action)&&"1".equals(u.getPermission()))l.saveRoute(q.getParameter("applicationType"),Integer.parseInt(q.getParameter("requiredSteps")));else if("delegate".equals(action)&&"1".equals(u.getPermission()))l.addDelegate(u.getUserId(),q.getParameter("delegateUserId"),LocalDate.parse(q.getParameter("validFrom")),LocalDate.parse(q.getParameter("validTo")));else{String decision=q.getParameter("decision"),comment=trim(q.getParameter("comment"));if("REJECTED".equals(decision)&&comment.isBlank())throw new IllegalArgumentException("差戻し理由を入力してください。");String[] values=q.getParameterValues("approvalIds");if(values!=null){List<Long> ids=new ArrayList<>();for(String v:values)ids.add(Long.valueOf(v));l.reviewBatch(ids,u.getUserId(),decision,comment);}else l.review(Long.parseLong(q.getParameter("approvalId")),u.getUserId(),decision,comment);}flash(session,"処理が完了しました。","success");}catch(Exception e){flash(session,e.getMessage()==null?"処理に失敗しました。":e.getMessage(),"error");}s.sendRedirect(q.getContextPath()+"/ReportApproval");}
+ private ApprovalRequestEntity selected(String v,ApprovalLogic l){try{return v==null?null:l.findById(Long.parseLong(v));}catch(Exception e){return null;}}private boolean reviewer(UserEntity u){return u!=null&&new ApprovalLogic().canReview(u.getUserId(),u.getPermission());}private String trim(String v){return v==null?"":v.trim();}private void flash(HttpSession s,String m,String t){s.setAttribute("approvalFlash",m);s.setAttribute("approvalFlashType",t);}
 }

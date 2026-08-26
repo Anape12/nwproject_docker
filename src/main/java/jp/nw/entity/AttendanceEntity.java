@@ -18,6 +18,10 @@ public class AttendanceEntity {
     private LocalTime clockOut;
     private int breakMinutes;
     private String workType;
+    private String attendanceType;
+    private int overtimeMinutes;
+    private String correctedById;
+    private String correctionReason;
     private String note;
     private Long reportId;
     private String reportTitle;
@@ -27,6 +31,7 @@ public class AttendanceEntity {
     public String getClockInValue(){return clockIn==null?"":clockIn.toString();}
     public String getClockOutValue(){return clockOut==null?"":clockOut.toString();}
     public String getWorkTypeLabel(){return switch(workType==null?"":workType){case "OFFICE"->"出社";case "REMOTE"->"リモート";case "LEAVE"->"休暇";case "HOLIDAY"->"休日";default->workType;};}
+    public String getAttendanceTypeLabel(){return switch(attendanceType==null?"NORMAL":attendanceType){case "LATE"->"遅刻";case "EARLY"->"早退";case "ABSENT"->"欠勤";case "PAID_LEAVE"->"有給休暇";case "COMP_LEAVE"->"振替休日";case "HOLIDAY_WORK"->"休日出勤";default->"通常";};}
     public String getWorkingTimeLabel(){
         if(clockIn==null||clockOut==null)return "-";long minutes=ChronoUnit.MINUTES.between(clockIn,clockOut)-breakMinutes;
         return String.format("%d:%02d",Math.max(0,minutes)/60,Math.max(0,minutes)%60);

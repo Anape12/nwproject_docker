@@ -1,5 +1,6 @@
 volumes:
   mysql-data:
+  attachment-data:
 
 services:
   nginx:
@@ -29,6 +30,7 @@ services:
     volumes:
       # - ../target/app.war:/usr/local/tomcat/webapps/ROOT.war
       - ../target/app:/usr/local/tomcat/webapps/ROOT
+      - attachment-data:/var/lib/nwproject/attachments
 
     depends_on:
       db:
@@ -41,6 +43,7 @@ services:
     environment:
       JPDA_ADDRESS: "*:5005"
       JPDA_TRANSPORT: dt_socket
+      ATTACHMENT_DIR: /var/lib/nwproject/attachments
     command: ["catalina.sh", "jpda", "run"]
     env_file:
       - ../.env

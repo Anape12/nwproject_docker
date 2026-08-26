@@ -22,6 +22,9 @@ public class ScheduleEventEntity {
     private LocalDateTime endAt;
     private boolean allDay;
     private String color;
+    private String visibility;
+    private String recurrenceRule;
+    private LocalDate recurrenceUntil;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -31,6 +34,7 @@ public class ScheduleEventEntity {
     public String getEndTimeValue() { return formatTime(endAt); }
     public String getTimeLabel() { return allDay ? "終日" : formatTime(startAt); }
     public LocalDate getLastDisplayDate() { return endAt.minusNanos(1).toLocalDate(); }
+    public String getVisibilityLabel(){return "SHARED".equals(visibility)?"共有":"非公開";}
 
     private String formatTime(LocalDateTime value) {
         return value == null ? "" : value.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"));

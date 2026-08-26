@@ -27,6 +27,7 @@ public class DairyWrite extends HttpServlet {
         HttpSession session=request.getSession();UserEntity user=(UserEntity)session.getAttribute("loginUser");WorkReportLogic logic=new WorkReportLogic();
         String token=(String)session.getAttribute("reportCsrfToken");if(token==null){token=UUID.randomUUID().toString();session.setAttribute("reportCsrfToken",token);}
         WorkReportEntity selected=parseReport(request.getParameter("edit"),user.getUserId(),logic);
+        if(selected!=null)request.setAttribute("attachments",new jp.nw.model.AttachmentLogic().find("REPORT",String.valueOf(selected.getReportId())));
         LocalDate initialDate=LocalDate.now();try{if(request.getParameter("date")!=null)initialDate=LocalDate.parse(request.getParameter("date"));}catch(Exception ignored){}
         request.setAttribute("reports",logic.findOwn(user.getUserId()));request.setAttribute("selectedReport",selected);request.setAttribute("today",initialDate);request.setAttribute("csrfToken",token);
         request.setAttribute("flashMessage",session.getAttribute("reportFlash"));request.setAttribute("flashType",session.getAttribute("reportFlashType"));session.removeAttribute("reportFlash");session.removeAttribute("reportFlashType");
