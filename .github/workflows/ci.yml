@@ -46,7 +46,7 @@ jobs:
       - name: Install Playwright
         run: |
           npm ci
-          npx playwright install --with-deps
+          npx playwright install --with-deps chromium
 
       - name: Docker Build
         run: docker compose -f .devcontainer/docker-compose.yml build
@@ -68,8 +68,8 @@ jobs:
           docker compose -f .devcontainer/docker-compose.yml logs
           exit 1
 
-      - name: Run Playwright Tests 
-        run: npx playwright test
+      - name: Run Playwright Tests
+        run: npm run test:e2e
 
       - name: Upload Playwright Report 
         if: always() 

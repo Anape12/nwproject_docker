@@ -2,6 +2,7 @@ package jp.nw.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -26,11 +27,23 @@ public class ThreadDetailController extends HttpServlet {
                         HttpServletResponse response)
                         throws ServletException, IOException {
 
-                int threadId = Integer.parseInt(request.getParameter("id"));
+                String idValue = request.getParameter("id");
+                if (idValue == null) idValue = request.getParameter("threadId");
+                int threadId;
+                try {
+                        threadId = Integer.parseInt(idValue);
+                } catch (Exception e) {
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                        return;
+                }
 
                 ThreadDao dao = new ThreadDao();
 
                 ThreadDto thread = dao.findById(threadId);
+                if (thread == null) {
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                        return;
+                }
 
                 List<ThreadCommentDto> commentList = dao.findComments(threadId);
 
@@ -41,6 +54,16 @@ public class ThreadDetailController extends HttpServlet {
                 request.setAttribute(
                                 "loginUserId",
                                 loginUser.getUserId());
+                request.setAttribute("canManageThread",
+                                loginUser.getUserId().equals(thread.getAuthorId())
+                                                || "1".equals(loginUser.getPermission()));
+                if (session.getAttribute("threadCsrfToken") == null) {
+                        session.setAttribute("threadCsrfToken", UUID.randomUUID().toString());
+                }
+                request.setAttribute("threadFlash", session.getAttribute("threadFlash"));
+                request.setAttribute("threadFlashType", session.getAttribute("threadFlashType"));
+                session.removeAttribute("threadFlash");
+                session.removeAttribute("threadFlashType");
 
                 request.setAttribute("thread", thread);
                 request.setAttribute("commentList", commentList);

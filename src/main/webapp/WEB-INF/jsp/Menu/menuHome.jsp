@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %><%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %><%@ page import="java.time.LocalDate,java.time.format.DateTimeFormatter,java.util.Locale" %>
 <% String todayLabel=LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy年M月d日（E）",Locale.JAPANESE)); %>
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ホーム｜NW Project</title><link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css"><link rel="stylesheet" href="${pageContext.request.contextPath}/css/style11.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"></head><body><jsp:include page="/WEB-INF/jsp/common/header.jsp"/>
-<main class="workspace-home">
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base target="_blank"><title>ホーム｜NW Project</title><link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css"><link rel="stylesheet" href="${pageContext.request.contextPath}/css/style11.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"></head><body><jsp:include page="/WEB-INF/jsp/common/header.jsp"/>
+<main class="workspace-home"><a class="mode-switch-link" href="${pageContext.request.contextPath}/MenuSelect" target="_self"><i class="fa-solid fa-table-cells-large"></i> 利用メニューを切り替える</a>
   <section class="welcome-panel"><div><p class="home-date"><%=todayLabel%></p><h1><c:out value="${sessionScope.loginUser.lastName}"/> <c:out value="${sessionScope.loginUser.firstName}"/>さん、お疲れさまです。</h1><p>今日の業務をここから始められます。</p></div><a class="dashboard-link" href="${pageContext.request.contextPath}/Portal"><span><i class="fa-solid fa-gauge-high"></i></span><div><strong>業務ダッシュボード</strong><small>予定・通知・未処理をまとめて確認</small></div><i class="fa-solid fa-arrow-right"></i></a></section>
 
   <section class="quick-section"><div class="section-heading"><div><span>QUICK START</span><h2>よく使う操作</h2></div></div><div class="quick-grid">
@@ -23,5 +23,5 @@
   </div></section></div>
 
   <c:if test="${sessionScope.loginUser.permission=='1'}"><details class="legacy-tools"><summary><i class="fa-solid fa-toolbox"></i> 外部・管理ツール</summary><div><form action="${pageContext.request.contextPath}/SelectApp?AppName=NC30001" method="post"><button><i class="fa-solid fa-cubes"></i> AX3アプリ</button></form><form action="${pageContext.request.contextPath}/SelectApp?AppName=NC40001" method="post"><button><i class="fa-solid fa-layer-group"></i> AX4アプリ</button></form></div></details></c:if>
-  <form class="home-logout" action="${pageContext.request.contextPath}/Logout" method="get"><button><i class="fa-solid fa-right-from-bracket"></i> ログアウト</button></form>
+  <form class="home-logout" action="${pageContext.request.contextPath}/Logout" method="get" target="_self"><button><i class="fa-solid fa-right-from-bracket"></i> ログアウト</button></form>
 </main><jsp:include page="/WEB-INF/jsp/login/footer.jsp"/></body></html>

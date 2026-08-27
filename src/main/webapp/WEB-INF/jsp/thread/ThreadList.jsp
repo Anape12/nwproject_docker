@@ -24,9 +24,7 @@
             <div class="thread-card">
                 <div class="thread-header">
                     <h2>${thread.title}</h2>
-                    <span class="thread-author">
-                        ${thread.authorId}
-                    </span>
+                    <span class="thread-status ${thread.status}">${thread.closed ? '完了' : '進行中'}</span>
                 </div>
 
                 <div class="thread-content">
@@ -34,7 +32,8 @@
                 </div>
 
                 <div class="thread-footer">
-                    <a href="ThreadDetailController?id=${thread.threadId}">
+                    <span class="thread-author">投稿者：<c:out value="${thread.authorId}"/></span>
+                    <a href="${pageContext.request.contextPath}/ThreadDetailController?id=${thread.threadId}">
                         詳細を見る →
                     </a>
                 </div>

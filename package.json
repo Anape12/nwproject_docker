@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:list": "playwright test --list"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Anape12/nwproject_docker.git"

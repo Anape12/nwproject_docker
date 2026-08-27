@@ -8,6 +8,8 @@ import javax.servlet.http.*;
 
 import jp.nw.dao.ThreadDao;
 import jp.nw.dto.ThreadCommentDto;
+import jp.nw.dto.ThreadDto;
+import jp.nw.entity.UserEntity;
 
 @WebServlet("/ThreadCommentController")
 public class ThreadCommentController
@@ -24,8 +26,26 @@ public class ThreadCommentController
                                 request.getParameter(
                                                 "threadId"));
 
-                String commentText = request.getParameter(
-                                "commentText");
+                String commentText = request.getParameter("commentText");
+                commentText = commentText == null ? "" : commentText.trim();
+
+                HttpSession session = request.getSession(false);
+                UserEntity loginUser = session == null ? null
+                                : (UserEntity) session.getAttribute("loginUser");
+                if (loginUser == null) {
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                        return;
+                }
+                if (!java.util.Objects.equals(session.getAttribute("threadCsrfToken"),
+                                request.getParameter("csrfToken"))) {
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
+                }
+                if (commentText.isEmpty() || commentText.length() > 500) {
+                        flash(session, "コメントは1～500文字で入力してください。", "error");
+                        response.sendRedirect(request.getContextPath() + "/ThreadDetailController?id=" + threadId);
+                        return;
+                }
 
                 ThreadCommentDto dto = new ThreadCommentDto();
 
@@ -33,21 +53,28 @@ public class ThreadCommentController
 
                 dto.setCommentText(commentText);
 
-                // ログインユーザーのセット
-                HttpSession session = request.getSession();
-                String loginUserId = (String) session.getAttribute(
-                                "loginUserId");
-                dto.setAuthorId(loginUserId);
-                request.setAttribute(
-                                "loginUserId",
-                                loginUserId);
+                dto.setAuthorId(loginUser.getUserId());
 
                 ThreadDao dao = new ThreadDao();
 
-                dao.insertComment(dto);
+                ThreadDto thread = dao.findById(threadId);
+                if (thread == null) {
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                        return;
+                }
+                if (thread.isClosed()) {
+                        flash(session, "完了済みのスレッドには投稿できません。", "error");
+                } else if (dao.insertComment(dto)) {
+                        flash(session, "コメントを投稿しました。", "success");
+                }
 
                 response.sendRedirect(
-                                "ThreadDetailController?id="
+                                request.getContextPath() + "/ThreadDetailController?id="
                                                 + threadId);
+        }
+
+        private void flash(HttpSession session, String message, String type) {
+                session.setAttribute("threadFlash", message);
+                session.setAttribute("threadFlashType", type);
         }
 }

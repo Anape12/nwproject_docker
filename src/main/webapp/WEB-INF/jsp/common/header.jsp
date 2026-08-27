@@ -8,9 +8,10 @@ UserEntity loginUser =
 %>
 
 <div class="header">
-    <a class="logo" href="<%=request.getContextPath()%>/Portal">NW Project</a>
+    <a class="logo" href="<%=request.getContextPath()%>/MenuSelect">NW Project</a>
     <nav class="header-nav">
-        <a href="<%=request.getContextPath()%>/Portal">ホーム</a>
+        <a href="<%=request.getContextPath()%>/BusinessMenu">業務メニュー</a>
+        <a href="<%=request.getContextPath()%>/MenuSelect">切替</a>
         <a href="<%=request.getContextPath()%>/WorkManagement">勤怠</a>
         <a href="<%=request.getContextPath()%>/OpenCalender">予定</a>
         <a href="<%=request.getContextPath()%>/ChatChanelList">チャット</a>

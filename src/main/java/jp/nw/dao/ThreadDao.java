@@ -2,6 +2,7 @@ package jp.nw.dao;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,9 +16,9 @@ public class ThreadDao extends DBBase {
 
                 List<ThreadDto> list = new ArrayList<>();
 
-                String sql = "SELECT thread_id, title, author_id, thread_content " +
+                String sql = "SELECT thread_id, title, author_id, thread_content, status, closed_by_id, closed_at " +
                                 "FROM thread_info " +
-                                "ORDER BY thread_id DESC";
+                                "ORDER BY status = 'OPEN' DESC, updated_at DESC, thread_id DESC";
 
                 try {
 
@@ -40,12 +41,13 @@ public class ThreadDao extends DBBase {
 
                                 thread.setContent(
                                                 rs.getString("thread_content"));
+                                applyStatus(thread, rs);
 
                                 list.add(thread);
                         }
 
-                } catch (Exception e) {
-                        e.printStackTrace();
+                } catch (SQLException e) {
+                        throw new RuntimeException("スレッド一覧の取得に失敗しました。", e);
                 }
 
                 return list;
@@ -80,10 +82,12 @@ public class ThreadDao extends DBBase {
 
                                 dto.setThreadContent(
                                                 rs.getString("thread_content"));
+                                dto.setContent(rs.getString("thread_content"));
+                                applyStatus(dto, rs);
                         }
 
-                } catch (Exception e) {
-                        e.printStackTrace();
+                } catch (SQLException e) {
+                        throw new RuntimeException("スレッドの取得に失敗しました。", e);
                 }
 
                 return dto;
@@ -126,38 +130,58 @@ public class ThreadDao extends DBBase {
                                 list.add(dto);
                         }
 
-                } catch (Exception e) {
-                        e.printStackTrace();
+                } catch (SQLException e) {
+                        throw new RuntimeException("コメントの取得に失敗しました。", e);
                 }
 
                 return list;
         }
 
-        public void insertComment(
-                        ThreadCommentDto dto) {
+        public boolean insertComment(ThreadCommentDto dto) {
 
-                String sql = "INSERT INTO thread_comment " +
-                                "(thread_id, author_id, comment_text) " +
-                                "VALUES (?, ?, ?)";
+                String sql = "INSERT INTO thread_comment (thread_id, author_id, comment_text) "
+                                + "SELECT thread_id, ?, ? FROM thread_info "
+                                + "WHERE thread_id = ? AND status = 'OPEN'";
 
                 try {
 
                         PreparedStatement ps = getConnection().prepareStatement(sql);
 
-                        ps.setInt(1,
-                                        dto.getThreadId());
-
-                        ps.setString(2,
+                        ps.setString(1,
                                         dto.getAuthorId());
-
-                        ps.setString(3,
+                        ps.setString(2,
                                         dto.getCommentText());
+                        ps.setInt(3, dto.getThreadId());
 
-                        ps.executeUpdate();
+                        return ps.executeUpdate() == 1;
 
-                } catch (Exception e) {
-
-                        e.printStackTrace();
+                } catch (SQLException e) {
+                        throw new RuntimeException("コメントの投稿に失敗しました。", e);
                 }
+        }
+
+        public boolean updateStatus(int threadId, String userId, boolean admin, String status) {
+                String sql = "UPDATE thread_info SET status = ?, "
+                                + "closed_by_id = CASE WHEN ? = 'CLOSED' THEN ? ELSE NULL END, "
+                                + "closed_at = CASE WHEN ? = 'CLOSED' THEN CURRENT_TIMESTAMP ELSE NULL END "
+                                + "WHERE thread_id = ? AND (author_id = ? OR ? = 1)";
+                try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+                        ps.setString(1, status);
+                        ps.setString(2, status);
+                        ps.setString(3, userId);
+                        ps.setString(4, status);
+                        ps.setInt(5, threadId);
+                        ps.setString(6, userId);
+                        ps.setInt(7, admin ? 1 : 0);
+                        return ps.executeUpdate() == 1;
+                } catch (SQLException e) {
+                        throw new RuntimeException("スレッド状態の更新に失敗しました。", e);
+                }
+        }
+
+        private void applyStatus(ThreadDto dto, ResultSet rs) throws SQLException {
+                dto.setStatus(rs.getString("status"));
+                dto.setClosedById(rs.getString("closed_by_id"));
+                dto.setClosedAt(rs.getTimestamp("closed_at"));
         }
 }

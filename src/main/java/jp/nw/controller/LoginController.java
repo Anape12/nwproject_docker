@@ -70,6 +70,7 @@ public class LoginController extends HttpServlet {
 			// ログイン失敗
 			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/login/loginMiss.jsp");
 			dispatcher.forward(request, response);
+			return;
 		}
 
 		String token = UUID.randomUUID().toString();
@@ -81,6 +82,7 @@ public class LoginController extends HttpServlet {
 			// ログイン失敗
 			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/login/loginMiss.jsp");
 			dispatcher.forward(request, response);
+			return;
 		}
 
 		// ログイン処理成功の場合、ユーザーID/トークンをセッションに保存
@@ -88,18 +90,7 @@ public class LoginController extends HttpServlet {
 		session.setAttribute("loginToken", token);
 		session.setAttribute("loginUser", userEntity);
 
-		// 管理者権限の場合
-		if (userEntity.getPermission().equals("1")) {
-			this.baseModel.writeInfo("ログイン成功（管理者）");
-			// ログイン成功（管理者画面）
-			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/Menu/perMenu.jsp");
-			dispatcher.forward(request, response);
-		} else {
-			// 権限なしの場合
-			this.baseModel.writeInfo("ログイン成功（一般）");
-			// ログイン成功（一般）
-			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/Menu/genMenu.jsp");
-			dispatcher.forward(request, response);
-		}
+		this.baseModel.writeInfo(userEntity.getPermission().equals("1") ? "ログイン成功（管理者）" : "ログイン成功（一般）");
+		response.sendRedirect(request.getContextPath() + "/MenuSelect");
 	}
 }
