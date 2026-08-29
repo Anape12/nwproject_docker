@@ -31,7 +31,7 @@ List<ChatRoomEntity> chatRoomList = (List<ChatRoomEntity>) session.getAttribute(
                 <div class="channel-icon">
                     <c:choose>
                         <c:when test="${room.roomType == '1'}">
-                            👤
+                            ${room.aiMemberCount > 0 ? 'AI' : '👤'}
                         </c:when>
                         <c:otherwise>
                             👥
@@ -41,7 +41,7 @@ List<ChatRoomEntity> chatRoomList = (List<ChatRoomEntity>) session.getAttribute(
 
                 <div class="channel-info">
                     <div class="channel-name">
-                        ${room.displayName}
+                        <c:out value="${room.displayName}"/> <c:if test="${room.aiMemberCount > 0}"><span class="ai-user-badge">AI</span></c:if>
                     </div>
 
                     <div class="channel-type">

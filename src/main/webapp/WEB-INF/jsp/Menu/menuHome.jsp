@@ -12,16 +12,16 @@
   </div></section>
 
   <div class="home-columns"><section class="menu-section"><div class="section-heading"><div><span>COLLABORATION</span><h2>コミュニケーション</h2></div></div><div class="menu-list">
-    <a href="${pageContext.request.contextPath}/ChatChanelList"><i class="fa-solid fa-comment-dots"></i><div><strong>チャット</strong><small>個別・グループチャット</small></div></a>
-    <a href="${pageContext.request.contextPath}/ThreadController"><i class="fa-solid fa-users"></i><div><strong>スレッド</strong><small>テーマごとの情報共有</small></div></a>
-    <a href="${pageContext.request.contextPath}/UserSearch"><i class="fa-solid fa-address-book"></i><div><strong>ユーザー検索</strong><small>社員情報を検索・確認</small></div></a>
-  </div></section>
+  <a href="${pageContext.request.contextPath}/ChatChanelList"><i class="fa-solid fa-comment-dots"></i><div><strong>チャット</strong><small>個別・グループチャット</small></div></a>
+  <a href="${pageContext.request.contextPath}/ThreadController"><i class="fa-solid fa-users"></i><div><strong>スレッド</strong><small>テーマごとの情報共有</small></div></a>
+  <a href="${pageContext.request.contextPath}/UserSearch"><i class="fa-solid fa-address-book"></i><div><strong>ユーザー検索</strong><small>社員情報を検索・確認</small></div></a>
+</div></section>
 
-  <section class="menu-section"><div class="section-heading"><div><span>WORKFLOW</span><h2>申請・管理</h2></div></div><div class="menu-list">
-    <a href="${pageContext.request.contextPath}/Portal"><i class="fa-solid fa-bell"></i><div><strong>通知・自分の申請</strong><small>承認結果や取下げを確認</small></div></a>
-    <c:if test="${sessionScope.loginUser.permission=='1'}"><a href="${pageContext.request.contextPath}/ReportApproval"><i class="fa-solid fa-circle-check"></i><div><strong>承認管理</strong><small>未処理申請の確認・一括承認</small></div></a><a href="${pageContext.request.contextPath}/UserInsert"><i class="fa-solid fa-user-plus"></i><div><strong>新規ユーザー登録</strong><small>アカウントと権限を登録</small></div></a></c:if>
+<section class="menu-section"><div class="section-heading"><div><span>WORKFLOW</span><h2>申請・管理</h2></div></div><div class="menu-list">
+  <a href="${pageContext.request.contextPath}/Portal"><i class="fa-solid fa-bell"></i><div><strong>通知・自分の申請</strong><small>承認結果や取下げを確認</small></div></a>
+  <c:if test="${sessionScope.loginUser.permission=='1'}"><a href="${pageContext.request.contextPath}/ReportApproval"><i class="fa-solid fa-circle-check"></i><div><strong>承認管理</strong><small>未処理申請の確認・一括承認</small></div></a><a href="${pageContext.request.contextPath}/UserInsert"><i class="fa-solid fa-user-plus"></i><div><strong>新規ユーザー登録</strong><small>アカウントと権限を登録</small></div></a><a href="${pageContext.request.contextPath}/AiCharacterAdmin"><i class="fa-solid fa-robot"></i><div><strong>AI住人管理</strong><small>人格・興味・応答方法を設定</small></div></a></c:if>
   </div></section></div>
 
   <c:if test="${sessionScope.loginUser.permission=='1'}"><details class="legacy-tools"><summary><i class="fa-solid fa-toolbox"></i> 外部・管理ツール</summary><div><form action="${pageContext.request.contextPath}/SelectApp?AppName=NC30001" method="post"><button><i class="fa-solid fa-cubes"></i> AX3アプリ</button></form><form action="${pageContext.request.contextPath}/SelectApp?AppName=NC40001" method="post"><button><i class="fa-solid fa-layer-group"></i> AX4アプリ</button></form></div></details></c:if>
-  <form class="home-logout" action="${pageContext.request.contextPath}/Logout" method="get" target="_self"><button><i class="fa-solid fa-right-from-bracket"></i> ログアウト</button></form>
-</main><jsp:include page="/WEB-INF/jsp/login/footer.jsp"/></body></html>
+    <form class="home-logout" action="${pageContext.request.contextPath}/Logout" method="get" target="_self"><button><i class="fa-solid fa-right-from-bracket"></i> ログアウト</button></form>
+  </main><jsp:include page="/WEB-INF/jsp/login/footer.jsp"/></body></html>

@@ -25,6 +25,8 @@ public class UserEntity {
 
     private String permission;
 
+    private String accountType;
+
     private String passwordExpiration;
 
     private String deleteFlag;

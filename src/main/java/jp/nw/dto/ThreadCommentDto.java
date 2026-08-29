@@ -9,6 +9,7 @@ public class ThreadCommentDto {
     private String authorId;
     private String commentText;
     private Timestamp createdAt;
+    private String authorAccountType;
 
     public int getCommentId() {
         return commentId;
@@ -49,4 +50,6 @@ public class ThreadCommentDto {
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
+    public String getAuthorAccountType() { return authorAccountType; }
+    public void setAuthorAccountType(String authorAccountType) { this.authorAccountType = authorAccountType; }
 }

@@ -26,9 +26,9 @@
     <div class="chat-user-list">
       <c:forEach var="user" items="${chatUsers}">
         <form class="chat-user-item" method="post" action="${pageContext.request.contextPath}/ChatRoomCreate">
-          <div class="channel-icon">👤</div>
+          <div class="channel-icon">${user.accountType == 'AI' ? 'AI' : '👤'}</div>
           <div class="chat-user-info">
-            <strong><c:out value="${user.lastName}"/> <c:out value="${user.firstName}"/></strong>
+            <strong><c:out value="${user.lastName}"/> <c:out value="${user.firstName}"/> <c:if test="${user.accountType == 'AI'}"><span class="ai-user-badge">AI</span></c:if></strong>
             <span><c:out value="${user.userId}"/></span>
           </div>
           <input type="hidden" name="targetUserId" value="<c:out value='${user.userId}'/>">

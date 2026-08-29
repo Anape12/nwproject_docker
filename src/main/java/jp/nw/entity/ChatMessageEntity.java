@@ -22,6 +22,7 @@ public class ChatMessageEntity {
     private String deleteFlg;
 
     private String postedByName;
+    private String postedByAccountType;
 
     private String chatTarget;
     

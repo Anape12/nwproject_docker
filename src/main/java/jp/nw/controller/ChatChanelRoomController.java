@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import jp.nw.application.ChatRoomOpenCommand;
 import jp.nw.base.CommandData;
 import jp.nw.entity.ChatMessageEntity;
+import jp.nw.entity.UserEntity;
 
 /**
  * Servlet implementation class UserView
@@ -37,13 +38,18 @@ public class ChatChanelRoomController extends HttpServlet {
 
 		HttpSession session = request.getSession();
 		session.setAttribute("chatDetail", (List<ChatMessageEntity>)output.getValue("chatDetail"));
-		session.setAttribute("RoomName", (String)request.getParameter("displayName"));
+		String displayName=request.getParameter("displayName");
+		if(displayName!=null&&!displayName.isBlank())session.setAttribute("RoomName",displayName);
 		session.setAttribute("RoomId", roomId);
 		request.setAttribute("attachments",new jp.nw.model.AttachmentLogic().find("CHAT",roomId));
+		UserEntity loginUser=(UserEntity)session.getAttribute("loginUser");
+		request.setAttribute("canManageMembers",canManageMembers(loginUser,roomId));
 
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/chat/ChatWindow.jsp");
 
 		dispatcher.forward(request, response);
 
 	}
+
+	private boolean canManageMembers(UserEntity user,String roomId){jp.nw.parts.DBBase db=new jp.nw.parts.DBBase();try(java.sql.Connection c=db.getConnection();java.sql.PreparedStatement p=c.prepareStatement("SELECT 1 FROM chat_room WHERE room_id=? AND room_type='2' AND (created_by_id=? OR ?='1')")){p.setString(1,roomId);p.setString(2,user.getUserId());p.setString(3,user.getPermission());try(java.sql.ResultSet r=p.executeQuery()){return r.next();}}catch(Exception e){return false;}}
 }

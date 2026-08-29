@@ -3,12 +3,14 @@ package jp.nw.dao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import jp.nw.dto.ThreadCommentDto;
 import jp.nw.dto.ThreadDto;
 import jp.nw.parts.DBBase;
+import jp.nw.model.AiResponseJobLogic;
 
 public class ThreadDao extends DBBase {
 
@@ -97,9 +99,9 @@ public class ThreadDao extends DBBase {
 
                 List<ThreadCommentDto> list = new ArrayList<>();
 
-                String sql = "SELECT * FROM thread_comment " +
-                                "WHERE thread_id = ? " +
-                                "ORDER BY created_at";
+                String sql = "SELECT c.*, u.account_type AS author_account_type FROM thread_comment c " +
+                                "LEFT JOIN users_info u ON u.user_id=c.author_id " +
+                                "WHERE c.thread_id = ? ORDER BY c.created_at";
 
                 try {
 
@@ -126,6 +128,7 @@ public class ThreadDao extends DBBase {
 
                                 dto.setCreatedAt(
                                                 rs.getTimestamp("created_at"));
+                                dto.setAuthorAccountType(rs.getString("author_account_type"));
 
                                 list.add(dto);
                         }
@@ -145,7 +148,7 @@ public class ThreadDao extends DBBase {
 
                 try {
 
-                        PreparedStatement ps = getConnection().prepareStatement(sql);
+                        PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
                         ps.setString(1,
                                         dto.getAuthorId());
@@ -153,7 +156,12 @@ public class ThreadDao extends DBBase {
                                         dto.getCommentText());
                         ps.setInt(3, dto.getThreadId());
 
-                        return ps.executeUpdate() == 1;
+                        if (ps.executeUpdate() != 1) return false;
+                        try (ResultSet keys = ps.getGeneratedKeys()) {
+                                if (!keys.next()) throw new SQLException("Comment key not found");
+                                AiResponseJobLogic.enqueueThread(getConnection(), keys.getLong(1), dto.getThreadId(), dto.getAuthorId(), dto.getCommentText());
+                        }
+                        return true;
 
                 } catch (SQLException e) {
                         throw new RuntimeException("コメントの投稿に失敗しました。", e);

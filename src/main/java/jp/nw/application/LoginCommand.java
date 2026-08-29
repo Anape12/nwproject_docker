@@ -22,6 +22,7 @@ public class LoginCommand extends ApplicationCommand {
 	private static final String KEY_PASS_EXPIRATION = "password_expiration";
 	private static final String KEY_FIRST_NAME = "first_name";
 	private static final String KEY_LAST_NAME = "last_name";
+	private static final String KEY_ACCOUNT_TYPE = "account_type";
 	private static final String KEY_QERYNAME = "user_id";
 	private static final String KEY_USEROBJ = "userobj";
 
@@ -54,7 +55,7 @@ public class LoginCommand extends ApplicationCommand {
 			Query query = Query.builder()
 					.sqlType(SqlType.SELECT)
 					.tableName("users_info")
-					.selectColumns(List.of(KEY_QERYNAME, KEY_USERPASS, KEY_USERPERMISS, KEY_PASS_EXPIRATION, KEY_FIRST_NAME, KEY_LAST_NAME))
+					.selectColumns(List.of(KEY_QERYNAME, KEY_USERPASS, KEY_USERPERMISS, KEY_PASS_EXPIRATION, KEY_FIRST_NAME, KEY_LAST_NAME, KEY_ACCOUNT_TYPE))
 					.conditions(conditions)
 					.build();
 

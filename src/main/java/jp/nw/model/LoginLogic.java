@@ -51,6 +51,9 @@ public class LoginLogic {
 		if (userList == null) {
 			return false;
 		}
+		if ("AI".equals(userList.getAccountType())) {
+			return false;
+		}
 		if (userInfoCheck(userList.getUserId()) && passwordCheck(userEntity, userList.getPassword()) && passwordExpireCheck(userList.getPasswordExpiration())) {
 			return true;
 		}

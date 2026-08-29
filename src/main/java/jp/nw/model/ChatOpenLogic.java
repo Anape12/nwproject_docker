@@ -34,6 +34,7 @@ public class ChatOpenLogic {
                 "m.room_id",
                 "m.posted_by_id",
                 "CONCAT(u.last_name, ' ', u.first_name) AS posted_by_name",
+                "u.account_type AS posted_by_account_type",
                 "m.message",
                 "m.created_at"
             ))

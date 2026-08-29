@@ -15,7 +15,7 @@ import jp.nw.parts.DBBase;
 public class ChatRoomCreateLogic {
 
     public List<UserEntity> getAvailableUsers(String loginUserId) {
-        String sql = "SELECT user_id, first_name, last_name "
+        String sql = "SELECT user_id, first_name, last_name, account_type "
                 + "FROM users_info "
                 + "WHERE user_id <> ? AND delete_flg = '0' "
                 + "ORDER BY last_name, first_name, user_id";
@@ -31,6 +31,7 @@ public class ChatRoomCreateLogic {
                             .userId(result.getString("user_id"))
                             .firstName(result.getString("first_name"))
                             .lastName(result.getString("last_name"))
+                            .accountType(result.getString("account_type"))
                             .build());
                 }
             }

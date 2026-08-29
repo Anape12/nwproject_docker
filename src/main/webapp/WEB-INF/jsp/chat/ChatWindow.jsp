@@ -7,6 +7,7 @@
 <html lang="ja">
 <script>
     const loginUserId = "${loginUser.userId}";
+    const contextPath = "${pageContext.request.contextPath}";
 </script>
 <head>
   <meta charset="utf-8">
@@ -20,7 +21,7 @@
 
     <jsp:include page="/WEB-INF/jsp/common/header.jsp"/>
     <div id="container">
-        <h1 class="page-title">${RoomName}</h1>
+        <h1 class="page-title"><c:out value="${RoomName}"/></h1><c:if test="${canManageMembers}"><a class="member-manage-link" href="${pageContext.request.contextPath}/ChatMemberManage?roomId=${RoomId}">メンバーを招待</a></c:if>
 
         <div id="chat-area" class="chat-area">
 
@@ -31,7 +32,7 @@
                     <c:when test="${message.postedById == loginUser.userId}">
                         <div class="chat-message my-message">
                             <div class="message-body">
-                                ${message.message}
+                                <c:out value="${message.message}"/>
                             </div>
                             <span class="message-time">
                                 ${DateFormatUtil.format(message.createdAt)}
@@ -42,11 +43,11 @@
                     <c:otherwise>
                         <div class="chat-message other-message">
                             <div class="message-user">
-                                ${message.postedByName}
+                                <c:out value="${message.postedByName}"/> <c:if test="${message.postedByAccountType == 'AI'}"><span class="ai-user-badge">AI</span></c:if>
                             </div>
 
                             <div class="message-body">
-                                ${message.message}
+                                <c:out value="${message.message}"/>
                             </div>
 
                             <div class="message-time">

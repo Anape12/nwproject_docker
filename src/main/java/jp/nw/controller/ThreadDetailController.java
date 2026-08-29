@@ -16,6 +16,7 @@ import jp.nw.dao.ThreadDao;
 import jp.nw.dto.ThreadCommentDto;
 import jp.nw.dto.ThreadDto;
 import jp.nw.entity.UserEntity;
+import jp.nw.model.AiResponseJobLogic;
 
 @WebServlet("/ThreadDetailController")
 public class ThreadDetailController extends HttpServlet {
@@ -67,6 +68,7 @@ public class ThreadDetailController extends HttpServlet {
 
                 request.setAttribute("thread", thread);
                 request.setAttribute("commentList", commentList);
+                request.setAttribute("aiResponsePending", AiResponseJobLogic.hasPending("THREAD", String.valueOf(threadId)));
 
                 RequestDispatcher dispatcher = request.getRequestDispatcher(
                                 "/WEB-INF/jsp/thread/ThreadDetail.jsp");

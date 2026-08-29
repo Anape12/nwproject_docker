@@ -21,4 +21,5 @@ public class ChatRoomEntity {
     private LocalDateTime updatedAt;
     private String deleteFlg;
     private String displayName;
+    private Long aiMemberCount;
 }

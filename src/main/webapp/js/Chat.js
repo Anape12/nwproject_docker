@@ -11,7 +11,7 @@ async function sendMessage() {
         const sendMsg = document.getElementById("commentText").value;
         const roomId = document.getElementById("roomId").value;
 
-        const response = await fetch("StartChat", {
+        const response = await fetch(contextPath + "/StartChat", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
@@ -49,11 +49,11 @@ function drawChat(messages) {
             <div class="chat-message ${isMine ? "my-message" : "other-message"}">
 
                 ${!isMine ?
-                    `<div class="message-user">${msg.postedByName}</div>`
+                    `<div class="message-user">${escapeHtml(msg.postedByName)} ${msg.postedByAccountType === "AI" ? '<span class="ai-user-badge">AI</span>' : ''}</div>`
                     : ""}
 
                 <div class="message-body">
-                    ${msg.message}
+                    ${escapeHtml(msg.message)}
                 </div>
 
                 <div class="message-time">
@@ -70,3 +70,22 @@ function drawChat(messages) {
     // 一番下までスクロール
     chatArea.scrollTop = chatArea.scrollHeight;
 }
+
+function escapeHtml(value) {
+    const div = document.createElement("div");
+    div.textContent = value == null ? "" : value;
+    return div.innerHTML;
+}
+
+async function refreshMessages() {
+    if (document.hidden) return;
+    try {
+        const roomId = document.getElementById("roomId").value;
+        const response = await fetch(contextPath + "/ChatMessages?roomId=" + encodeURIComponent(roomId));
+        if (response.ok) drawChat(await response.json());
+    } catch (e) {
+        console.debug("chat refresh skipped", e);
+    }
+}
+
+setInterval(refreshMessages, 3000);

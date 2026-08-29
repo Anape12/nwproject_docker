@@ -38,6 +38,7 @@ public class ChatChanelListLogic {
             "ELSE r.room_name " +
             "END AS display_name"
         );
+        colList.add("(SELECT COUNT(*) FROM chat_room_member am INNER JOIN users_info au ON au.user_id=am.user_id WHERE am.room_id=r.room_id AND au.account_type='AI') AS ai_member_count");
 
         // 検索条件
         LinkedHashMap<String, Object> conditions = new LinkedHashMap<>();
