@@ -17,10 +17,10 @@
   <link rel="stylesheet"  href="${pageContext.request.contextPath}/css/style.css">
   <link rel="stylesheet"  href="${pageContext.request.contextPath}/css/chatLayout.css">
 </head>
-<body>
+<body class="chat-page">
 
     <jsp:include page="/WEB-INF/jsp/common/header.jsp"/>
-    <div id="container">
+    <div id="container" class="chat-container">
         <h1 class="page-title"><c:out value="${RoomName}"/></h1><c:if test="${canManageMembers}"><a class="member-manage-link" href="${pageContext.request.contextPath}/ChatMemberManage?roomId=${RoomId}">メンバーを招待</a></c:if>
 
         <div id="chat-area" class="chat-area">

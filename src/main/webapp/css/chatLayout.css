@@ -1,3 +1,36 @@
+html,
+body.chat-page {
+    height:100%;
+    overflow:hidden;
+}
+
+body.chat-page {
+    display:flex;
+    flex-direction:column;
+    margin:0;
+}
+
+.chat-page .header {
+    flex:0 0 70px;
+    box-sizing:border-box;
+}
+
+.chat-container {
+    display:flex;
+    flex:1 1 auto;
+    flex-direction:column;
+    min-height:0;
+    padding:18px 24px;
+    box-sizing:border-box;
+}
+
+.chat-container .page-title,
+.chat-container .member-manage-link,
+.chat-container .comment-form,
+.chat-container .attachments {
+    flex:0 0 auto;
+}
+
 /* ---------- タイトル ---------- */
 
 .chat-title{
@@ -15,7 +48,8 @@
     display:flex;
     flex-direction:column;
 
-    height:500px;
+    flex:1 1 auto;
+    min-height:0;
 
     overflow-y:auto;
 
@@ -230,3 +264,8 @@
 }
 .ai-user-badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:999px;background:#7c3aed;color:#fff;font-size:10px;font-weight:900;letter-spacing:.05em}
 .member-manage-link{display:inline-block;margin:0 0 16px;color:#7c3aed;font-weight:800;text-decoration:none}
+
+@media(max-width:700px){
+    .chat-container{padding:12px}
+    .chat-message{max-width:82%}
+}

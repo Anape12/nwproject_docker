@@ -43,7 +43,7 @@ async function sendMessage() {
     }
 }
 
-function drawChat(messages) {
+function drawChat(messages, scrollToBottom = true, preservedScrollTop = 0) {
 
     const chatArea = document.getElementById("chat-area");
 
@@ -76,8 +76,11 @@ function drawChat(messages) {
 
     });
 
-    // 一番下までスクロール
-    chatArea.scrollTop = chatArea.scrollHeight;
+    if (scrollToBottom) {
+        chatArea.scrollTop = chatArea.scrollHeight;
+    } else {
+        chatArea.scrollTop = preservedScrollTop;
+    }
 }
 
 function escapeHtml(value) {
@@ -91,7 +94,15 @@ async function refreshMessages() {
     try {
         const roomId = document.getElementById("roomId").value;
         const response = await fetch(contextPath + "/ChatMessages?roomId=" + encodeURIComponent(roomId));
-        if (response.ok) drawChat(await response.json());
+        if (response.ok) {
+            const messages = await response.json();
+            // 通信中に利用者がスクロールすることもあるため、描画直前の位置を使う。
+            const chatArea = document.getElementById("chat-area");
+            const previousScrollTop = chatArea.scrollTop;
+            const distanceFromBottom = chatArea.scrollHeight - chatArea.clientHeight - previousScrollTop;
+            const wasNearBottom = distanceFromBottom <= 80;
+            drawChat(messages, wasNearBottom, previousScrollTop);
+        }
     } catch (e) {
         console.debug("chat refresh skipped", e);
     }
