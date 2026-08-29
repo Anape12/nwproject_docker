@@ -58,8 +58,7 @@ public class AiCharacterAdminController extends HttpServlet {
         try {
             AiCharacterEntity v = AiCharacterEntity.builder().userId(trim(q.getParameter("userId")))
                     .characterName(trim(q.getParameter("characterName")))
-                    .systemPrompt(trim(q.getParameter("systemPrompt"))).personality(trim(q.getParameter("personality")))
-                    .interests(trim(q.getParameter("interests"))).modelName(trim(q.getParameter("modelName")))
+                    .promptKey(trim(q.getParameter("promptKey"))).modelName(trim(q.getParameter("modelName")))
                     .replyMode(q.getParameter("replyMode")).activeFlg(q.getParameter("activeFlg") == null ? "0" : "1")
                     .build();
             String id = q.getParameter("characterId");

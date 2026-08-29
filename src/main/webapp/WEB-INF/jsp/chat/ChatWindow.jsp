@@ -64,7 +64,8 @@
 
         <form id="chat-form" class="comment-form">
             <input type="hidden" id="roomId" name="roomId" value="${RoomId}"/>
-            <input id="commentText" type="text" name="commentText" maxlength="500" required placeholder="コメントを入力してください"/>
+            <textarea id="commentText" name="commentText" maxlength="500" rows="1" required
+                placeholder="コメントを入力（Shift + Enterで改行）"></textarea>
             <button type="submit">送信</button>
         </form>
         <div class="attachments"><c:forEach var="f" items="${attachments}"><a href="${pageContext.request.contextPath}/Attachment?id=${f.attachment_id}"><c:out value="${f.original_name}"/></a></c:forEach><form method="post" enctype="multipart/form-data" action="${pageContext.request.contextPath}/Attachment"><input type="hidden" name="ownerType" value="CHAT"><input type="hidden" name="ownerId" value="${RoomId}"><input type="file" name="file" required><button>ファイル送信</button></form></div>

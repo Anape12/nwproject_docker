@@ -16,7 +16,7 @@ public final class AiResponseJobLogic {
                 + "SELECT a.character_id,'CHAT',?, ?, ? FROM ai_character a JOIN users_info u ON u.user_id=a.user_id "
                 + "JOIN chat_room_member m ON m.user_id=a.user_id JOIN chat_room r ON r.room_id=m.room_id "
                 + "WHERE m.room_id=? AND a.active_flg='1' AND u.delete_flg='0' AND "
-                + "(r.room_type='1' OR a.reply_mode='ALWAYS' OR LOCATE(CONCAT('@',a.character_name),?)>0 OR LOCATE(CONCAT('@',a.user_id),?)>0)";
+                + "(r.room_type='1' OR a.reply_mode='ALWAYS' OR LOCATE(CONCAT('@',u.first_name),?)>0 OR LOCATE(CONCAT('@',a.user_id),?)>0)";
         try (PreparedStatement p = c.prepareStatement(sql)) {
             p.setString(1, roomId);
             p.setLong(2, messageId);
@@ -32,7 +32,7 @@ public final class AiResponseJobLogic {
             throws SQLException {
         String sql = "INSERT IGNORE INTO ai_response_job(character_id,source_type,conversation_id,source_message_id,requested_by_id) "
                 + "SELECT a.character_id,'THREAD',?, ?, ? FROM ai_character a JOIN users_info u ON u.user_id=a.user_id "
-                + "WHERE a.active_flg='1' AND u.delete_flg='0' AND (LOCATE(CONCAT('@',a.character_name),?)>0 OR LOCATE(CONCAT('@',a.user_id),?)>0)";
+                + "WHERE a.active_flg='1' AND u.delete_flg='0' AND (LOCATE(CONCAT('@',u.first_name),?)>0 OR LOCATE(CONCAT('@',a.user_id),?)>0)";
         try (PreparedStatement p = c.prepareStatement(sql)) {
             p.setString(1, String.valueOf(threadId));
             p.setLong(2, commentId);

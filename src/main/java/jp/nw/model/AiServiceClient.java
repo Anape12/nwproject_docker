@@ -19,14 +19,12 @@ public class AiServiceClient {
     private final String baseUrl = env("AI_SERVICE_URL", "http://localhost:8000");
     private final String token = env("AI_SERVICE_TOKEN", "");
 
-    public String respond(long characterId, String name, String prompt, String personality, String interests,
-            String model, String type, String conversationId, String context, String message) throws Exception {
+    public String respond(long characterId, String name, String promptKey, String model,
+            String type, String conversationId, String context, String message) throws Exception {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("character_id", String.valueOf(characterId));
         body.put("character_name", safe(name));
-        body.put("system_prompt", safe(prompt));
-        body.put("personality", safe(personality));
-        body.put("interests", safe(interests));
+        body.put("prompt_key", safe(promptKey));
         if (model != null && !model.isBlank()) body.put("model_name", model.trim());
         body.put("conversation_type", safe(type));
         body.put("conversation_id", safe(conversationId));

@@ -1,14 +1,23 @@
 const form = document.getElementById("chat-form");
+const messageInput = document.getElementById("commentText");
 
 form.addEventListener("submit", (e) => {
     e.preventDefault();   // 画面遷移を止める
     sendMessage();
 });
 
+messageInput.addEventListener("keydown", (e) => {
+    // 日本語変換中のEnterは送信として扱わない。
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        form.requestSubmit();
+    }
+});
+
 
 async function sendMessage() {
     try {
-        const sendMsg = document.getElementById("commentText").value;
+        const sendMsg = messageInput.value;
         const roomId = document.getElementById("roomId").value;
 
         const response = await fetch(contextPath + "/StartChat", {
@@ -28,7 +37,7 @@ async function sendMessage() {
 
         drawChat(result);
 
-        document.getElementById("commentText").value = "";
+        messageInput.value = "";
     } catch (e) {
         console.error(e);
     }

@@ -14,7 +14,7 @@ import jp.nw.parts.DBBase;
 
 public class AiCharacterLogic {
     public List<AiCharacterEntity> findAll() {
-        String sql = "SELECT character_id,user_id,character_name,system_prompt,personality,interests,model_name,reply_mode,active_flg FROM ai_character ORDER BY character_id";
+        String sql = "SELECT a.character_id,a.user_id,u.first_name character_name,a.prompt_key,a.model_name,a.reply_mode,a.active_flg FROM ai_character a JOIN users_info u ON u.user_id=a.user_id ORDER BY a.character_id";
         List<AiCharacterEntity> result = new ArrayList<>();
         DBBase db = new DBBase();
         try (Connection c = db.getConnection();
@@ -32,7 +32,7 @@ public class AiCharacterLogic {
         DBBase db = new DBBase();
         try (Connection c = db.getConnection();
                 PreparedStatement p = c.prepareStatement(
-                        "SELECT character_id,user_id,character_name,system_prompt,personality,interests,model_name,reply_mode,active_flg FROM ai_character WHERE character_id=?")) {
+                        "SELECT a.character_id,a.user_id,u.first_name character_name,a.prompt_key,a.model_name,a.reply_mode,a.active_flg FROM ai_character a JOIN users_info u ON u.user_id=a.user_id WHERE a.character_id=?")) {
             p.setLong(1, id);
             try (ResultSet r = p.executeQuery()) {
                 return r.next() ? map(r) : null;
@@ -43,7 +43,7 @@ public class AiCharacterLogic {
     }
 
     public List<Map<String, Object>> findRecentJobs() {
-        String sql = "SELECT j.job_id,a.character_name,j.source_type,j.status,j.retry_count,j.error_message,j.created_at,j.completed_at FROM ai_response_job j JOIN ai_character a ON a.character_id=j.character_id ORDER BY j.job_id DESC LIMIT 20";
+        String sql = "SELECT j.job_id,u.first_name character_name,j.source_type,j.status,j.retry_count,j.error_message,j.created_at,j.completed_at FROM ai_response_job j JOIN ai_character a ON a.character_id=j.character_id JOIN users_info u ON u.user_id=a.user_id ORDER BY j.job_id DESC LIMIT 20";
         List<Map<String, Object>> list = new ArrayList<>();
         DBBase db = new DBBase();
         try (Connection c = db.getConnection(); PreparedStatement p = c.prepareStatement(sql); ResultSet r = p.executeQuery()) {
@@ -72,8 +72,11 @@ public class AiCharacterLogic {
                     p.executeUpdate();
                 }
                 try (PreparedStatement p = c.prepareStatement(
-                        "INSERT INTO ai_character(user_id,character_name,system_prompt,personality,interests,model_name,reply_mode,active_flg) VALUES(?,?,?,?,?,?,?,'1')")) {
-                    bind(p, v, false);
+                        "INSERT INTO ai_character(user_id,prompt_key,model_name,reply_mode,active_flg) VALUES(?,?,?,?,'1')")) {
+                    p.setString(1, v.getUserId());
+                    p.setString(2, v.getPromptKey());
+                    p.setString(3, blankToNull(v.getModelName()));
+                    p.setString(4, v.getReplyMode());
                     p.executeUpdate();
                 }
                 c.commit();
@@ -93,15 +96,12 @@ public class AiCharacterLogic {
             c.setAutoCommit(false);
             try {
                 try (PreparedStatement p = c.prepareStatement(
-                        "UPDATE ai_character SET character_name=?,system_prompt=?,personality=?,interests=?,model_name=?,reply_mode=?,active_flg=? WHERE character_id=?")) {
-                    p.setString(1, v.getCharacterName());
-                    p.setString(2, v.getSystemPrompt());
-                    p.setString(3, v.getPersonality());
-                    p.setString(4, v.getInterests());
-                    p.setString(5, blankToNull(v.getModelName()));
-                    p.setString(6, v.getReplyMode());
-                    p.setString(7, v.getActiveFlg());
-                    p.setLong(8, v.getCharacterId());
+                        "UPDATE ai_character SET prompt_key=?,model_name=?,reply_mode=?,active_flg=? WHERE character_id=?")) {
+                    p.setString(1, v.getPromptKey());
+                    p.setString(2, blankToNull(v.getModelName()));
+                    p.setString(3, v.getReplyMode());
+                    p.setString(4, v.getActiveFlg());
+                    p.setLong(5, v.getCharacterId());
                     if (p.executeUpdate() != 1)
                         throw new IllegalArgumentException("AI住人が見つかりません。");
                 }
@@ -122,20 +122,11 @@ public class AiCharacterLogic {
         }
     }
 
-    private void bind(PreparedStatement p, AiCharacterEntity v, boolean ignored) throws SQLException {
-        p.setString(1, v.getUserId());
-        p.setString(2, v.getCharacterName());
-        p.setString(3, v.getSystemPrompt());
-        p.setString(4, v.getPersonality());
-        p.setString(5, v.getInterests());
-        p.setString(6, blankToNull(v.getModelName()));
-        p.setString(7, v.getReplyMode());
-    }
-
     private void validate(AiCharacterEntity v) {
-        if (v.getCharacterName() == null || v.getCharacterName().isBlank() || v.getSystemPrompt() == null
-                || v.getSystemPrompt().isBlank())
-            throw new IllegalArgumentException("名前と基本指示は必須です。");
+        if (v.getCharacterName() == null || v.getCharacterName().isBlank())
+            throw new IllegalArgumentException("名前は必須です。");
+        if (v.getPromptKey() == null || !v.getPromptKey().matches("[a-z0-9][a-z0-9_-]{0,63}"))
+            throw new IllegalArgumentException("プロンプトキーは小文字の半角英数字・_ ・-の1〜64文字です。");
         if (!"MENTION".equals(v.getReplyMode()) && !"ALWAYS".equals(v.getReplyMode()))
             throw new IllegalArgumentException("応答モードが不正です。");
         if (v.getUserId() != null && !v.getUserId().matches("[a-zA-Z0-9_-]{3,20}"))
@@ -148,8 +139,7 @@ public class AiCharacterLogic {
 
     private AiCharacterEntity map(ResultSet r) throws SQLException {
         return AiCharacterEntity.builder().characterId(r.getLong("character_id")).userId(r.getString("user_id"))
-                .characterName(r.getString("character_name")).systemPrompt(r.getString("system_prompt"))
-                .personality(r.getString("personality")).interests(r.getString("interests"))
+                .characterName(r.getString("character_name")).promptKey(r.getString("prompt_key"))
                 .modelName(r.getString("model_name")).replyMode(r.getString("reply_mode"))
                 .activeFlg(r.getString("active_flg")).build();
     }

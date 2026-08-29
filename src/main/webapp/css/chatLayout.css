@@ -157,14 +157,17 @@
 
     flex:1;
 
-    height:42px;
+    min-height:42px;
+    max-height:120px;
 
-    padding:0 16px;
+    padding:10px 16px;
 
     border:1px solid #ccc;
     border-radius:22px;
 
     font-size:14px;
+    line-height:1.5;
+    resize:vertical;
 
     transition:.2s;
 

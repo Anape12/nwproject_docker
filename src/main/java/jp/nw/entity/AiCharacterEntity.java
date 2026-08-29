@@ -13,9 +13,7 @@ public class AiCharacterEntity {
     private long characterId;
     private String userId;
     private String characterName;
-    private String systemPrompt;
-    private String personality;
-    private String interests;
+    private String promptKey;
     private String modelName;
     private String replyMode;
     private String activeFlg;
