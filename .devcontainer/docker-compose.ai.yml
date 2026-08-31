@@ -3,6 +3,7 @@ services:
     environment:
       AI_SERVICE_URL: http://ai-service:8000
       AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:-local-ai-token}
+      AI_SERVICE_TIMEOUT_SECONDS: ${AI_SERVICE_TIMEOUT_SECONDS:-180}
     depends_on:
       ai-service:
         condition: service_healthy

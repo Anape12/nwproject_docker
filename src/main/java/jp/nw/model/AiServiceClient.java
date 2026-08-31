@@ -12,12 +12,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AiServiceClient {
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final int DEFAULT_REQUEST_TIMEOUT_SECONDS = 180;
     private final HttpClient client = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .connectTimeout(Duration.ofSeconds(5))
             .build();
     private final String baseUrl = env("AI_SERVICE_URL", "http://localhost:8000");
     private final String token = env("AI_SERVICE_TOKEN", "");
+    private final Duration requestTimeout = Duration.ofSeconds(
+            positiveIntEnv("AI_SERVICE_TIMEOUT_SECONDS", DEFAULT_REQUEST_TIMEOUT_SECONDS));
 
     public String respond(long characterId, String name, String promptKey, String model,
             String type, String conversationId, String context, String message) throws Exception {
@@ -32,7 +35,7 @@ public class AiServiceClient {
         body.put("message", safe(message));
         HttpRequest.Builder b = HttpRequest.newBuilder(URI.create(baseUrl + "/internal/respond"))
                 .version(HttpClient.Version.HTTP_1_1)
-                .timeout(Duration.ofSeconds(90)).header("Content-Type", "application/json; charset=UTF-8");
+                .timeout(requestTimeout).header("Content-Type", "application/json; charset=UTF-8");
         if (!token.isBlank())
             b.header("X-Internal-Token", token);
         HttpResponse<String> res = client.send(
@@ -49,6 +52,15 @@ public class AiServiceClient {
     private static String env(String k, String d) {
         String v = System.getenv(k);
         return v == null || v.isBlank() ? d : v;
+    }
+
+    private static int positiveIntEnv(String key, int defaultValue) {
+        try {
+            int value = Integer.parseInt(env(key, String.valueOf(defaultValue)));
+            return value > 0 ? value : defaultValue;
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     private static String safe(String value) {
