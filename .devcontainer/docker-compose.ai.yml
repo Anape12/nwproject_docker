@@ -3,7 +3,7 @@ services:
     environment:
       AI_SERVICE_URL: http://ai-service:8000
       AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:-local-ai-token}
-      AI_SERVICE_TIMEOUT_SECONDS: ${AI_SERVICE_TIMEOUT_SECONDS:-180}
+      AI_SERVICE_TIMEOUT_SECONDS: ${AI_SERVICE_TIMEOUT_SECONDS:-360}
     depends_on:
       ai-service:
         condition: service_healthy
@@ -21,6 +21,7 @@ services:
       OLLAMA_NUM_CTX: ${OLLAMA_NUM_CTX:-4096}
       OLLAMA_NUM_PREDICT: ${OLLAMA_NUM_PREDICT:-180}
       OLLAMA_TEMPERATURE: ${OLLAMA_TEMPERATURE:-0.5}
+      OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-300}
       AI_ONLINE: ${AI_ONLINE:-false}
       AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:-local-ai-token}
     extra_hosts:

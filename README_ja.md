@@ -40,6 +40,24 @@
 
     * %APPDATA%\Code\User\workspaceStorage
 
+# My-AIとの接続
+
+cd C:\Users\tmng1\workspace\nwproject_docker
+
+docker compose `  --env-file .env`
+-f .devcontainer/docker-compose.yml `  -f .devcontainer/docker-compose.ai.yml`
+up -d --build --force-recreate
+
+- war再作成
+  docker compose `  --env-file .env`
+  -f .devcontainer/docker-compose.yml `  -f .devcontainer/docker-compose.ai.yml`
+  run --rm -w /workspaces app ./mvnw clean package
+
+- tomcat再構築
+  docker compose `  --env-file .env`
+  -f .devcontainer/docker-compose.yml `  -f .devcontainer/docker-compose.ai.yml`
+  up -d --build --force-recreate
+
 # 技術スタック
 
 - Java(Servlet/JSP)

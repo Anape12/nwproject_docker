@@ -52,6 +52,7 @@ docker compose -f docker-compose.yml -f docker-compose.ai.yml up -d --build
 | `OLLAMA_MODEL` | `qwen2.5:3b` | Ollamaモデル名 |
 | `AI_ONLINE` | `false` | オンラインツールの有効化 |
 | `AI_SERVICE_TOKEN` | `local-ai-token` | NWProjectとAIサービス間の内部認証 |
-| `AI_SERVICE_TIMEOUT_SECONDS` | `180` | NWProjectからAIサービスの応答を待つ最大秒数 |
+| `OLLAMA_TIMEOUT_SECONDS` | `300` | AIサービスからOllamaの応答を待つ最大秒数 |
+| `AI_SERVICE_TIMEOUT_SECONDS` | `360` | NWProjectからAIサービスの応答を待つ最大秒数（Ollama側より長く設定） |
 
 AI応答が3回失敗すると `ai_response_job.status` は `FAILED` になる。原因は同テーブルの `error_message` で確認できる。
