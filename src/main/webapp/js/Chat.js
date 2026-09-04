@@ -1,6 +1,18 @@
 const form = document.getElementById("chat-form");
 const messageInput = document.getElementById("commentText");
 
+function scrollChatToBottom() {
+    const chatArea = document.getElementById("chat-area");
+    if (!chatArea) {
+        return;
+    }
+    chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+// JSPで描画済みのメッセージを、画面初回表示時だけ最新位置まで移動する。
+requestAnimationFrame(scrollChatToBottom);
+window.addEventListener("load", scrollChatToBottom, { once: true });
+
 form.addEventListener("submit", (e) => {
     e.preventDefault();   // 画面遷移を止める
     sendMessage();
