@@ -23,7 +23,7 @@
     "homepage": "https://github.com/Anape12/nwproject_docker#readme",
     "devDependencies": {
         "@playwright/test": "^1.60.0",
-        "@types/node": "^25.9.2",
+        "@types/node": "^25.9.8",
         "prettier": "^2.8.8",
         "prettier-plugin-jsp": "^1.0.13"
     }
