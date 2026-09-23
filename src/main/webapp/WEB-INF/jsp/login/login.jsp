@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 pageEncoding="UTF-8"%> <% %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
   <head>
@@ -23,6 +24,9 @@ pageEncoding="UTF-8"%> <% %>
     </div>
 
     <div class="login-card">
+      <c:if test="${not empty errorMessage}">
+        <p class="login-error"><c:out value="${errorMessage}" /></p>
+      </c:if>
       <form action="${pageContext.request.contextPath}/Login" method="post">
         <div class="form-group">
           <label>ユーザーID</label>

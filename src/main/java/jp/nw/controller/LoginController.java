@@ -42,6 +42,11 @@ public class LoginController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		if ("1".equals(request.getParameter("sessionInvalid"))) {
+			request.setAttribute("errorMessage", "別のブラウザまたは端末でログインされたため、以前のセッションを終了しました。再度ログインしてください。");
+		} else if ("1".equals(request.getParameter("windowInvalid"))) {
+			request.setAttribute("errorMessage", "この画面を開いた後に同じブラウザで再ログインされたため、この画面からの操作を停止しました。再度ログインしてください。");
+		}
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/login/login.jsp");
 		dispatcher.forward(request, response);
 	}
@@ -67,6 +72,13 @@ public class LoginController extends HttpServlet {
 		}
 		UserEntity userEntity = result.user();
 
+		// 現在のブラウザに既存セッションがあれば、先に破棄する
+		HttpSession oldSession = request.getSession(false);
+		if (oldSession != null) {
+			oldSession.setAttribute("intentionalLogout", Boolean.TRUE);
+			oldSession.invalidate();
+		}
+
 		String token = UUID.randomUUID().toString();
 		boolean isTokenUpdated = SecurityToken.updateToken(userEntity.getUserId(), token);
 
@@ -80,18 +92,17 @@ public class LoginController extends HttpServlet {
 		}
 
 		// ログイン処理成功の場合、ユーザーID/トークンをセッションに保存
-		HttpSession oldSession = request.getSession(false);
-		if (oldSession != null)
-			oldSession.invalidate();
 		HttpSession session = request.getSession(true);
 		session.setMaxInactiveInterval(sessionTimeoutSeconds());
 		session.setAttribute("loginToken", token);
+		session.setAttribute("loginContext", UUID.randomUUID().toString());
 		session.setAttribute("loginUser", userEntity);
 		session.setAttribute("forcePasswordChange", result.forcePasswordChange());
 
 		this.baseModel.writeInfo(userEntity.getPermission().equals("1") ? "ログイン成功（管理者）" : "ログイン成功（一般）");
 		response.sendRedirect(
-				request.getContextPath() + (result.forcePasswordChange() ? "/ChangePassword" : "/MenuSelect"));
+				request.getContextPath()
+						+ (result.forcePasswordChange() ? "/ChangePassword?loginFresh=1" : "/MenuSelect?loginFresh=1"));
 	}
 
 	private int sessionTimeoutSeconds() {
