@@ -52,10 +52,10 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Docker Build
-        run: docker compose -f .devcontainer/docker-compose.yml build
+        run: docker compose --env-file .env -f .devcontainer/docker-compose.yml build
 
       - name: Start Containers
-        run: docker compose -f .devcontainer/docker-compose.yml up -d
+        run: docker compose --env-file .env -f .devcontainer/docker-compose.yml up -d
 
       - name: Wait for Tomcat
         run: |
@@ -68,7 +68,7 @@ jobs:
             sleep 5
           done
           echo "Tomcat startup timeout"
-          docker compose -f .devcontainer/docker-compose.yml logs
+          docker compose --env-file .env -f .devcontainer/docker-compose.yml logs
           exit 1
 
       - name: Run Playwright Tests
@@ -89,8 +89,8 @@ jobs:
 
       - name: Show Container Logs
         if: failure()
-        run: docker compose -f .devcontainer/docker-compose.yml logs
+        run: docker compose --env-file .env -f .devcontainer/docker-compose.yml logs
 
       - name: Shutdown Containers
         if: always()
-        run: docker compose -f .devcontainer/docker-compose.yml down
+        run: docker compose --env-file .env -f .devcontainer/docker-compose.yml down

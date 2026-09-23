@@ -28,6 +28,18 @@ echo "========================================"
 
 cd "$PROJECT_DIR/.devcontainer"
 
+# MYSQL_ROOT_PASSWORD導入前の既存環境に限り、DB_PASSWORDを一時的に引き継ぐ。
+# 認証情報のローテーション後は.envのMYSQL_ROOT_PASSWORDが使用される。
+if ! grep -q '^MYSQL_ROOT_PASSWORD=' "$PROJECT_DIR/.env"; then
+    MYSQL_ROOT_PASSWORD="$(sed -n 's/^DB_PASSWORD=//p' "$PROJECT_DIR/.env" | head -n 1)"
+    if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
+        echo "MYSQL_ROOT_PASSWORD is not set and no legacy DB_PASSWORD is available." >&2
+        exit 1
+    fi
+    export MYSQL_ROOT_PASSWORD
+    echo "WARNING: MYSQL_ROOT_PASSWORD is missing; using the legacy DB password for this deployment." >&2
+fi
+
 # Always layer the AI Compose definition when the sibling AI project exists.
 # Without this overlay, a deployment recreates Tomcat without AI_SERVICE_URL,
 # causing AI response jobs to fail with ConnectException.
