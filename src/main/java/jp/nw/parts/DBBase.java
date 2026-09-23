@@ -10,10 +10,13 @@ import java.util.Map;
 
 public class DBBase {
 
-	String host = System.getenv("DB_HOST");
-	String db = System.getenv("DB_NAME");
+	private static final String HOST = requiredEnvironmentVariable("DB_HOST");
+	private static final String PORT = requiredEnvironmentVariable("DB_PORT");
+	private static final String DATABASE = requiredEnvironmentVariable("DB_NAME");
+	private static final String USER = requiredEnvironmentVariable("DB_USER");
+	private static final String PASSWORD = requiredEnvironmentVariable("DB_PASSWORD");
 
-	String URL = "jdbc:mysql://" + host + ":3306/" + db
+	private static final String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE
 			+ "?connectionTimeZone=LOCAL" +
 			"&forceConnectionTimeZoneToSession=true" +
 			"&preserveInstants=false" +
@@ -21,9 +24,6 @@ public class DBBase {
 			"&characterEncoding=UTF-8" +
 			"&allowPublicKeyRetrieval=true" +
 			"&useSSL=false";
-
-	private final String USER = "root";
-	private final String PASSWORD = "root";
 
 	private Connection con;
 
@@ -56,10 +56,6 @@ public class DBBase {
 
 			PreparedStatement ps = con.prepareStatement(sql);
 
-			this.con = DriverManager.getConnection(URL, USER, PASSWORD);
-
-
-
 			bindParameter(ps, query);
 
 			switch (query.getSqlType()) {
@@ -72,6 +68,14 @@ public class DBBase {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private static String requiredEnvironmentVariable(String name) {
+		String value = System.getenv(name);
+		if (value == null || value.isBlank()) {
+			throw new IllegalStateException("Required environment variable is not set: " + name);
+		}
+		return value;
 	}
 
 	public <T> List<T> execute(Query query, Class<T> clazz) {

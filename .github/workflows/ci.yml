@@ -28,11 +28,14 @@ jobs:
 
       - name: Create .env
         run: |
+          DB_PASSWORD="$(openssl rand -hex 24)"
+          MYSQL_ROOT_PASSWORD="$(openssl rand -hex 24)"
           echo "DB_HOST=db" >> .env
           echo "DB_PORT=3306" >> .env
           echo "DB_NAME=nwproject_db" >> .env
-          echo "DB_USER=root" >> .env
-          echo "DB_PASSWORD=root" >> .env
+          echo "DB_USER=nwproject_app" >> .env
+          echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+          echo "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" >> .env
 
       - name: Build WAR
         run: mvn --batch-mode --no-transfer-progress clean package

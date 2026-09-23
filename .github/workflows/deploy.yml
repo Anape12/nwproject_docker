@@ -77,10 +77,10 @@ jobs:
 
             echo "===== Docker Deploy ====="
             cd .devcontainer
-            docker compose up -d --build
+            docker compose --env-file ../.env up -d --build
 
             echo "===== Container Status ====="
-            docker compose ps
+            docker compose --env-file ../.env ps
 
             echo "===== Health Check ====="
 

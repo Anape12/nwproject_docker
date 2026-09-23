@@ -77,8 +77,10 @@ services:
       --default-time-zone=+09:00
 
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: nwproject_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD must be set}
+      MYSQL_DATABASE: ${DB_NAME:?DB_NAME must be set}
+      MYSQL_USER: ${DB_USER:?DB_USER must be set}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
       TZ: Asia/Tokyo
 
     ports:
@@ -110,9 +112,9 @@ services:
       - ./migration:/flyway/sql
 
     environment:
-      FLYWAY_URL: jdbc:mysql://db:3306/nwproject_db?allowPublicKeyRetrieval=true&useSSL=false
-      FLYWAY_USER: root
-      FLYWAY_PASSWORD: root
+      FLYWAY_URL: jdbc:mysql://db:3306/${DB_NAME:?DB_NAME must be set}?allowPublicKeyRetrieval=true&useSSL=false
+      FLYWAY_USER: ${DB_USER:?DB_USER must be set}
+      FLYWAY_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
 
     networks:
       - app-network
