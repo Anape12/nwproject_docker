@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import jp.nw.entity.UserEntity;
+import jp.nw.model.AuditLogLogic;
 import jp.nw.parts.DBBase;
 import jp.nw.parts.Query;
 import jp.nw.parts.SqlType;
@@ -24,6 +25,10 @@ public class LogoutController extends HttpServlet {
 
         HttpSession session = request.getSession(false);
 
+        if (session == null || session.getAttribute("loginUser") == null) {
+            response.sendRedirect(request.getContextPath() + "/Login");
+            return;
+        }
         LinkedHashMap<String, Object> values = new LinkedHashMap<>();
         values.put("current_login_token", null);
         LinkedHashMap<String, Object> conditions = new LinkedHashMap<>();
@@ -39,6 +44,9 @@ public class LogoutController extends HttpServlet {
 
         DBBase db = new DBBase();
         db.execute(query);
+
+        AuditLogLogic.record(request, "AUTH", "LOGOUT", "USER", loginUser.getUserId(), true, null);
+        session.setAttribute("intentionalLogout", Boolean.TRUE);
 
         if (session != null) {
             session.invalidate();

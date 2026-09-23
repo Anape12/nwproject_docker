@@ -60,6 +60,12 @@ public class LoginFilter implements Filter {
             return;
         }
 
+        if (Boolean.TRUE.equals(session.getAttribute("forcePasswordChange"))
+                && !uri.endsWith("/ChangePassword") && !uri.endsWith("/Logout")) {
+            res.sendRedirect(req.getContextPath() + "/ChangePassword");
+            return;
+        }
+
         chain.doFilter(request, response);
     }
 

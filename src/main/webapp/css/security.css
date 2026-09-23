@@ -1,0 +1,223 @@
+.security-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 36px 24px;
+    color: #182230;
+}
+.security-page.narrow {
+    max-width: 620px;
+}
+.page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    margin-bottom: 24px;
+}
+.page-head p {
+    margin: 0;
+    color: #3157d5;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+}
+.page-head h1 {
+    margin: 5px 0 0;
+}
+.page-head a {
+    padding: 11px 16px;
+    border: 1px solid #d0d5dd;
+    border-radius: 9px;
+    text-decoration: none;
+    color: #344054;
+    background: #fff;
+}
+.security-card {
+    background: #fff;
+    border: 1px solid #e4e7ec;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 5px 20px #1018280d;
+}
+.security-card h1 {
+    margin-top: 0;
+}
+.security-card label,
+.audit-filter label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 700;
+    color: #344054;
+}
+.security-card input,
+.security-card select,
+.audit-filter input,
+.audit-filter select {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    background: #fff;
+}
+.security-card form {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+}
+.security-card button,
+.audit-filter button {
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    background: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+.primary,
+.security-card button.primary,
+.audit-filter > button.primary {
+    background-color: #3157d5;
+    color: #fff;
+    border-color: #3157d5;
+}
+.security-card button.danger {
+    background: #b42318;
+    color: #fff;
+    border-color: #b42318;
+}
+.user-security-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+.user-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+.user-title strong {
+    display: block;
+    font-size: 19px;
+}
+.user-title small {
+    display: block;
+    color: #667085;
+    margin-top: 4px;
+}
+.status {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 4px 9px;
+    font-size: 12px;
+    font-weight: 800;
+}
+.status.active {
+    background: #dcfae6;
+    color: #067647;
+}
+.status.disabled {
+    background: #fee4e2;
+    color: #b42318;
+}
+.user-card dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 7px 14px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 9px;
+}
+.user-card dt {
+    color: #667085;
+}
+.user-card dd {
+    margin: 0;
+    text-align: right;
+    word-break: break-all;
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+.action-row {
+    display: flex;
+    gap: 10px;
+}
+.action-row form {
+    flex: 1;
+}
+.action-row button {
+    width: 100%;
+}
+.reset-form {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+}
+.alert {
+    padding: 12px 15px;
+    border-radius: 9px;
+    margin-bottom: 16px;
+}
+.alert.success {
+    background: #dcfae6;
+    color: #067647;
+}
+.alert.error {
+    background: #fee4e2;
+    color: #b42318;
+}
+.audit-filter {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr) auto;
+    align-items: end;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #e4e7ec;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 18px;
+}
+.audit-table-wrap {
+    overflow: auto;
+    background: #fff;
+    border: 1px solid #e4e7ec;
+    border-radius: 14px;
+}
+.audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1050px;
+}
+.audit-table th,
+.audit-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e4e7ec;
+    vertical-align: top;
+}
+.audit-table th {
+    background: #f8fafc;
+    color: #475467;
+}
+.empty {
+    text-align: center !important;
+    color: #667085;
+    padding: 40px !important;
+}
+@media (max-width: 900px) {
+    .user-security-grid {
+        grid-template-columns: 1fr;
+    }
+    .audit-filter {
+        grid-template-columns: 1fr 1fr;
+    }
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .page-head {
+        align-items: start;
+        gap: 12px;
+        flex-direction: column;
+    }
+}

@@ -1,25 +1,30 @@
 {
-  "name": "nwproject_docker",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test:e2e": "playwright test",
-    "test:e2e:list": "playwright test --list"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Anape12/nwproject_docker.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Anape12/nwproject_docker/issues"
-  },
-  "homepage": "https://github.com/Anape12/nwproject_docker#readme",
-  "devDependencies": {
-    "@playwright/test": "^1.60.0",
-    "@types/node": "^25.9.2"
-  }
+    "name": "nwproject_docker",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "format": "prettier --write \"src/main/webapp/**/*.{jsp,js,css}\" \"docs/**/*.md\" \"*.{json,md,yml,yaml}\"",
+        "format:jsp": "prettier --write \"src/main/webapp/WEB-INF/jsp/security/**/*.jsp\"",
+        "format:check": "prettier --check \"src/main/webapp/**/*.{jsp,js,css}\" \"docs/**/*.md\" \"*.{json,md,yml,yaml}\"",
+        "test:e2e": "playwright test",
+        "test:e2e:list": "playwright test --list"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Anape12/nwproject_docker.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Anape12/nwproject_docker/issues"
+    },
+    "homepage": "https://github.com/Anape12/nwproject_docker#readme",
+    "devDependencies": {
+        "@playwright/test": "^1.60.0",
+        "@types/node": "^25.9.2",
+        "prettier": "^2.8.8",
+        "prettier-plugin-jsp": "^1.0.13"
+    }
 }

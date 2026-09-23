@@ -1,0 +1,12 @@
+node_modules/
+target/
+playwright-report/
+test-results/
+.git/
+*.min.css
+*.min.js
+
+# 旧JSPにはPrettierが解析できない属性内スクリプトレットがあるため、移行完了まで除外する。
+src/main/webapp/WEB-INF/jsp/**/*.jsp
+!src/main/webapp/WEB-INF/jsp/security/
+!src/main/webapp/WEB-INF/jsp/security/**/*.jsp

@@ -1,15 +1,190 @@
 package jp.nw.model;
-import java.sql.*;import java.time.*;import java.util.*;import jp.nw.entity.AttendanceEntity;import jp.nw.parts.DBBase;
-public class AttendanceLogic{
- private static final String SELECT="SELECT a.*,r.title report_title,r.status report_status FROM attendance_record a LEFT JOIN work_report r ON r.report_id=a.report_id ";
- public List<AttendanceEntity> findMonth(String user,YearMonth month){return query(SELECT+"WHERE a.user_id=? AND a.work_date>=? AND a.work_date<? ORDER BY a.work_date",user,month.atDay(1),month.plusMonths(1).atDay(1));}
- public AttendanceEntity findById(long id,String user){List<AttendanceEntity> l=query(SELECT+"WHERE a.attendance_id=? AND a.user_id=?",id,user);return l.isEmpty()?null:l.get(0);}
- public void save(AttendanceEntity v){validateReport(v);String sql=v.getAttendanceId()==0?"INSERT INTO attendance_record(user_id,work_date,clock_in,clock_out,break_minutes,work_type,attendance_type,overtime_minutes,note,report_id,corrected_by_id,correction_reason) SELECT ?,?,?,?,?,?,?,?,?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM attendance_month_close WHERE user_id=? AND target_month=DATE_FORMAT(?,'%Y-%m-01'))":"UPDATE attendance_record SET work_date=?,clock_in=?,clock_out=?,break_minutes=?,work_type=?,attendance_type=?,overtime_minutes=?,note=?,report_id=?,corrected_by_id=?,correction_reason=? WHERE attendance_id=? AND user_id=? AND approval_status IN ('DRAFT','REJECTED') AND NOT EXISTS(SELECT 1 FROM attendance_month_close c WHERE c.user_id=attendance_record.user_id AND c.target_month=DATE_FORMAT(attendance_record.work_date,'%Y-%m-01'))";DBBase db=new DBBase();try(Connection c=db.getConnection();PreparedStatement p=c.prepareStatement(sql)){int i=1;if(v.getAttendanceId()==0)p.setString(i++,v.getUserId());p.setObject(i++,v.getWorkDate());p.setObject(i++,v.getClockIn());p.setObject(i++,v.getClockOut());p.setInt(i++,v.getBreakMinutes());p.setString(i++,v.getWorkType());p.setString(i++,v.getAttendanceType()==null?"NORMAL":v.getAttendanceType());p.setInt(i++,v.getOvertimeMinutes());p.setString(i++,v.getNote());if(v.getReportId()==null)p.setNull(i++,Types.BIGINT);else p.setLong(i++,v.getReportId());p.setString(i++,v.getCorrectedById());p.setString(i++,v.getCorrectionReason());if(v.getAttendanceId()==0){p.setString(i++,v.getUserId());p.setObject(i,v.getWorkDate());}else{p.setLong(i++,v.getAttendanceId());p.setString(i,v.getUserId());}if(p.executeUpdate()!=1)throw new IllegalArgumentException("更新対象がないか、月次締め済みです。");if(v.getCorrectedById()!=null&&v.getAttendanceId()!=0)history(c,v);}catch(SQLIntegrityConstraintViolationException e){throw new IllegalArgumentException("同じ勤務日の勤怠は既に登録されています。");}catch(SQLException e){throw new RuntimeException("勤怠情報の保存に失敗しました。",e);}}
- public boolean delete(long id,String user){DBBase db=new DBBase();try(Connection c=db.getConnection();PreparedStatement p=c.prepareStatement("DELETE a FROM attendance_record a WHERE a.attendance_id=? AND a.user_id=? AND a.approval_status IN ('DRAFT','REJECTED') AND NOT EXISTS(SELECT 1 FROM attendance_month_close m WHERE m.user_id=a.user_id AND m.target_month=DATE_FORMAT(a.work_date,'%Y-%m-01'))")){p.setLong(1,id);p.setString(2,user);return p.executeUpdate()==1;}catch(SQLException e){throw new RuntimeException(e);}}
- public Map<String,Long> summary(String user,YearMonth m){DBBase db=new DBBase();try(Connection c=db.getConnection();PreparedStatement p=c.prepareStatement("SELECT COUNT(*),COALESCE(SUM(attendance_type='ABSENT'),0),COALESCE(SUM(attendance_type IN ('PAID_LEAVE','COMP_LEAVE')),0),COALESCE(SUM(overtime_minutes),0) FROM attendance_record WHERE user_id=? AND work_date>=? AND work_date<?")){p.setString(1,user);p.setObject(2,m.atDay(1));p.setObject(3,m.plusMonths(1).atDay(1));try(ResultSet r=p.executeQuery()){r.next();return Map.of("days",r.getLong(1),"absent",r.getLong(2),"leave",r.getLong(3),"overtime",r.getLong(4));}}catch(SQLException e){throw new RuntimeException(e);}}
- public boolean isClosed(String user,YearMonth m){DBBase db=new DBBase();try(Connection c=db.getConnection();PreparedStatement p=c.prepareStatement("SELECT 1 FROM attendance_month_close WHERE user_id=? AND target_month=?")){p.setString(1,user);p.setObject(2,m.atDay(1));try(ResultSet r=p.executeQuery()){return r.next();}}catch(SQLException e){throw new RuntimeException(e);}}
- private void validateReport(AttendanceEntity v){if(v.getReportId()==null)return;DBBase db=new DBBase();try(Connection c=db.getConnection();PreparedStatement p=c.prepareStatement("SELECT 1 FROM work_report WHERE report_id=? AND author_id=? AND report_date=?")){p.setLong(1,v.getReportId());p.setString(2,v.getUserId());p.setObject(3,v.getWorkDate());try(ResultSet r=p.executeQuery()){if(!r.next())throw new IllegalArgumentException("同じ報告日の本人の報告書だけを関連付けできます。");}}catch(SQLException e){throw new RuntimeException(e);}}
- private void history(Connection c,AttendanceEntity v)throws SQLException{try(PreparedStatement p=c.prepareStatement("INSERT INTO attendance_change_history(attendance_id,changed_by_id,change_summary) VALUES(?,?,?)")){p.setLong(1,v.getAttendanceId());p.setString(2,v.getCorrectedById());p.setString(3,Optional.ofNullable(v.getCorrectionReason()).orElse("管理者による代理修正"));p.executeUpdate();}}
- private List<AttendanceEntity> query(String sql,Object...a){DBBase db=new DBBase();try(Connection c=db.getConnection();PreparedStatement p=c.prepareStatement(sql)){for(int i=0;i<a.length;i++)p.setObject(i+1,a[i]);try(ResultSet r=p.executeQuery()){List<AttendanceEntity> l=new ArrayList<>();while(r.next())l.add(map(r));return l;}}catch(SQLException e){throw new RuntimeException("勤怠情報の取得に失敗しました。",e);}}
- private AttendanceEntity map(ResultSet r)throws SQLException{long report=r.getLong("report_id");boolean noReport=r.wasNull();return AttendanceEntity.builder().attendanceId(r.getLong("attendance_id")).userId(r.getString("user_id")).workDate(r.getObject("work_date",LocalDate.class)).clockIn(r.getObject("clock_in",LocalTime.class)).clockOut(r.getObject("clock_out",LocalTime.class)).breakMinutes(r.getInt("break_minutes")).workType(r.getString("work_type")).attendanceType(r.getString("attendance_type")).overtimeMinutes(r.getInt("overtime_minutes")).correctedById(r.getString("corrected_by_id")).correctionReason(r.getString("correction_reason")).note(r.getString("note")).reportId(noReport?null:report).reportTitle(r.getString("report_title")).reportStatus(r.getString("report_status")).approvalStatus(r.getString("approval_status")).build();}
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import jp.nw.entity.AttendanceEntity;
+import jp.nw.parts.DBBase;
+
+public class AttendanceLogic {
+    private static final String SELECT = "SELECT a.*,r.title report_title,r.status report_status FROM attendance_record a LEFT JOIN work_report r ON r.report_id=a.report_id ";
+
+    public List<AttendanceEntity> findMonth(String user, YearMonth month) {
+        return query(SELECT + "WHERE a.user_id=? AND a.work_date>=? AND a.work_date<? ORDER BY a.work_date", user,
+                month.atDay(1), month.plusMonths(1).atDay(1));
+    }
+
+    public AttendanceEntity findById(long id, String user) {
+        List<AttendanceEntity> l = query(SELECT + "WHERE a.attendance_id=? AND a.user_id=?", id, user);
+        return l.isEmpty() ? null : l.get(0);
+    }
+
+    public void save(AttendanceEntity v) {
+        validateReport(v);
+        String sql = v.getAttendanceId() == 0
+                ? "INSERT INTO attendance_record(user_id,work_date,clock_in,clock_out,break_minutes,work_type,attendance_type,overtime_minutes,note,report_id,corrected_by_id,correction_reason) SELECT ?,?,?,?,?,?,?,?,?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM attendance_month_close WHERE user_id=? AND target_month=DATE_FORMAT(?,'%Y-%m-01'))"
+                : "UPDATE attendance_record SET work_date=?,clock_in=?,clock_out=?,break_minutes=?,work_type=?,attendance_type=?,overtime_minutes=?,note=?,report_id=?,corrected_by_id=?,correction_reason=? WHERE attendance_id=? AND user_id=? AND approval_status IN ('DRAFT','REJECTED') AND NOT EXISTS(SELECT 1 FROM attendance_month_close c WHERE c.user_id=attendance_record.user_id AND c.target_month=DATE_FORMAT(attendance_record.work_date,'%Y-%m-01'))";
+        DBBase db = new DBBase();
+        try (Connection c = db.getConnection(); PreparedStatement p = c.prepareStatement(sql)) {
+            int i = 1;
+            if (v.getAttendanceId() == 0)
+                p.setString(i++, v.getUserId());
+            p.setObject(i++, v.getWorkDate());
+            p.setObject(i++, v.getClockIn());
+            p.setObject(i++, v.getClockOut());
+            p.setInt(i++, v.getBreakMinutes());
+            p.setString(i++, v.getWorkType());
+            p.setString(i++, v.getAttendanceType() == null ? "NORMAL" : v.getAttendanceType());
+            p.setInt(i++, v.getOvertimeMinutes());
+            p.setString(i++, v.getNote());
+            if (v.getReportId() == null)
+                p.setNull(i++, Types.BIGINT);
+            else
+                p.setLong(i++, v.getReportId());
+            p.setString(i++, v.getCorrectedById());
+            p.setString(i++, v.getCorrectionReason());
+            if (v.getAttendanceId() == 0) {
+                p.setString(i++, v.getUserId());
+                p.setObject(i, v.getWorkDate());
+            } else {
+                p.setLong(i++, v.getAttendanceId());
+                p.setString(i, v.getUserId());
+            }
+            if (p.executeUpdate() != 1)
+                throw new IllegalArgumentException("更新対象がないか、月次締め済みです。");
+            if (v.getCorrectedById() != null && v.getAttendanceId() != 0)
+                history(c, v);
+            else
+                AuditLogLogic.record(c, v.getUserId(), "ATTENDANCE", v.getAttendanceId() == 0 ? "CREATED" : "UPDATED",
+                        "ATTENDANCE", v.getAttendanceId() == 0 ? String.valueOf(v.getWorkDate())
+                                : String.valueOf(v.getAttendanceId()),
+                        true, null, null, v.getCorrectionReason());
+        } catch (SQLIntegrityConstraintViolationException e) {
+            throw new IllegalArgumentException("同じ勤務日の勤怠は既に登録されています。");
+        } catch (SQLException e) {
+            throw new RuntimeException("勤怠情報の保存に失敗しました。", e);
+        }
+    }
+
+    public boolean delete(long id, String user) {
+        DBBase db = new DBBase();
+        try (Connection c = db.getConnection();
+                PreparedStatement p = c.prepareStatement(
+                        "DELETE a FROM attendance_record a WHERE a.attendance_id=? AND a.user_id=? AND a.approval_status IN ('DRAFT','REJECTED') AND NOT EXISTS(SELECT 1 FROM attendance_month_close m WHERE m.user_id=a.user_id AND m.target_month=DATE_FORMAT(a.work_date,'%Y-%m-01'))")) {
+            p.setLong(1, id);
+            p.setString(2, user);
+            boolean deleted = p.executeUpdate() == 1;
+            if (deleted)
+                AuditLogLogic.record(c, user, "ATTENDANCE", "DELETED", "ATTENDANCE", String.valueOf(id), true, null,
+                        null, null);
+            return deleted;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Map<String, Long> summary(String user, YearMonth m) {
+        DBBase db = new DBBase();
+        try (Connection c = db.getConnection();
+                PreparedStatement p = c.prepareStatement(
+                        "SELECT COUNT(*),COALESCE(SUM(attendance_type='ABSENT'),0),COALESCE(SUM(attendance_type IN ('PAID_LEAVE','COMP_LEAVE')),0),COALESCE(SUM(overtime_minutes),0) FROM attendance_record WHERE user_id=? AND work_date>=? AND work_date<?")) {
+            p.setString(1, user);
+            p.setObject(2, m.atDay(1));
+            p.setObject(3, m.plusMonths(1).atDay(1));
+            try (ResultSet r = p.executeQuery()) {
+                r.next();
+                return Map.of("days", r.getLong(1), "absent", r.getLong(2), "leave", r.getLong(3), "overtime",
+                        r.getLong(4));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean isClosed(String user, YearMonth m) {
+        DBBase db = new DBBase();
+        try (Connection c = db.getConnection();
+                PreparedStatement p = c
+                        .prepareStatement("SELECT 1 FROM attendance_month_close WHERE user_id=? AND target_month=?")) {
+            p.setString(1, user);
+            p.setObject(2, m.atDay(1));
+            try (ResultSet r = p.executeQuery()) {
+                return r.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void validateReport(AttendanceEntity v) {
+        if (v.getReportId() == null)
+            return;
+        DBBase db = new DBBase();
+        try (Connection c = db.getConnection();
+                PreparedStatement p = c.prepareStatement(
+                        "SELECT 1 FROM work_report WHERE report_id=? AND author_id=? AND report_date=?")) {
+            p.setLong(1, v.getReportId());
+            p.setString(2, v.getUserId());
+            p.setObject(3, v.getWorkDate());
+            try (ResultSet r = p.executeQuery()) {
+                if (!r.next())
+                    throw new IllegalArgumentException("同じ報告日の本人の報告書だけを関連付けできます。");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void history(Connection c, AttendanceEntity v) throws SQLException {
+        String detail = Optional.ofNullable(v.getCorrectionReason()).orElse("管理者による代理修正");
+        try (PreparedStatement p = c.prepareStatement(
+                "INSERT INTO attendance_change_history(attendance_id,changed_by_id,change_summary) VALUES(?,?,?)")) {
+            p.setLong(1, v.getAttendanceId());
+            p.setString(2, v.getCorrectedById());
+            p.setString(3, detail);
+            p.executeUpdate();
+        }
+        AuditLogLogic.record(c, v.getCorrectedById(), "ATTENDANCE", "CORRECTED", "ATTENDANCE",
+                String.valueOf(v.getAttendanceId()), true, null, null, detail);
+    }
+
+    private List<AttendanceEntity> query(String sql, Object... a) {
+        DBBase db = new DBBase();
+        try (Connection c = db.getConnection(); PreparedStatement p = c.prepareStatement(sql)) {
+            for (int i = 0; i < a.length; i++)
+                p.setObject(i + 1, a[i]);
+            try (ResultSet r = p.executeQuery()) {
+                List<AttendanceEntity> l = new ArrayList<>();
+                while (r.next())
+                    l.add(map(r));
+                return l;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("勤怠情報の取得に失敗しました。", e);
+        }
+    }
+
+    private AttendanceEntity map(ResultSet r) throws SQLException {
+        long report = r.getLong("report_id");
+        boolean noReport = r.wasNull();
+        return AttendanceEntity.builder().attendanceId(r.getLong("attendance_id")).userId(r.getString("user_id"))
+                .workDate(r.getObject("work_date", LocalDate.class)).clockIn(r.getObject("clock_in", LocalTime.class))
+                .clockOut(r.getObject("clock_out", LocalTime.class)).breakMinutes(r.getInt("break_minutes"))
+                .workType(r.getString("work_type")).attendanceType(r.getString("attendance_type"))
+                .overtimeMinutes(r.getInt("overtime_minutes")).correctedById(r.getString("corrected_by_id"))
+                .correctionReason(r.getString("correction_reason")).note(r.getString("note"))
+                .reportId(noReport ? null : report).reportTitle(r.getString("report_title"))
+                .reportStatus(r.getString("report_status")).approvalStatus(r.getString("approval_status")).build();
+    }
 }

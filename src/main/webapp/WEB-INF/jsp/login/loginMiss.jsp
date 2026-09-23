@@ -7,7 +7,7 @@
 <title>エラー</title>
 </head>
 <body>
-	<p>ログインに失敗しました</p>
+	<p>${empty errorMessage ? 'ログインに失敗しました。' : errorMessage}</p>
 	<button class="search-btn2" onclick="history.back()">ログイン画面へ</button>
 </body>
 </html>

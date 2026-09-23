@@ -17,6 +17,15 @@
       "settings": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "prettier.enable": true,
+        "files.associations": {
+          "*.jsp": "jsp",
+          "*.tag": "jsp"
+        },
+        "[jsp]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.formatOnSave": true
+        },
         "[java]": {
           "editor.defaultFormatter": "redhat.java"
         },
@@ -29,6 +38,7 @@
         "adashen.vscode-tomcat",
         "redhat.vscode-xml",
         "esbenp.prettier-vscode",
+        "pthorsson.vscode-jsp",
         "cweijan.dbclient-jdbc"
       ]
     }

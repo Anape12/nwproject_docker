@@ -1,5 +1,7 @@
 package jp.nw.entity;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,4 +32,11 @@ public class UserEntity {
     private String passwordExpiration;
 
     private String deleteFlag;
+
+    private boolean accountDisabled;
+    private int failedLoginCount;
+    private LocalDateTime lockedUntil;
+    private LocalDateTime lastLoginAt;
+    private LocalDateTime passwordChangedAt;
+    private boolean forcePasswordChange;
 }
