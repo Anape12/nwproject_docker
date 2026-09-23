@@ -17,6 +17,8 @@ public class DBBase {
 			+ "?connectionTimeZone=LOCAL" +
 			"&forceConnectionTimeZoneToSession=true" +
 			"&preserveInstants=false" +
+			"&useUnicode=true" +
+			"&characterEncoding=UTF-8" +
 			"&allowPublicKeyRetrieval=true" +
 			"&useSSL=false";
 

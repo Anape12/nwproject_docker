@@ -1,6 +1,7 @@
 package jp.nw.filter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -27,6 +28,11 @@ public class LoginFilter implements Filter {
 
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
+
+        // getParameter()が一度でも呼ばれると、その時点の文字コードでPOST全体が解析される。
+        // ログイン画面識別子を読む前に必ずUTF-8を設定する。
+        req.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        res.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         String uri = req.getRequestURI();
         String applicationRoot = req.getContextPath() + "/";
