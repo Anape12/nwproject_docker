@@ -15,6 +15,7 @@ import jp.nw.base.BaseModel;
 import jp.nw.entity.UserEntity;
 import jp.nw.model.AuthenticationLogic;
 import jp.nw.util.SecurityToken;
+import jp.nw.util.StatusCheckUtil;
 
 /**
  * Servlet implementation class Login
@@ -99,7 +100,8 @@ public class LoginController extends HttpServlet {
 		session.setAttribute("loginUser", userEntity);
 		session.setAttribute("forcePasswordChange", result.forcePasswordChange());
 
-		this.baseModel.writeInfo(userEntity.getPermission().equals("1") ? "ログイン成功（管理者）" : "ログイン成功（一般）");
+		this.baseModel
+				.writeInfo(StatusCheckUtil.isAdministrator(userEntity.getPermission()) ? "ログイン成功（管理者）" : "ログイン成功（一般）");
 		response.sendRedirect(
 				request.getContextPath()
 						+ (result.forcePasswordChange() ? "/ChangePassword?loginFresh=1" : "/MenuSelect?loginFresh=1"));

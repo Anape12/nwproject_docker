@@ -1,7 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page import="java.time.LocalDate,java.time.format.DateTimeFormatter,java.util.Locale" %>
-<% String todayLabel=LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy年M月d日（E）",Locale.JAPANESE)); %>
+<%@ page import="java.time.LocalDate,java.time.format.DateTimeFormatter,java.util.Locale,java.time.ZoneId" %>
+<% String
+todayLabel=LocalDate.now(ZoneId.of("Asia/Tokyo")).format(DateTimeFormatter.ofPattern("yyyy年M月d日（E）",Locale.JAPANESE));
+%>
 <!DOCTYPE html>
 <html lang="ja">
     <head>
