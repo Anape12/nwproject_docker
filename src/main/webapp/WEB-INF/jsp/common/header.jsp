@@ -1,11 +1,7 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="jp.nw.entity.UserEntity" %>
 
-<%
-UserEntity loginUser =
-    (UserEntity)session.getAttribute("loginUser");
-%>
+<% UserEntity loginUser = (UserEntity)session.getAttribute("loginUser"); %>
 
 <div class="header">
     <a class="logo" href="<%=request.getContextPath()%>/MenuSelect">NW Project</a>
@@ -17,9 +13,6 @@ UserEntity loginUser =
         <a href="<%=request.getContextPath()%>/ChatChanelList">チャット</a>
     </nav>
     <div class="login-user">
-        <% if(loginUser != null){ %>
-            <%=loginUser.getLastName()%> <%=loginUser.getFirstName()%> さん ログイン中
-        <% } %>
+        <% if(loginUser != null){ %> <%=loginUser.getLastName()%> <%=loginUser.getFirstName()%> さん ログイン中 <% } %>
     </div>
-
 </div>

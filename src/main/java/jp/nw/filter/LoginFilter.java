@@ -94,6 +94,10 @@ public class LoginFilter implements Filter {
             return;
         }
 
+        if (session.getAttribute("attachmentCsrfToken") == null) {
+            session.setAttribute("attachmentCsrfToken", UUID.randomUUID().toString());
+        }
+
         chain.doFilter(request, response);
     }
 

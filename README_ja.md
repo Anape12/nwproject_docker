@@ -56,6 +56,10 @@ npx prettier --write "src/main/webapp/WEB-INF/jsp/security/auditLog.jsp"
 
 JSP の整形には`prettier-plugin-jsp`を使用します。プラグインが解析できない旧形式の JSP は`.prettierignore`で除外しているため、構文を移行してから自動整形の対象へ追加してください。
 
+# Prettier の適用
+
+-   npm run format:jsp
+
 # Flyway 実行
 
     * cd .devcontainer

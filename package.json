@@ -4,9 +4,9 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "format": "prettier --write \"src/main/webapp/**/*.{jsp,js,css}\" \"docs/**/*.md\" \"*.{json,md,yml,yaml}\"",
-        "format:jsp": "prettier --write \"src/main/webapp/WEB-INF/jsp/security/**/*.jsp\"",
-        "format:check": "prettier --check \"src/main/webapp/**/*.{jsp,js,css}\" \"docs/**/*.md\" \"*.{json,md,yml,yaml}\"",
+        "format": "npm run format:jsp && prettier --write \"src/main/webapp/**/*.{js,css}\" \"docs/**/*.md\" \"*.{json,md,yml,yaml}\"",
+        "format:jsp": "node scripts/format-jsp.js",
+        "format:check": "node scripts/format-jsp.js --check && prettier --check \"src/main/webapp/**/*.{js,css}\" \"docs/**/*.md\" \"*.{json,md,yml,yaml}\"",
         "test:e2e": "playwright test",
         "test:e2e:list": "playwright test --list"
     },

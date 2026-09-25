@@ -15,6 +15,8 @@ import jp.nw.application.ChatRoomOpenCommand;
 import jp.nw.base.CommandData;
 import jp.nw.entity.ChatMessageEntity;
 import jp.nw.entity.UserEntity;
+import jp.nw.model.AttachmentAccessPolicy;
+import jp.nw.model.AttachmentOwnerType;
 
 /**
  * Servlet implementation class UserView
@@ -29,6 +31,17 @@ public class ChatChanelRoomController extends HttpServlet {
 
 		// チャットを表示
 		String roomId = request.getParameter("roomId");
+		UserEntity loginUser = (UserEntity) request.getSession().getAttribute("loginUser");
+		try {
+			roomId = AttachmentOwnerType.CHAT.validateOwnerId(roomId);
+		} catch (IllegalArgumentException e) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+		if (!new AttachmentAccessPolicy().canRead(loginUser, AttachmentOwnerType.CHAT, roomId)) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
 
 		ChatRoomOpenCommand command = new ChatRoomOpenCommand();
 		request.setAttribute("targetRoomId", roomId);
@@ -42,7 +55,6 @@ public class ChatChanelRoomController extends HttpServlet {
 		if(displayName!=null&&!displayName.isBlank())session.setAttribute("RoomName",displayName);
 		session.setAttribute("RoomId", roomId);
 		request.setAttribute("attachments",new jp.nw.model.AttachmentLogic().find("CHAT",roomId));
-		UserEntity loginUser=(UserEntity)session.getAttribute("loginUser");
 		request.setAttribute("canManageMembers",canManageMembers(loginUser,roomId));
 
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/chat/ChatWindow.jsp");

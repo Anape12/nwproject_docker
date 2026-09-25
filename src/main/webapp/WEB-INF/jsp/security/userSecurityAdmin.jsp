@@ -34,9 +34,7 @@
                         <div class="user-title">
                             <div>
                                 <strong><c:out value="${u.lastName} ${u.firstName}" /></strong>
-                                <small>
-                                    <c:out value="${u.userId}" />・${fn:escapeXml(u.accountType)}
-                                </small>
+                                <small> <c:out value="${u.userId}" />・${fn:escapeXml(u.accountType)} </small>
                             </div>
                             <span class="status ${u.accountDisabled ? 'disabled' : 'active'}">
                                 ${u.accountDisabled ? '無効' : '有効'}
