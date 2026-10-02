@@ -96,6 +96,32 @@ up -d --build --force-recreate
     -f .devcontainer/docker-compose.yml `  -f .devcontainer/docker-compose.ai.yml`
     up -d --build --force-recreate
 
+# Qiita Guide（記事の読み上げ）との連携
+
+業務メニューの「Qiita記事を聴く」から、別プロジェクトの`AI_Support`（Qiita Guide）を新しいタブで開きます。NW ProjectとQiita Guideはそれぞれ起動する必要があります。
+
+ローカルでは`AI_Support`を`nwproject_docker`と同階層に配置し、`AI_Support/.env`にOpenAI APIキーを設定してください。Qiita Guide用のComposeファイルを追加すれば、Node.jsを別ターミナルで起動する必要はありません。PowerShellで`nwproject_docker`直下から実行します。
+
+```powershell
+docker compose --env-file .env -f .devcontainer/docker-compose.yml -f .devcontainer/docker-compose.ai.yml -f .devcontainer/docker-compose.qiita.yml up -d --build
+```
+
+Qiita Guideだけを再ビルドして起動する場合は次のコマンドを使います。
+
+```powershell
+docker compose --env-file .env -f .devcontainer/docker-compose.yml -f .devcontainer/docker-compose.ai.yml -f .devcontainer/docker-compose.qiita.yml up -d --build qiita-guide
+```
+
+`http://localhost:3000/api/status`で起動状態を確認できます。NW Projectを`localhost`で開いている場合、`QIITA_GUIDE_URL`を省略すると`http://localhost:3000/`を使用します。Qiita Guideのポートはホストのループバックアドレスにだけ公開します。
+
+別端末やCloudで利用する場合は、Qiita Guideをアクセス可能なHTTPSのURLで公開し、NW Projectの`.env`に接続先を設定します。
+
+```text
+QIITA_GUIDE_URL=https://reader.example.com/
+```
+
+設定変更後はTomcatコンテナを再作成して環境変数を反映します。Cloudでは`localhost`を接続先に指定しないでください。上記Compose設定はローカル用で、Cloudでブラウザーから使うにはHTTPSのリバースプロキシとQiita Guide側のアクセス制御が別途必要です。NW Projectのログイン制御はメニューの起動口にのみ適用されます。
+
 # 技術スタック
 
 -   Java(Servlet/JSP)

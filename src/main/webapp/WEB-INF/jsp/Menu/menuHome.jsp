@@ -89,6 +89,10 @@ todayLabel=LocalDate.now(ZoneId.of("Asia/Tokyo")).format(DateTimeFormatter.ofPat
                             ><i class="fa-solid fa-address-book"></i>
                             <div><strong>ユーザー検索</strong><small>社員情報を検索・確認</small></div></a
                         >
+                        <a href="${pageContext.request.contextPath}/QiitaGuide"
+                            ><i class="fa-solid fa-book-open-reader"></i>
+                            <div><strong>Qiita記事を聴く</strong><small>技術記事を検索・解説・読み上げ</small></div></a
+                        >
                     </div>
                 </section>
 
