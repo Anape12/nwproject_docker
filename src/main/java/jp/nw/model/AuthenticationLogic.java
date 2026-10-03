@@ -2,21 +2,27 @@ package jp.nw.model;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import jp.nw.entity.UserEntity;
 import jp.nw.parts.DBBase;
 import jp.nw.parts.PasswordUtil;
+import jp.nw.parts.Query;
+import jp.nw.parts.SqlType;
 
 public class AuthenticationLogic {
     private static final int MAX_FAILURES = positiveEnv("LOGIN_MAX_FAILURES", 5);
     private static final int LOCK_MINUTES = positiveEnv("LOGIN_LOCK_MINUTES", 15);
+
+    private DBBase dbCon = null;
 
     public Result authenticate(String userId, String rawPassword, HttpServletRequest request) {
         DBBase db = new DBBase();
@@ -94,28 +100,36 @@ public class AuthenticationLogic {
     }
 
     private UserRecord findForUpdate(Connection con, String userId) throws SQLException {
-        String sql = "SELECT user_id,password,first_name,last_name,permission,password_expiration,delete_flg,account_type,account_disabled,failed_login_count,locked_until,force_password_change FROM users_info WHERE user_id=? FOR UPDATE";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next())
-                    return null;
-                UserRecord r = new UserRecord();
-                r.password = rs.getString("password");
-                r.firstName = rs.getString("first_name");
-                r.lastName = rs.getString("last_name");
-                r.permission = rs.getString("permission");
-                r.passwordExpiration = rs.getString("password_expiration");
-                r.deleteFlag = rs.getString("delete_flg");
-                r.accountType = rs.getString("account_type");
-                r.accountDisabled = rs.getBoolean("account_disabled");
-                r.failedCount = rs.getInt("failed_login_count");
-                java.sql.Timestamp locked = rs.getTimestamp("locked_until");
-                r.lockedUntil = locked == null ? null : locked.toLocalDateTime();
-                r.forcePasswordChange = rs.getBoolean("force_password_change");
-                return r;
-            }
+        LinkedHashMap<String, Object> conditions = new LinkedHashMap<>();
+        conditions.put("user_id", userId);
+        Query query = Query.builder().sqlType(SqlType.SELECT).tableName("users_info")
+                .selectColumns(List.of("user_id", "password",
+                        "first_name", "last_name", "permission", "password_expiration", "delete_flg", "account_type",
+                        "account_disabled", "failed_login_count", "locked_until", "force_password_change"))
+                .conditions(conditions).build();
+
+        this.dbCon = new DBBase();
+        List<Object> resultList = (List<Object>) this.dbCon.execute(query);
+
+        if (resultList.isEmpty()) {
+            return null;
         }
+
+        UserRecord record = new UserRecord();
+        HashMap<String, Object> resultMap = (HashMap<String, Object>) resultList.get(0);
+        record.password = (String) resultMap.get("password");
+        record.firstName = (String) resultMap.get("first_name");
+        record.lastName = (String) resultMap.get("last_name");
+        record.permission = (String) resultMap.get("permission");
+        record.passwordExpiration = (String) resultMap.get("password_expiration");
+        record.deleteFlag = (String) resultMap.get("delete_flg");
+        record.accountType = (String) resultMap.get("account_type");
+        record.accountDisabled = (Boolean) resultMap.get("account_disabled");
+        record.failedCount = (Integer) resultMap.get("failed_login_count");
+        record.lockedUntil = (LocalDateTime) resultMap.get("locked_until");
+        record.forcePasswordChange = (Boolean) resultMap.get("force_password_change");
+
+        return record;
     }
 
     private boolean passwordExpired(String expiration) {
