@@ -2,6 +2,7 @@ package jp.nw.domain.user;
 
 public enum PermissionStatus {
 
+    SYSTEM_ADMINISTRATOR("0"),
     ADMINISTRATOR("1"),
     GENERAL("2");
 

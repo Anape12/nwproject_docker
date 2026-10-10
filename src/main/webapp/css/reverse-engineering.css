@@ -1,0 +1,249 @@
+.reverse-page {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 36px 24px 72px;
+    color: #182230;
+}
+.reverse-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.reverse-header h1 {
+    font-size: 2rem;
+    margin: 4px 0 8px;
+}
+.reverse-header p {
+    margin: 0;
+    color: #667085;
+}
+.reverse-header .reverse-eyebrow {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.17em;
+    color: #3157d5;
+}
+.reverse-header a,
+.reverse-toolbar button {
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: white;
+    color: #344054;
+    padding: 11px 15px;
+    text-decoration: none;
+    font-weight: 700;
+    cursor: pointer;
+}
+.reverse-tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid #dbe2ea;
+    margin-bottom: 18px;
+}
+.reverse-tabs button {
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    padding: 12px 20px;
+    font: inherit;
+    font-weight: 700;
+    color: #475467;
+    cursor: pointer;
+}
+.reverse-tabs button[aria-selected="true"] {
+    border-bottom-color: #3157d5;
+    color: #2443af;
+}
+.reverse-toolbar {
+    display: flex;
+    align-items: end;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+.reverse-toolbar label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-weight: 700;
+    flex: 1;
+    max-width: 420px;
+}
+.reverse-toolbar input {
+    padding: 11px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    font: inherit;
+}
+.reverse-toolbar span {
+    margin-right: auto;
+    color: #667085;
+}
+.reverse-status {
+    background: #eef4ff;
+    padding: 13px 16px;
+    border-radius: 9px;
+    color: #2443af;
+}
+.reverse-status.error {
+    background: #fff1f0;
+    color: #b42318;
+}
+.reverse-layout {
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+.reverse-list-panel,
+.reverse-main-panel > div,
+.reverse-diagram-panel {
+    background: #fff;
+    border: 1px solid #e4e7ec;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px #1018280d;
+}
+.reverse-list-panel {
+    position: sticky;
+    top: 12px;
+    max-height: 75vh;
+    overflow: auto;
+}
+.reverse-list-panel h2 {
+    font-size: 1rem;
+    padding: 16px;
+    margin: 0;
+    border-bottom: 1px solid #e4e7ec;
+}
+.reverse-list {
+    display: grid;
+}
+.reverse-list button {
+    text-align: left;
+    padding: 10px 15px;
+    border: 0;
+    border-bottom: 1px solid #f1f3f5;
+    background: white;
+    color: #344054;
+    font: inherit;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+.reverse-list button:hover,
+.reverse-list button.active {
+    background: #edf2ff;
+    color: #2443af;
+    font-weight: 700;
+}
+.reverse-main-panel {
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+}
+.reverse-main-panel > div,
+.reverse-diagram-panel {
+    padding: 22px;
+}
+.reverse-main-panel h2 {
+    margin: 0 0 8px;
+    overflow-wrap: anywhere;
+}
+.reverse-subtitle {
+    color: #667085;
+    margin: 0 0 16px;
+    overflow-wrap: anywhere;
+}
+.reverse-kind {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 3px 8px;
+    border-radius: 5px;
+    background: #eef4ff;
+    color: #2443af;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+.reverse-table-wrap {
+    overflow: auto;
+}
+.reverse-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.91rem;
+}
+.reverse-table th,
+.reverse-table td {
+    text-align: left;
+    border-bottom: 1px solid #e4e7ec;
+    padding: 9px 10px;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+}
+.reverse-table th {
+    background: #f8fafc;
+    color: #475467;
+}
+.reverse-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: #ecfdf3;
+    color: #067647;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+.reverse-code-list {
+    margin: 12px 0 0;
+    padding-left: 20px;
+    overflow-wrap: anywhere;
+}
+.reverse-diagram-panel svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 200px;
+    background: #f8fafc;
+    border: 1px solid #e4e7ec;
+    border-radius: 10px;
+}
+.reverse-diagram-panel p {
+    color: #667085;
+}
+.reverse-relations {
+    display: grid;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+}
+.reverse-relations span {
+    padding: 6px 9px;
+    background: #f8fafc;
+    border-radius: 6px;
+}
+.reverse-note {
+    color: #667085;
+    font-size: 0.86rem;
+    margin-top: 20px;
+}
+@media (max-width: 780px) {
+    .reverse-layout {
+        grid-template-columns: 1fr;
+    }
+    .reverse-list-panel {
+        position: static;
+        max-height: 220px;
+    }
+    .reverse-header,
+    .reverse-toolbar {
+        flex-wrap: wrap;
+    }
+    .reverse-toolbar label {
+        max-width: none;
+        flex-basis: 100%;
+    }
+    .reverse-toolbar span {
+        margin-right: 0;
+    }
+}

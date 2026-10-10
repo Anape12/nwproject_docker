@@ -112,7 +112,7 @@ todayLabel=LocalDate.now(ZoneId.of("Asia/Tokyo")).format(DateTimeFormatter.ofPat
                             ><i class="fa-solid fa-key"></i>
                             <div><strong>パスワード変更</strong><small>ログインパスワードを安全に更新</small></div></a
                         >
-                        <c:if test="${sessionScope.loginUser.permission=='1'}"
+                        <c:if test="${sessionScope.loginUser.permission=='1' or sessionScope.loginUser.permission=='0'}"
                             ><a href="${pageContext.request.contextPath}/ReportApproval"
                                 ><i class="fa-solid fa-circle-check"></i>
                                 <div><strong>承認管理</strong><small>未処理申請の確認・一括承認</small></div></a
@@ -130,6 +130,12 @@ todayLabel=LocalDate.now(ZoneId.of("Asia/Tokyo")).format(DateTimeFormatter.ofPat
                             ><a href="${pageContext.request.contextPath}/AiCharacterAdmin"
                                 ><i class="fa-solid fa-robot"></i>
                                 <div><strong>AI住人管理</strong><small>人格・興味・応答方法を設定</small></div></a
+                            ></c:if
+                        >
+                        <c:if test="${sessionScope.loginUser.permission=='0'}"
+                            ><a href="${pageContext.request.contextPath}/ReverseEngineering"
+                                ><i class="fa-solid fa-diagram-project"></i>
+                                <div><strong>設計リバース</strong><small>DB・Javaの構造と関係図を確認</small></div></a
                             ></c:if
                         >
                     </div>
