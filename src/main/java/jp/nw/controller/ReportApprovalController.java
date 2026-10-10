@@ -72,11 +72,11 @@ public class ReportApprovalController extends HttpServlet {
                 l.addDelegate(u.getUserId(), q.getParameter("delegateUserId"),
                         LocalDate.parse(q.getParameter("validFrom")), LocalDate.parse(q.getParameter("validTo")));
             else if ("route".equals(action) || "delegate".equals(action))
-                throw new CodedException.Denied("ERR00010020");
+                throw new CodedException.Denied(jp.nw.model.ErrorCode.APP_020);
             else {
                 String decision = q.getParameter("decision"), comment = trim(q.getParameter("comment"));
                 if ("REJECTED".equals(decision) && comment.isBlank())
-                    throw new CodedException.Validation("ERR00010021");
+                    throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_021);
                 String[] values = q.getParameterValues("approvalIds");
                 if (values != null) {
                     List<Long> ids = new ArrayList<>();

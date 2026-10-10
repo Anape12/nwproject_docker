@@ -6,52 +6,52 @@ public final class CodedException {
     }
 
     public interface Coded {
-        String errorCode();
+        ErrorCode errorCode();
     }
 
     public static final class Validation extends IllegalArgumentException implements Coded {
-        private final String errorCode;
+        private final ErrorCode errorCode;
 
-        public Validation(String errorCode) {
-            super(errorCode);
+        public Validation(ErrorCode errorCode) {
+            super(errorCode.code());
             this.errorCode = errorCode;
         }
 
         @Override
-        public String errorCode() {
+        public ErrorCode errorCode() {
             return errorCode;
         }
     }
 
     public static final class Denied extends SecurityException implements Coded {
-        private final String errorCode;
+        private final ErrorCode errorCode;
 
-        public Denied(String errorCode) {
-            super(errorCode);
+        public Denied(ErrorCode errorCode) {
+            super(errorCode.code());
             this.errorCode = errorCode;
         }
 
         @Override
-        public String errorCode() {
+        public ErrorCode errorCode() {
             return errorCode;
         }
     }
 
     public static final class Failure extends RuntimeException implements Coded {
-        private final String errorCode;
+        private final ErrorCode errorCode;
 
-        public Failure(String errorCode) {
-            super(errorCode);
+        public Failure(ErrorCode errorCode) {
+            super(errorCode.code());
             this.errorCode = errorCode;
         }
 
-        public Failure(String errorCode, Throwable cause) {
-            super(errorCode, cause);
+        public Failure(ErrorCode errorCode, Throwable cause) {
+            super(errorCode.code(), cause);
             this.errorCode = errorCode;
         }
 
         @Override
-        public String errorCode() {
+        public ErrorCode errorCode() {
             return errorCode;
         }
     }

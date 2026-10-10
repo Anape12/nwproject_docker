@@ -57,12 +57,12 @@ public class ChangePasswordController extends HttpServlet {
                         p.setString(1, u.getUserId());
                         try (var r = p.executeQuery()) {
                             if (!r.next() || !PasswordUtil.matches(current, r.getString(1)))
-                                throw new CodedException.Validation("ERR00010003");
+                                throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_003);
                             encoded = r.getString(1);
                         }
                     }
                     if (PasswordUtil.matches(next, encoded))
-                        throw new CodedException.Validation("ERR00010004");
+                        throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_004);
                     try (PreparedStatement p = c.prepareStatement(
                             "UPDATE users_info SET password=?,password_changed_at=NOW(),password_expiration=?,force_password_change=FALSE WHERE user_id=?")) {
                         p.setString(1, PasswordUtil.encode(next));
@@ -90,8 +90,8 @@ public class ChangePasswordController extends HttpServlet {
 
     private void validate(String p, String c) {
         if (p == null || p.length() < 8 || p.length() > 72 || !p.matches(".*[A-Za-z].*") || !p.matches(".*[0-9].*"))
-            throw new CodedException.Validation("ERR00010005");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_005);
         if (!p.equals(c))
-            throw new CodedException.Validation("ERR00010006");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_006);
     }
 }

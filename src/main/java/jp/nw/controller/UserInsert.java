@@ -35,7 +35,7 @@ public class UserInsert extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         if (!isAdministrator(session)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get("ERR00010127"));
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_127));
             return;
         }
 
@@ -61,11 +61,11 @@ public class UserInsert extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         HttpSession session = request.getSession(false);
         if (!isAdministrator(session)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get("ERR00010127"));
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_127));
             return;
         }
         if (!Objects.equals(session.getAttribute("userInsertCsrfToken"), request.getParameter("csrfToken"))) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get("ERR00010121"));
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_121));
             return;
         }
 
@@ -73,14 +73,14 @@ public class UserInsert extends HttpServlet {
             UserEntity user = validateAndBuild(request);
             UserEntity actor = (UserEntity) session.getAttribute("loginUser");
             if (!PermissionCheckUtil.canManageRole(actor, user.getPermission()))
-                throw new CodedException.Validation("ERR00010022");
+                throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_022);
             LocalDate expiration = LocalDate.parse(request.getParameter("passwordExpiration"));
             if (expiration.isBefore(LocalDate.now()))
-                throw new CodedException.Validation("ERR00010023");
+                throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_023);
 
             UserInsertLogic logic = new UserInsertLogic();
             if (logic.userIdExists(user.getUserId()))
-                throw new CodedException.Validation("ERR00010024");
+                throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_024);
             logic.insert(user, expiration);
             AuditLogLogic.record(request, "USER", "USER_CREATED", "USER", user.getUserId(), true,
                     "権限=" + user.getPermission());
@@ -112,18 +112,18 @@ public class UserInsert extends HttpServlet {
         String passwordConfirmation = request.getParameter("passwordConfirmation");
 
         if (!USER_ID_PATTERN.matcher(userId).matches())
-            throw new CodedException.Validation("ERR00010025");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_025);
         if (lastName.isBlank() || lastName.length() > 36 || firstName.isBlank() || firstName.length() > 36)
-            throw new CodedException.Validation("ERR00010026");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_026);
         LocalDate birthday = LocalDate.parse(birthdayValue);
         if (birthday.isAfter(LocalDate.now()) || birthday.isBefore(LocalDate.of(1900, 1, 1)))
-            throw new CodedException.Validation("ERR00010027");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_027);
         if (password == null || password.length() < 8 || password.length() > 72
                 || !HAS_LETTER.matcher(password).matches() || !HAS_NUMBER.matcher(password).matches()) {
-            throw new CodedException.Validation("ERR00010028");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_028);
         }
         if (!password.equals(passwordConfirmation))
-            throw new CodedException.Validation("ERR00010006");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_006);
 
         return UserEntity.builder().userId(userId).lastName(lastName).firstName(firstName)
                 .birthDate(birthday.toString()).permission(permission).password(password).build();

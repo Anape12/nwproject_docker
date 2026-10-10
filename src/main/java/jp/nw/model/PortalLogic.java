@@ -120,7 +120,7 @@ public class PortalLogic {
                 return list;
             }
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010086", e);
+            throw new CodedException.Failure(ErrorCode.APP_086, e);
         }
     }
 

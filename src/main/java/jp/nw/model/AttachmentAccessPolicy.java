@@ -65,7 +65,7 @@ public class AttachmentAccessPolicy {
                 return result.next();
             }
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010066", e);
+            throw new CodedException.Failure(ErrorCode.APP_066, e);
         }
     }
 }

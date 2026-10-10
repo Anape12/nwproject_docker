@@ -51,7 +51,7 @@ public class ThreadDao extends DBBase {
                         }
 
                 } catch (SQLException e) {
-                        throw new CodedException.Failure("ERR00010037", e);
+                        throw new CodedException.Failure(jp.nw.model.ErrorCode.APP_037, e);
                 }
 
                 return list;
@@ -91,7 +91,7 @@ public class ThreadDao extends DBBase {
                         }
 
                 } catch (SQLException e) {
-                        throw new CodedException.Failure("ERR00010038", e);
+                        throw new CodedException.Failure(jp.nw.model.ErrorCode.APP_038, e);
                 }
 
                 return dto;
@@ -136,7 +136,7 @@ public class ThreadDao extends DBBase {
                         }
 
                 } catch (SQLException e) {
-                        throw new CodedException.Failure("ERR00010039", e);
+                        throw new CodedException.Failure(jp.nw.model.ErrorCode.APP_039, e);
                 }
 
                 return list;
@@ -166,7 +166,7 @@ public class ThreadDao extends DBBase {
                         return true;
 
                 } catch (SQLException e) {
-                        throw new CodedException.Failure("ERR00010040", e);
+                        throw new CodedException.Failure(jp.nw.model.ErrorCode.APP_040, e);
                 }
         }
 
@@ -185,7 +185,7 @@ public class ThreadDao extends DBBase {
                         ps.setInt(7, admin ? 1 : 0);
                         return ps.executeUpdate() == 1;
                 } catch (SQLException e) {
-                        throw new CodedException.Failure("ERR00010041", e);
+                        throw new CodedException.Failure(jp.nw.model.ErrorCode.APP_041, e);
                 }
         }
 

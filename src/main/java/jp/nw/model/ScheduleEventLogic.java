@@ -26,7 +26,7 @@ public class ScheduleEventLogic {
             ps.setTimestamp(4, Timestamp.valueOf(start));
             try (ResultSet rs = ps.executeQuery()) { while (rs.next()) events.add(map(rs)); }
             return events;
-        } catch (SQLException e) { throw new CodedException.Failure("ERR00010090", e); }
+        } catch (SQLException e) { throw new CodedException.Failure(ErrorCode.APP_090, e); }
     }
 
     public ScheduleEventEntity findById(long id, String userId) {
@@ -35,7 +35,7 @@ public class ScheduleEventLogic {
         try (Connection con = db.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1,id);ps.setString(2,userId);ps.setString(3,userId);
             try (ResultSet rs = ps.executeQuery()) { return rs.next() ? map(rs) : null; }
-        } catch (SQLException e) { throw new CodedException.Failure("ERR00010090", e); }
+        } catch (SQLException e) { throw new CodedException.Failure(ErrorCode.APP_090, e); }
     }
 
     public long create(ScheduleEventEntity event) {
@@ -46,7 +46,7 @@ public class ScheduleEventLogic {
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) { if (keys.next()) return keys.getLong(1); }
             throw new SQLException("Generated key not found.");
-        } catch (SQLException e) { throw new CodedException.Failure("ERR00010091", e); }
+        } catch (SQLException e) { throw new CodedException.Failure(ErrorCode.APP_091, e); }
     }
 
     public boolean update(ScheduleEventEntity event) {
@@ -55,7 +55,7 @@ public class ScheduleEventLogic {
         try (Connection con = db.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             int i = bind(ps, event, 1); ps.setLong(i++, event.getEventId()); ps.setString(i, event.getUserId());
             return ps.executeUpdate() == 1;
-        } catch (SQLException e) { throw new CodedException.Failure("ERR00010092", e); }
+        } catch (SQLException e) { throw new CodedException.Failure(ErrorCode.APP_092, e); }
     }
 
     public boolean delete(long id, String userId) {
@@ -63,14 +63,14 @@ public class ScheduleEventLogic {
         DBBase db = new DBBase();
         try (Connection con = db.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, id); ps.setString(2, userId); return ps.executeUpdate() == 1;
-        } catch (SQLException e) { throw new CodedException.Failure("ERR00010093", e); }
+        } catch (SQLException e) { throw new CodedException.Failure(ErrorCode.APP_093, e); }
     }
 
     public List<java.util.Map<String,String>> users(String except){DBBase db=new DBBase();try(Connection c=db.getConnection();PreparedStatement p=c.prepareStatement("SELECT user_id,CONCAT(last_name,' ',first_name) name FROM users_info WHERE delete_flg='0' AND user_id<>? ORDER BY last_name,first_name")){p.setString(1,except);try(ResultSet r=p.executeQuery()){List<java.util.Map<String,String>> list=new ArrayList<>();while(r.next())list.add(java.util.Map.of("id",r.getString(1),"name",r.getString(2)));return list;}}catch(SQLException e){throw new RuntimeException(e);}}
-    public void invite(long eventId,String[] users){if(users==null)return;DBBase db=new DBBase();try(Connection c=db.getConnection();PreparedStatement p=c.prepareStatement("INSERT IGNORE INTO schedule_participant(event_id,user_id) VALUES(?,?)")){for(String user:users){p.setLong(1,eventId);p.setString(2,user);p.addBatch();}p.executeBatch();PortalLogic portal=new PortalLogic();for(String user:users)portal.notifyUser(c,user,"SCHEDULE","予定への招待","新しい予定へ招待されました。","/OpenCalender?edit="+eventId);}catch(SQLException e){throw new CodedException.Failure("ERR00010094",e);}}
+    public void invite(long eventId,String[] users){if(users==null)return;DBBase db=new DBBase();try(Connection c=db.getConnection();PreparedStatement p=c.prepareStatement("INSERT IGNORE INTO schedule_participant(event_id,user_id) VALUES(?,?)")){for(String user:users){p.setLong(1,eventId);p.setString(2,user);p.addBatch();}p.executeBatch();PortalLogic portal=new PortalLogic();for(String user:users)portal.notifyUser(c,user,"SCHEDULE","予定への招待","新しい予定へ招待されました。","/OpenCalender?edit="+eventId);}catch(SQLException e){throw new CodedException.Failure(ErrorCode.APP_094,e);}}
 
     public boolean isParticipant(long eventId,String user){DBBase db=new DBBase();try(Connection c=db.getConnection();PreparedStatement p=c.prepareStatement("SELECT 1 FROM schedule_participant WHERE event_id=? AND user_id=?")){p.setLong(1,eventId);p.setString(2,user);try(ResultSet r=p.executeQuery()){return r.next();}}catch(SQLException e){throw new RuntimeException(e);}}
-    public void respond(long eventId,String user,String status){if(!java.util.Set.of("ACCEPTED","DECLINED").contains(status))throw new CodedException.Validation("ERR00010095");DBBase db=new DBBase();try(Connection c=db.getConnection();PreparedStatement p=c.prepareStatement("UPDATE schedule_participant SET response_status=?,responded_at=NOW() WHERE event_id=? AND user_id=?")){p.setString(1,status);p.setLong(2,eventId);p.setString(3,user);if(p.executeUpdate()!=1)throw new CodedException.Validation("ERR00010096");}catch(SQLException e){throw new RuntimeException(e);}}
+    public void respond(long eventId,String user,String status){if(!java.util.Set.of("ACCEPTED","DECLINED").contains(status))throw new CodedException.Validation(ErrorCode.APP_095);DBBase db=new DBBase();try(Connection c=db.getConnection();PreparedStatement p=c.prepareStatement("UPDATE schedule_participant SET response_status=?,responded_at=NOW() WHERE event_id=? AND user_id=?")){p.setString(1,status);p.setLong(2,eventId);p.setString(3,user);if(p.executeUpdate()!=1)throw new CodedException.Validation(ErrorCode.APP_096);}catch(SQLException e){throw new RuntimeException(e);}}
 
     private int bind(PreparedStatement ps, ScheduleEventEntity event, int i) throws SQLException {
         ps.setString(i++, event.getTitle()); ps.setString(i++, event.getDescription());

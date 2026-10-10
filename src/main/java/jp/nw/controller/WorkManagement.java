@@ -85,7 +85,7 @@ public class WorkManagement extends HttpServlet {
         UserEntity user = (UserEntity) session.getAttribute("loginUser");
         YearMonth month = month(request);
         if (!Objects.equals(session.getAttribute("attendanceCsrfToken"), request.getParameter("csrfToken"))) {
-            response.sendError(403, jp.nw.model.ErrorMessageLogic.get("ERR00010121"));
+            response.sendError(403, jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_121));
             return;
         }
         AttendanceLogic logic = new AttendanceLogic();
@@ -98,7 +98,7 @@ public class WorkManagement extends HttpServlet {
                 flash(session, "勤怠を日付単位で承認申請しました。", "success");
             } else if ("delete".equals(request.getParameter("action"))) {
                 if (!logic.delete(id(request), user.getUserId()))
-                    throw new CodedException.Validation("ERR00010030");
+                    throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_030);
                 flash(session, "勤怠情報を削除しました。", "success");
             } else {
                 AttendanceEntity value = build(request, user.getUserId());
@@ -118,7 +118,7 @@ public class WorkManagement extends HttpServlet {
         LocalDate date = LocalDate.parse(request.getParameter("workDate"));
         String type = request.getParameter("workType");
         if (!WORK_TYPES.contains(type))
-            throw new CodedException.Validation("ERR00010031");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_031);
         boolean nonWorking = "LEAVE".equals(type) || "HOLIDAY".equals(type);
         LocalTime in = null, out = null;
         int breakMinutes = 0;
@@ -126,19 +126,19 @@ public class WorkManagement extends HttpServlet {
             in = LocalTime.parse(request.getParameter("clockIn"));
             out = LocalTime.parse(request.getParameter("clockOut"));
             if (!out.isAfter(in))
-                throw new CodedException.Validation("ERR00010032");
+                throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_032);
             try {
                 breakMinutes = Integer.parseInt(request.getParameter("breakMinutes"));
             } catch (Exception e) {
-                throw new CodedException.Validation("ERR00010033");
+                throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_033);
             }
             long duration = java.time.temporal.ChronoUnit.MINUTES.between(in, out);
             if (breakMinutes < 0 || breakMinutes >= duration)
-                throw new CodedException.Validation("ERR00010034");
+                throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_034);
         }
         String note = trim(request.getParameter("note"));
         if (note.length() > 500)
-            throw new CodedException.Validation("ERR00010035");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_035);
         String reportValue = request.getParameter("reportId");
         Long reportId = reportValue == null || reportValue.isBlank() ? null : Long.valueOf(reportValue);
         String attendanceType = request.getParameter("attendanceType");
@@ -183,7 +183,7 @@ public class WorkManagement extends HttpServlet {
         try {
             return Long.parseLong(request.getParameter("attendanceId"));
         } catch (Exception e) {
-            throw new CodedException.Validation("ERR00010036");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_036);
         }
     }
 

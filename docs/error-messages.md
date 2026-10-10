@@ -2,9 +2,9 @@
 
 画面に表示するアプリケーションのエラー文言は `error_message_mst` で管理します。コードはエラーが `ERR` + 8 桁の数字、警告が `WAR` + 8 桁の数字です（例: `ERR00000001`、`WAR00000001`）。ハイフンは使いません。警告コードを登録する際も同じマスタを使います。現在登録済みの文言はすべてエラーです。
 
-Flyway の `V22__create_error_message_master.sql` がテーブルと認証文言、`V23__catalog_application_errors.sql` が各機能の文言を登録し、`V24__standardize_message_codes.sql` が既存コードを新形式へ変換します。既に V22・V23 を適用済みの DB にも V24 を適用できます。新しいエラー・警告は、新しいマイグレーションでコードと文言を登録してください。適用済みの Flyway ファイルは編集しません。
+Flyway の `V22__create_error_message_master.sql` がテーブルと認証文言、`V23__catalog_application_errors.sql` が各機能の文言を登録し、`V24__standardize_message_codes.sql` が既存コードを新形式へ変換します。既に V22・V23 を適用済みの DB にも V24 を適用できます。Java 側のコード値は `ErrorCode` Enum に集約しています。新しいエラー・警告は、新しいマイグレーションでコードと文言を登録し、同じコードを `ErrorCode` に追加してください。適用済みの Flyway ファイルは編集しません。
 
-認証では `AuthenticationLogic` が結果に `ERR00000001`～`ERR00000006` を設定します。従来の `APP-000`～`APP-139` は `ERR00010000`～`ERR00010139` に対応します。失敗回数と監査ログを確定した後、`ErrorMessageLogic.find` で文言を取得します。その他の機能では、モデル層が `CodedException.Validation`、`Denied`、`Failure` のいずれかをエラーコード付きで送出し、画面側が `ErrorMessageLogic.forDisplay` で表示文言に変換します。Controller 自身が判定するエラーは `ErrorMessageLogic.get("ERR00010000")` のように参照します。
+認証では `AuthenticationLogic` が `ErrorCode.AUTH_001`～`AUTH_006` を参照します。従来の `APP-000`～`APP-139` は `ErrorCode.APP_000`～`APP_139`（DB 上は `ERR00010000`～`ERR00010139`）に対応します。失敗回数と監査ログを確定した後、`ErrorMessageLogic.find` で文言を取得します。その他の機能では、モデル層が `CodedException.Validation`、`Denied`、`Failure` のいずれかを `ErrorCode` 付きで送出し、画面側が `ErrorMessageLogic.forDisplay` で表示文言に変換します。Controller 自身が判定するエラーは `ErrorMessageLogic.get(ErrorCode.APP_000)` のように参照します。DB 検索時や外部へ結果を返す時だけ `ErrorCode.code()` で文字列へ変換します。
 
 未分類の例外は `ERR00010000` の一般的な文言に変換し、SQL エラーなどの内部詳細を画面に表示しません。コードの形式が不正、または未登録・無効・空文言なら設定不備として失敗させます。DB に接続できない場合も文言を取得できないため、その障害はサーバーログで確認してください。内部診断用の例外メッセージ、監査ログの詳細、成功通知、HTTP の標準ステータス文言はこのマスタの対象外です。
 

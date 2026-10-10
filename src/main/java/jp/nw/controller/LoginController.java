@@ -12,11 +12,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import jp.nw.base.BaseModel;
+import jp.nw.domain.user.PermissionAction;
 import jp.nw.entity.UserEntity;
 import jp.nw.model.AuthenticationLogic;
-import jp.nw.util.SecurityToken;
-import jp.nw.domain.user.PermissionAction;
 import jp.nw.util.PermissionCheckUtil;
+import jp.nw.util.SecurityToken;
 
 /**
  * Servlet implementation class Login
@@ -45,9 +45,9 @@ public class LoginController extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		if ("1".equals(request.getParameter("sessionInvalid"))) {
-			request.setAttribute("errorMessage", jp.nw.model.ErrorMessageLogic.get("ERR00010128"));
+			request.setAttribute("errorMessage", jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_128));
 		} else if ("1".equals(request.getParameter("windowInvalid"))) {
-			request.setAttribute("errorMessage", jp.nw.model.ErrorMessageLogic.get("ERR00010129"));
+			request.setAttribute("errorMessage", jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_129));
 		}
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/login/login.jsp");
 		dispatcher.forward(request, response);
@@ -93,7 +93,7 @@ public class LoginController extends HttpServlet {
 		if (!isTokenUpdated) {
 			this.baseModel.writeInfo("トークン更新失敗");
 			// ログイン失敗
-			request.setAttribute("errorMessage", jp.nw.model.ErrorMessageLogic.get("ERR00010134"));
+			request.setAttribute("errorMessage", jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_134));
 			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/login/loginMiss.jsp");
 			dispatcher.forward(request, response);
 			return;
@@ -108,7 +108,8 @@ public class LoginController extends HttpServlet {
 		session.setAttribute("forcePasswordChange", result.forcePasswordChange());
 
 		this.baseModel
-				.writeInfo(PermissionCheckUtil.can(userEntity, PermissionAction.USER_MANAGE) ? "ログイン成功（管理者）" : "ログイン成功（一般）");
+				.writeInfo(PermissionCheckUtil.can(userEntity, PermissionAction.USER_MANAGE) ? "ログイン成功（管理者）"
+						: "ログイン成功（一般）");
 		response.sendRedirect(
 				request.getContextPath()
 						+ (result.forcePasswordChange() ? "/ChangePassword?loginFresh=1" : "/MenuSelect?loginFresh=1"));

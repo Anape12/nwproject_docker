@@ -12,17 +12,17 @@ public enum AttachmentOwnerType {
     APPROVAL;
 
     public static AttachmentOwnerType parse(String value) {
-        if (value == null || value.isBlank()) throw new CodedException.Validation("ERR00010074");
+        if (value == null || value.isBlank()) throw new CodedException.Validation(ErrorCode.APP_074);
         try {
             return valueOf(value.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            throw new CodedException.Validation("ERR00010074");
+            throw new CodedException.Validation(ErrorCode.APP_074);
         }
     }
 
     public String validateOwnerId(String value) {
         if (value == null || value.isBlank() || value.length() > 64) {
-            throw new CodedException.Validation("ERR00010075");
+            throw new CodedException.Validation(ErrorCode.APP_075);
         }
         String normalized = value.trim();
         try {
@@ -34,7 +34,7 @@ public enum AttachmentOwnerType {
             }
             return normalized;
         } catch (IllegalArgumentException e) {
-            throw new CodedException.Validation("ERR00010075");
+            throw new CodedException.Validation(ErrorCode.APP_075);
         }
     }
 }

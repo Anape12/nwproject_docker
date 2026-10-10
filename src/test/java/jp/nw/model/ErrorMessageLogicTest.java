@@ -19,7 +19,7 @@ class ErrorMessageLogicTest {
     void resolvesEnabledMessageByCode() throws Exception {
         AtomicReference<String> boundCode = new AtomicReference<>();
         Connection connection = connection("DBで設定した文言", boundCode);
-        assertEquals("DBで設定した文言", ErrorMessageLogic.find(connection, "ERR00000001"));
+        assertEquals("DBで設定した文言", ErrorMessageLogic.find(connection, ErrorCode.AUTH_001));
         assertEquals("ERR00000001", boundCode.get());
     }
 
@@ -43,9 +43,9 @@ class ErrorMessageLogicTest {
     @Test
     void resolvesCodeFromWrappedFailureWithoutShowingExceptionDetails() {
         RuntimeException wrapped = new RuntimeException("database detail",
-                new CodedException.Failure("ERR00010115", new SQLException("secret SQL")));
-        assertEquals("ERR00010115", ErrorMessageLogic.errorCode(wrapped));
-        assertEquals("ERR00010000", ErrorMessageLogic.errorCode(new SQLException("secret SQL")));
+                new CodedException.Failure(ErrorCode.APP_115, new SQLException("secret SQL")));
+        assertEquals(ErrorCode.APP_115, ErrorMessageLogic.errorCode(wrapped));
+        assertEquals(ErrorCode.APP_000, ErrorMessageLogic.errorCode(new SQLException("secret SQL")));
     }
 
     private Connection connection(String message, AtomicReference<String> boundCode) {

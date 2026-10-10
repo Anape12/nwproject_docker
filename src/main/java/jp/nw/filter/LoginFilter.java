@@ -161,7 +161,7 @@ public class LoginFilter implements Filter {
 
         if (request.getHeader("X-NW-Login-Context") != null) {
             response.sendError(HttpServletResponse.SC_CONFLICT,
-                    jp.nw.model.ErrorMessageLogic.get("ERR00010132"));
+                    jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_132));
             return;
         }
         response.sendRedirect(request.getContextPath() + "/Login?windowInvalid=1");

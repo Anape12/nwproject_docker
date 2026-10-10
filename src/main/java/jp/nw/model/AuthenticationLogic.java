@@ -40,7 +40,7 @@ public class AuthenticationLogic {
                 throw e;
             }
         } catch (Exception e) {
-            throw new CodedException.Failure("ERR00010134", e);
+            throw new CodedException.Failure(ErrorCode.APP_134, e);
         }
     }
 
@@ -144,19 +144,19 @@ public class AuthenticationLogic {
     }
 
     enum Outcome {
-        NO_USER("LOGIN_FAILURE", "ERR00000001"),
-        DISABLED("LOGIN_BLOCKED_DISABLED", "ERR00000002"),
-        AI_ACCOUNT("LOGIN_BLOCKED_AI", "ERR00000003"),
-        ALREADY_LOCKED("LOGIN_BLOCKED_LOCKED", "ERR00000004"),
-        BAD_PASSWORD("LOGIN_FAILURE", "ERR00000001"),
-        NOW_LOCKED("ACCOUNT_LOCKED", "ERR00000005"),
-        EXPIRED("LOGIN_BLOCKED_PASSWORD_EXPIRED", "ERR00000006"),
+        NO_USER("LOGIN_FAILURE", ErrorCode.AUTH_001),
+        DISABLED("LOGIN_BLOCKED_DISABLED", ErrorCode.AUTH_002),
+        AI_ACCOUNT("LOGIN_BLOCKED_AI", ErrorCode.AUTH_003),
+        ALREADY_LOCKED("LOGIN_BLOCKED_LOCKED", ErrorCode.AUTH_004),
+        BAD_PASSWORD("LOGIN_FAILURE", ErrorCode.AUTH_001),
+        NOW_LOCKED("ACCOUNT_LOCKED", ErrorCode.AUTH_005),
+        EXPIRED("LOGIN_BLOCKED_PASSWORD_EXPIRED", ErrorCode.AUTH_006),
         SUCCESS("LOGIN_SUCCESS", null);
 
         final String auditAction;
-        final String errorCode;
+        final ErrorCode errorCode;
 
-        Outcome(String auditAction, String errorCode) {
+        Outcome(String auditAction, ErrorCode errorCode) {
             this.auditAction = auditAction;
             this.errorCode = errorCode;
         }
@@ -174,7 +174,7 @@ public class AuthenticationLogic {
 
         Result toResult(String userId, UserRecord record, String message) {
             if (outcome != Outcome.SUCCESS)
-                return Result.failure(outcome.errorCode, message);
+                return Result.failure(outcome.errorCode.code(), message);
             UserEntity user = UserEntity.builder().userId(userId).firstName(record.firstName)
                     .lastName(record.lastName).permission(record.permission).accountType(record.accountType).build();
             return Result.success(user, record.forcePasswordChange);

@@ -33,7 +33,7 @@ public class ApprovalLogic {
 
     public void submit(String type, long targetId, String applicantId) {
         if (!"REPORT".equals(type) && !"ATTENDANCE".equals(type))
-            throw new CodedException.Validation("ERR00010050");
+            throw new CodedException.Validation(ErrorCode.APP_050);
         DBBase db = new DBBase();
         try (Connection con = db.getConnection()) {
             con.setAutoCommit(false);
@@ -48,7 +48,7 @@ public class ApprovalLogic {
                     target.setLong(1, targetId);
                     target.setString(2, applicantId);
                     if (target.executeUpdate() != 1)
-                        throw new CodedException.Validation("ERR00010051");
+                        throw new CodedException.Validation(ErrorCode.APP_051);
                 }
                 long approvalId;
                 try (PreparedStatement upsert = con.prepareStatement(
@@ -76,7 +76,7 @@ public class ApprovalLogic {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new CodedException.Failure("ERR00010052", e);
+            throw new CodedException.Failure(ErrorCode.APP_052, e);
         }
     }
 
@@ -93,7 +93,7 @@ public class ApprovalLogic {
                     ps.setString(2, applicantId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next())
-                            throw new CodedException.Validation("ERR00010053");
+                            throw new CodedException.Validation(ErrorCode.APP_053);
                         type = rs.getString(1);
                         targetId = rs.getLong(2);
                     }
@@ -120,12 +120,12 @@ public class ApprovalLogic {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new CodedException.Failure("ERR00010054", e);
+            throw new CodedException.Failure(ErrorCode.APP_054, e);
         }
     }
 
     public int reviewBatch(List<Long> ids, jp.nw.entity.UserEntity reviewer, String decision, String comment) {
-        if (!canReview(reviewer)) throw new CodedException.Denied("ERR00010055");
+        if (!canReview(reviewer)) throw new CodedException.Denied(ErrorCode.APP_055);
         int count = 0;
         for (Long id : ids) {
             review(id, reviewer, decision, comment);
@@ -153,7 +153,7 @@ public class ApprovalLogic {
                 return list;
             }
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010056", e);
+            throw new CodedException.Failure(ErrorCode.APP_056, e);
         }
     }
 
@@ -174,14 +174,14 @@ public class ApprovalLogic {
                     }
                 }
                 if (targetIds.isEmpty())
-                    throw new CodedException.Validation("ERR00010057");
+                    throw new CodedException.Validation(ErrorCode.APP_057);
                 for (long targetId : targetIds) {
                     try (PreparedStatement update = con.prepareStatement(
                             "UPDATE attendance_record SET approval_status='SUBMITTED' WHERE attendance_id=? AND user_id=? AND approval_status IN ('DRAFT','REJECTED')")) {
                         update.setLong(1, targetId);
                         update.setString(2, applicantId);
                         if (update.executeUpdate() != 1)
-                            throw new CodedException.Validation("ERR00010058");
+                            throw new CodedException.Validation(ErrorCode.APP_058);
                     }
                     long approvalId;
                     try (PreparedStatement upsert = con.prepareStatement(
@@ -210,15 +210,15 @@ public class ApprovalLogic {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new CodedException.Failure("ERR00010059", e);
+            throw new CodedException.Failure(ErrorCode.APP_059, e);
         }
     }
 
     public void review(long approvalId, jp.nw.entity.UserEntity reviewer, String decision, String comment) {
-        if (!canReview(reviewer)) throw new CodedException.Denied("ERR00010055");
+        if (!canReview(reviewer)) throw new CodedException.Denied(ErrorCode.APP_055);
         String reviewerId = reviewer.getUserId();
         if (!"APPROVED".equals(decision) && !"REJECTED".equals(decision))
-            throw new CodedException.Validation("ERR00010060");
+            throw new CodedException.Validation(ErrorCode.APP_060);
         DBBase db = new DBBase();
         try (Connection con = db.getConnection()) {
             con.setAutoCommit(false);
@@ -231,7 +231,7 @@ public class ApprovalLogic {
                     lock.setLong(1, approvalId);
                     try (ResultSet rs = lock.executeQuery()) {
                         if (!rs.next() || !"SUBMITTED".equals(rs.getString("status")))
-                            throw new CodedException.Validation("ERR00010061");
+                            throw new CodedException.Validation(ErrorCode.APP_061);
                         type = rs.getString("application_type");
                         targetId = rs.getLong("target_id");
                         step = rs.getInt("approval_step");
@@ -291,7 +291,7 @@ public class ApprovalLogic {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new CodedException.Failure("ERR00010062", e);
+            throw new CodedException.Failure(ErrorCode.APP_062, e);
         }
     }
 
@@ -330,7 +330,7 @@ public class ApprovalLogic {
 
     public void saveRoute(String type, int steps) {
         if (!java.util.Set.of("REPORT", "ATTENDANCE").contains(type) || steps < 1 || steps > 5)
-            throw new CodedException.Validation("ERR00010063");
+            throw new CodedException.Validation(ErrorCode.APP_063);
         DBBase db = new DBBase();
         try (Connection c = db.getConnection();
                 PreparedStatement p = c.prepareStatement(
@@ -345,7 +345,7 @@ public class ApprovalLogic {
 
     public void addDelegate(String approver, String delegate, java.time.LocalDate from, java.time.LocalDate to) {
         if (to.isBefore(from) || approver.equals(delegate))
-            throw new CodedException.Validation("ERR00010064");
+            throw new CodedException.Validation(ErrorCode.APP_064);
         DBBase db = new DBBase();
         try (Connection c = db.getConnection();
                 PreparedStatement p = c.prepareStatement(
@@ -390,7 +390,7 @@ public class ApprovalLogic {
                 return list;
             }
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010065", e);
+            throw new CodedException.Failure(ErrorCode.APP_065, e);
         }
     }
 

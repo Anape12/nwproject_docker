@@ -26,7 +26,7 @@ public class AiCharacterLogic {
                 result.add(map(r));
             return result;
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010042", e);
+            throw new CodedException.Failure(ErrorCode.APP_042, e);
         }
     }
 
@@ -40,7 +40,7 @@ public class AiCharacterLogic {
                 return r.next() ? map(r) : null;
             }
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010042", e);
+            throw new CodedException.Failure(ErrorCode.APP_042, e);
         }
     }
 
@@ -87,7 +87,7 @@ public class AiCharacterLogic {
                 throw e;
             }
         } catch (Exception e) {
-            throw new CodedException.Failure("ERR00010043", e);
+            throw new CodedException.Failure(ErrorCode.APP_043, e);
         }
     }
 
@@ -105,7 +105,7 @@ public class AiCharacterLogic {
                     p.setString(4, v.getActiveFlg());
                     p.setLong(5, v.getCharacterId());
                     if (p.executeUpdate() != 1)
-                        throw new CodedException.Validation("ERR00010044");
+                        throw new CodedException.Validation(ErrorCode.APP_044);
                 }
                 try (PreparedStatement p = c.prepareStatement(
                         "UPDATE users_info u JOIN ai_character a ON a.user_id=u.user_id SET u.first_name=?,u.delete_flg=IF(?='1','0','1') WHERE a.character_id=?")) {
@@ -120,19 +120,19 @@ public class AiCharacterLogic {
                 throw e;
             }
         } catch (Exception e) {
-            throw new CodedException.Failure("ERR00010045", e);
+            throw new CodedException.Failure(ErrorCode.APP_045, e);
         }
     }
 
     private void validate(AiCharacterEntity v) {
         if (v.getCharacterName() == null || v.getCharacterName().isBlank())
-            throw new CodedException.Validation("ERR00010046");
+            throw new CodedException.Validation(ErrorCode.APP_046);
         if (v.getPromptKey() == null || !v.getPromptKey().matches("[a-z0-9][a-z0-9_-]{0,63}"))
-            throw new CodedException.Validation("ERR00010047");
+            throw new CodedException.Validation(ErrorCode.APP_047);
         if (!"MENTION".equals(v.getReplyMode()) && !"ALWAYS".equals(v.getReplyMode()))
-            throw new CodedException.Validation("ERR00010048");
+            throw new CodedException.Validation(ErrorCode.APP_048);
         if (v.getUserId() != null && !v.getUserId().matches("[a-zA-Z0-9_-]{3,20}"))
-            throw new CodedException.Validation("ERR00010049");
+            throw new CodedException.Validation(ErrorCode.APP_049);
     }
 
     private String blankToNull(String s) {

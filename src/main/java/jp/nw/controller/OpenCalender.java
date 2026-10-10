@@ -76,7 +76,7 @@ public class OpenCalender extends HttpServlet {
         YearMonth month = parseMonth(request);
 
         if (!Objects.equals(session.getAttribute("scheduleCsrfToken"), request.getParameter("csrfToken"))) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get("ERR00010121"));
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_121));
             return;
         }
 
@@ -85,14 +85,14 @@ public class OpenCalender extends HttpServlet {
             String action = request.getParameter("action");
             if ("delete".equals(action)) {
                 if (!logic.delete(parseRequiredId(request.getParameter("eventId")), loginUser.getUserId())) {
-                    throw new CodedException.Validation("ERR00010012");
+                    throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_012);
                 }
                 setFlash(session, "予定を削除しました。", "success");
             } else {
                 ScheduleEventEntity event = buildEvent(request, loginUser.getUserId());
                 if ("update".equals(action)) {
                     event.setEventId(parseRequiredId(request.getParameter("eventId")));
-                    if (!logic.update(event)) throw new CodedException.Validation("ERR00010013");
+                    if (!logic.update(event)) throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_013);
                     setFlash(session, "予定を更新しました。", "success");
                 } else {
                     int count=createRecurring(logic,event,request.getParameterValues("participantIds"));
@@ -111,9 +111,9 @@ public class OpenCalender extends HttpServlet {
         boolean allDay = "true".equals(request.getParameter("allDay"));
         LocalDate startDate = LocalDate.parse(request.getParameter("startDate"));
         LocalDate endDate = LocalDate.parse(request.getParameter("endDate"));
-        if (title.isBlank() || title.length() > 100) throw new CodedException.Validation("ERR00010014");
-        if (description.length() > 1000) throw new CodedException.Validation("ERR00010015");
-        if (endDate.isBefore(startDate)) throw new CodedException.Validation("ERR00010016");
+        if (title.isBlank() || title.length() > 100) throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_014);
+        if (description.length() > 1000) throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_015);
+        if (endDate.isBefore(startDate)) throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_016);
 
         LocalDateTime startAt;
         LocalDateTime endAt;
@@ -123,11 +123,11 @@ public class OpenCalender extends HttpServlet {
         } else {
             startAt = LocalDateTime.of(startDate, LocalTime.parse(request.getParameter("startTime")));
             endAt = LocalDateTime.of(endDate, LocalTime.parse(request.getParameter("endTime")));
-            if (!endAt.isAfter(startAt)) throw new CodedException.Validation("ERR00010017");
+            if (!endAt.isAfter(startAt)) throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_017);
         }
         String color = request.getParameter("color");
         if (!COLORS.contains(color)) color = "#1a73e8";
-        String visibility="SHARED".equals(request.getParameter("visibility"))?"SHARED":"PRIVATE";String recurrence=Set.of("DAILY","WEEKLY","MONTHLY").contains(request.getParameter("recurrence"))?request.getParameter("recurrence"):null;LocalDate until=recurrence==null?null:parseDate(request.getParameter("recurrenceUntil"),startDate);if(until!=null&&until.isBefore(startDate))throw new CodedException.Validation("ERR00010018");
+        String visibility="SHARED".equals(request.getParameter("visibility"))?"SHARED":"PRIVATE";String recurrence=Set.of("DAILY","WEEKLY","MONTHLY").contains(request.getParameter("recurrence"))?request.getParameter("recurrence"):null;LocalDate until=recurrence==null?null:parseDate(request.getParameter("recurrenceUntil"),startDate);if(until!=null&&until.isBefore(startDate))throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_018);
         return ScheduleEventEntity.builder().userId(userId).title(title).description(description)
                 .startAt(startAt).endAt(endAt).allDay(allDay).color(color).visibility(visibility).recurrenceRule(recurrence).recurrenceUntil(until).build();
     }
@@ -162,7 +162,7 @@ public class OpenCalender extends HttpServlet {
     }
 
     private long parseRequiredId(String value) {
-        try { return Long.parseLong(value); } catch (NumberFormatException e) { throw new CodedException.Validation("ERR00010019"); }
+        try { return Long.parseLong(value); } catch (NumberFormatException e) { throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_019); }
     }
 
     private YearMonth parseMonth(HttpServletRequest request) {

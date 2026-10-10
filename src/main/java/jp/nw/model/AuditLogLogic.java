@@ -138,7 +138,7 @@ public final class AuditLogLogic {
                 return result;
             }
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010081", e);
+            throw new CodedException.Failure(ErrorCode.APP_081, e);
         }
     }
 

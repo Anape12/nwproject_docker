@@ -63,7 +63,7 @@ public class DairyWrite extends HttpServlet {
         HttpSession session = request.getSession(false);
         UserEntity user = (UserEntity) session.getAttribute("loginUser");
         if (!Objects.equals(session.getAttribute("reportCsrfToken"), request.getParameter("csrfToken"))) {
-            response.sendError(403, jp.nw.model.ErrorMessageLogic.get("ERR00010121"));
+            response.sendError(403, jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_121));
             return;
         }
         WorkReportLogic logic = new WorkReportLogic();
@@ -74,14 +74,14 @@ public class DairyWrite extends HttpServlet {
                 flash(session, "報告書を承認申請しました。", "success");
             } else if ("delete".equals(action)) {
                 if (!logic.delete(id(request), user.getUserId()))
-                    throw new CodedException.Validation("ERR00010007");
+                    throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_007);
                 flash(session, "下書きを削除しました。", "success");
             } else {
                 WorkReportEntity report = build(request, user.getUserId());
                 if ("update".equals(action)) {
                     report.setReportId(id(request));
                     if (!logic.update(report))
-                        throw new CodedException.Validation("ERR00010008");
+                        throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_008);
                     flash(session, "下書きを更新しました。", "success");
                 } else {
                     logic.create(report);
@@ -99,9 +99,9 @@ public class DairyWrite extends HttpServlet {
         String body = trim(request.getParameter("body"));
         LocalDate date = LocalDate.parse(request.getParameter("reportDate"));
         if (title.isBlank() || title.length() > 150)
-            throw new CodedException.Validation("ERR00010009");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_009);
         if (body.isBlank() || body.length() > 10000)
-            throw new CodedException.Validation("ERR00010010");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_010);
         return WorkReportEntity.builder().authorId(userId).reportDate(date).title(title).body(body).build();
     }
 
@@ -109,7 +109,7 @@ public class DairyWrite extends HttpServlet {
         try {
             return Long.parseLong(request.getParameter("reportId"));
         } catch (Exception e) {
-            throw new CodedException.Validation("ERR00010011");
+            throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_011);
         }
     }
 

@@ -85,13 +85,13 @@ class AuthenticationLogicTest {
 
     @Test
     void authenticationOutcomesMapToStableErrorCodes() {
-        assertEquals("ERR00000001", Outcome.NO_USER.errorCode);
+        assertEquals(ErrorCode.AUTH_001, Outcome.NO_USER.errorCode);
         assertEquals(Outcome.NO_USER.errorCode, Outcome.BAD_PASSWORD.errorCode);
-        assertEquals("ERR00000002", Outcome.DISABLED.errorCode);
-        assertEquals("ERR00000003", Outcome.AI_ACCOUNT.errorCode);
-        assertEquals("ERR00000004", Outcome.ALREADY_LOCKED.errorCode);
-        assertEquals("ERR00000005", Outcome.NOW_LOCKED.errorCode);
-        assertEquals("ERR00000006", Outcome.EXPIRED.errorCode);
+        assertEquals(ErrorCode.AUTH_002, Outcome.DISABLED.errorCode);
+        assertEquals(ErrorCode.AUTH_003, Outcome.AI_ACCOUNT.errorCode);
+        assertEquals(ErrorCode.AUTH_004, Outcome.ALREADY_LOCKED.errorCode);
+        assertEquals(ErrorCode.AUTH_005, Outcome.NOW_LOCKED.errorCode);
+        assertEquals(ErrorCode.AUTH_006, Outcome.EXPIRED.errorCode);
         assertNull(Outcome.SUCCESS.errorCode);
     }
 

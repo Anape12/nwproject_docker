@@ -1,7 +1,5 @@
 package jp.nw.controller;
 
-import jp.nw.model.CodedException;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -16,9 +14,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import jp.nw.entity.UserEntity;
 import jp.nw.domain.user.PermissionAction;
+import jp.nw.entity.UserEntity;
 import jp.nw.model.AuditLogLogic;
+import jp.nw.model.CodedException;
 import jp.nw.parts.DBBase;
 import jp.nw.util.PermissionCheckUtil;
 
@@ -53,7 +52,7 @@ public class AttendanceActionController extends HttpServlet {
                         "UPDATE attendance_record a SET clock_out=CURTIME(),overtime_minutes=GREATEST(TIMESTAMPDIFF(MINUTE,clock_in,CURTIME())-break_minutes-480,0) WHERE user_id=? AND work_date=CURDATE() AND approval_status IN ('DRAFT','REJECTED') AND NOT EXISTS(SELECT 1 FROM attendance_month_close m WHERE m.user_id=a.user_id AND m.target_month=DATE_FORMAT(a.work_date,'%Y-%m-01'))")) {
                     p.setString(1, u.getUserId());
                     if (p.executeUpdate() == 0)
-                        throw new CodedException.Validation("ERR00010002");
+                        throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_002);
                     AuditLogLogic.record(req, "ATTENDANCE", "CLOCK_OUT", "USER", u.getUserId(), true, null);
                 }
             } else if ("close".equals(action) || "reopen".equals(action)) {

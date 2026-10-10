@@ -34,8 +34,7 @@ import jp.nw.model.AttachmentVirusScanner;
 import jp.nw.parts.DBBase;
 
 @WebServlet("/Attachment")
-@MultipartConfig(maxFileSize = AttachmentController.MAX_FILE_SIZE,
-        maxRequestSize = AttachmentController.MAX_REQUEST_SIZE)
+@MultipartConfig(maxFileSize = AttachmentController.MAX_FILE_SIZE, maxRequestSize = AttachmentController.MAX_REQUEST_SIZE)
 public class AttachmentController extends HttpServlet {
     static final long MAX_FILE_SIZE = 10_485_760L;
     static final long MAX_REQUEST_SIZE = 11_534_336L;
@@ -50,10 +49,12 @@ public class AttachmentController extends HttpServlet {
         request.setCharacterEncoding(StandardCharsets.UTF_8.name());
         HttpSession session = request.getSession(false);
         UserEntity user = authenticatedUser(session, response);
-        if (user == null) return;
+        if (user == null)
+            return;
 
         if (!Objects.equals(session.getAttribute("attachmentCsrfToken"), request.getParameter("csrfToken"))) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get("ERR00010121"));
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                    jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_121));
             return;
         }
 
@@ -68,7 +69,8 @@ public class AttachmentController extends HttpServlet {
         }
 
         if (!accessPolicy.canWrite(user, ownerType, ownerId)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get("ERR00010122"));
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                    jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_122));
             return;
         }
 
@@ -77,11 +79,12 @@ public class AttachmentController extends HttpServlet {
             part = request.getPart("file");
         } catch (IllegalStateException e) {
             response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE,
-                    jp.nw.model.ErrorMessageLogic.get("ERR00010123"));
+                    jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_123));
             return;
         }
         if (part == null || part.getSize() <= 0) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, jp.nw.model.ErrorMessageLogic.get("ERR00010124"));
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_124));
             return;
         }
 
@@ -97,7 +100,7 @@ public class AttachmentController extends HttpServlet {
                     part.getSubmittedFileName(), part.getContentType(), part.getSize(), temporary);
             AttachmentVirusScanner.ScanResult scanResult = virusScanner.scan(temporary, file.originalName());
             if (!scanResult.clean()) {
-                response.sendError(422, jp.nw.model.ErrorMessageLogic.get("ERR00010125"));
+                response.sendError(422, jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_125));
                 return;
             }
 
@@ -109,7 +112,8 @@ public class AttachmentController extends HttpServlet {
         } catch (IllegalArgumentException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, jp.nw.model.ErrorMessageLogic.forDisplay(e));
         } catch (SQLException e) {
-            if (target != null) Files.deleteIfExists(target);
+            if (target != null)
+                Files.deleteIfExists(target);
             throw new ServletException("添付ファイル情報の保存に失敗しました。", e);
         } finally {
             Files.deleteIfExists(temporary);
@@ -119,21 +123,25 @@ public class AttachmentController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserEntity user = authenticatedUser(request.getSession(false), response);
-        if (user == null) return;
+        if (user == null)
+            return;
 
         long attachmentId;
         try {
             attachmentId = Long.parseLong(request.getParameter("id"));
-            if (attachmentId <= 0) throw new NumberFormatException();
+            if (attachmentId <= 0)
+                throw new NumberFormatException();
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, jp.nw.model.ErrorMessageLogic.get("ERR00010126"));
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    jp.nw.model.ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_126));
             return;
         }
 
         DBBase db = new DBBase();
         String sql = "SELECT owner_type,owner_id,original_name,stored_name,content_type,file_size "
                 + "FROM attachment WHERE attachment_id=?";
-        try (Connection connection = db.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = db.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, attachmentId);
             try (ResultSet result = statement.executeQuery()) {
                 if (!result.next()) {
@@ -180,7 +188,8 @@ public class AttachmentController extends HttpServlet {
         String sql = "INSERT INTO attachment(owner_type,owner_id,uploaded_by_id,original_name,stored_name,content_type,file_size) "
                 + "VALUES(?,?,?,?,?,?,?)";
         DBBase db = new DBBase();
-        try (Connection connection = db.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = db.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, ownerType.name());
             statement.setString(2, ownerId);
             statement.setString(3, userId);
@@ -207,7 +216,8 @@ public class AttachmentController extends HttpServlet {
                 : Path.of(configured);
         Files.createDirectories(root);
         Path realRoot = root.toRealPath();
-        if (!Files.isDirectory(realRoot)) throw new IOException("添付ファイル保存先がディレクトリではありません。");
+        if (!Files.isDirectory(realRoot))
+            throw new IOException("添付ファイル保存先がディレクトリではありません。");
         return realRoot;
     }
 
@@ -216,7 +226,8 @@ public class AttachmentController extends HttpServlet {
             throw new IOException("保存ファイル名が不正です。");
         }
         Path file = root.resolve(storedName).normalize();
-        if (!file.getParent().equals(root)) throw new IOException("保存先が不正です。");
+        if (!file.getParent().equals(root))
+            throw new IOException("保存先が不正です。");
         return file;
     }
 

@@ -39,13 +39,13 @@ public class ChatRoomCreateLogic {
             }
             return users;
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010082", e);
+            throw new CodedException.Failure(ErrorCode.APP_082, e);
         }
     }
 
     public CreatedRoom createOrGetDirectRoom(String loginUserId, String targetUserId) {
         if (targetUserId == null || targetUserId.isBlank() || loginUserId.equals(targetUserId)) {
-            throw new CodedException.Validation("ERR00010083");
+            throw new CodedException.Validation(ErrorCode.APP_083);
         }
 
         DBBase dbBase = new DBBase();
@@ -72,7 +72,7 @@ public class ChatRoomCreateLogic {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new CodedException.Failure("ERR00010084", e);
+            throw new CodedException.Failure(ErrorCode.APP_084, e);
         }
     }
 
@@ -95,7 +95,7 @@ public class ChatRoomCreateLogic {
             }
         }
         if (found != 2 || displayName == null) {
-            throw new CodedException.Validation("ERR00010085");
+            throw new CodedException.Validation(ErrorCode.APP_085);
         }
         return displayName;
     }

@@ -36,7 +36,7 @@ public final class ErrorMessageLogic {
         return errorCode != null && CODE_FORMAT.matcher(errorCode).matches();
     }
 
-    public static String get(String errorCode) {
+    private static String get(String errorCode) {
         try (Connection connection = new DBBase().getConnection()) {
             return find(connection, errorCode);
         } catch (SQLException e) {
@@ -44,17 +44,25 @@ public final class ErrorMessageLogic {
         }
     }
 
+    public static String get(ErrorCode errorCode) {
+        return get(errorCode.code());
+    }
+
+    public static String find(Connection connection, ErrorCode errorCode) throws SQLException {
+        return find(connection, errorCode.code());
+    }
+
     /** Never show an arbitrary exception message (including SQL details) to a user. */
     public static String forDisplay(Throwable error) {
         return get(errorCode(error));
     }
 
-    static String errorCode(Throwable error) {
+    static ErrorCode errorCode(Throwable error) {
         Throwable current = error;
         while (current != null) {
             if (current instanceof CodedException.Coded coded) return coded.errorCode();
             current = current.getCause();
         }
-        return "ERR00010000";
+        return ErrorCode.APP_000;
     }
 }

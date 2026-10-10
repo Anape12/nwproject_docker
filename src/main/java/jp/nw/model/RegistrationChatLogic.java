@@ -14,7 +14,7 @@ import jp.nw.parts.DBBase;
 public class RegistrationChatLogic {
     public long register(UserEntity user, String roomId, String comment) {
         if (comment == null || comment.isBlank() || comment.length() > 500)
-            throw new CodedException.Validation("ERR00010087");
+            throw new CodedException.Validation(ErrorCode.APP_087);
         DBBase db = new DBBase();
         try (Connection c = db.getConnection()) {
             c.setAutoCommit(false);
@@ -29,7 +29,7 @@ public class RegistrationChatLogic {
                     p.setString(4, roomId);
                     p.setString(5, user.getUserId());
                     if (p.executeUpdate() != 1)
-                        throw new CodedException.Validation("ERR00010088");
+                        throw new CodedException.Validation(ErrorCode.APP_088);
                     try (ResultSet r = p.getGeneratedKeys()) {
                         if (!r.next())
                             throw new SQLException("Message key not found");
@@ -56,7 +56,7 @@ public class RegistrationChatLogic {
                 throw e;
             }
         } catch (Exception e) {
-            throw new CodedException.Failure("ERR00010089", e);
+            throw new CodedException.Failure(ErrorCode.APP_089, e);
         }
     }
 }

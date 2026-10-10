@@ -39,16 +39,16 @@ public class UserSecurityLogic {
                         .forcePasswordChange(r.getBoolean("force_password_change")).build());
             return list;
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010101", e);
+            throw new CodedException.Failure(ErrorCode.APP_101, e);
         }
     }
 
     public void updateProfile(String actor, String target, String first, String last, String permission, String ip,
             String agent) {
         if (first.isBlank() || last.isBlank())
-            throw new CodedException.Validation("ERR00010102");
+            throw new CodedException.Validation(ErrorCode.APP_102);
         if (PermissionStatus.fromValue(permission).isEmpty())
-            throw new CodedException.Validation("ERR00010103");
+            throw new CodedException.Validation(ErrorCode.APP_103);
         DBBase db = new DBBase();
         try (Connection c = db.getConnection()) {
             c.setAutoCommit(false);
@@ -59,7 +59,7 @@ public class UserSecurityLogic {
                     p.setString(1, target);
                     try (ResultSet r = p.executeQuery()) {
                         if (!r.next() || "AI".equalsIgnoreCase(r.getString("account_type")))
-                            throw new CodedException.Validation("ERR00010104");
+                            throw new CodedException.Validation(ErrorCode.APP_104);
                         oldFirst = r.getString(1);
                         oldLast = r.getString(2);
                         oldPermission = r.getString(3);
@@ -67,7 +67,7 @@ public class UserSecurityLogic {
                 }
                 authorize(c, actor, oldPermission, permission);
                 if (actor.equals(target) && !oldPermission.equals(permission))
-                    throw new CodedException.Validation("ERR00010105");
+                    throw new CodedException.Validation(ErrorCode.APP_105);
                 try (PreparedStatement p = c.prepareStatement(
                         "UPDATE users_info SET first_name=?,last_name=?,current_login_token=CASE WHEN permission<>? THEN NULL ELSE current_login_token END,permission=? WHERE user_id=?")) {
                     p.setString(1, first);
@@ -91,13 +91,13 @@ public class UserSecurityLogic {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new CodedException.Failure("ERR00010106", e);
+            throw new CodedException.Failure(ErrorCode.APP_106, e);
         }
     }
 
     public void setDisabled(String actor, String target, boolean disabled, String ip, String agent) {
         if (actor.equals(target) && disabled)
-            throw new CodedException.Validation("ERR00010107");
+            throw new CodedException.Validation(ErrorCode.APP_107);
         execute(actor, target, "ACCOUNT_" + (disabled ? "DISABLED" : "ENABLED"), ip, agent, c -> {
             try (PreparedStatement p = c.prepareStatement(
                     "UPDATE users_info SET account_disabled=?,delete_flg=?,current_login_token=NULL WHERE user_id=? AND account_type<>'AI'")) {
@@ -105,7 +105,7 @@ public class UserSecurityLogic {
                 p.setString(2, disabled ? "1" : "0");
                 p.setString(3, target);
                 if (p.executeUpdate() != 1)
-                    throw new CodedException.Validation("ERR00010108");
+                    throw new CodedException.Validation(ErrorCode.APP_108);
             }
         });
     }
@@ -116,7 +116,7 @@ public class UserSecurityLogic {
                     .prepareStatement("UPDATE users_info SET failed_login_count=0,locked_until=NULL WHERE user_id=?")) {
                 p.setString(1, target);
                 if (p.executeUpdate() != 1)
-                    throw new CodedException.Validation("ERR00010109");
+                    throw new CodedException.Validation(ErrorCode.APP_109);
             }
         });
     }
@@ -124,7 +124,7 @@ public class UserSecurityLogic {
     public void resetPassword(String actor, String target, String password, String ip, String agent) {
         if (password == null || password.length() < 8 || password.length() > 72 || !password.matches(".*[A-Za-z].*")
                 || !password.matches(".*[0-9].*"))
-            throw new CodedException.Validation("ERR00010110");
+            throw new CodedException.Validation(ErrorCode.APP_110);
         execute(actor, target, "PASSWORD_RESET", ip, agent, c -> {
             try (PreparedStatement p = c.prepareStatement(
                     "UPDATE users_info SET password=?,password_changed_at=NOW(),password_expiration=?,force_password_change=TRUE,failed_login_count=0,locked_until=NULL,current_login_token=NULL WHERE user_id=? AND account_type<>'AI'")) {
@@ -132,7 +132,7 @@ public class UserSecurityLogic {
                 p.setString(2, LocalDate.now().plusDays(1).format(DateTimeFormatter.BASIC_ISO_DATE));
                 p.setString(3, target);
                 if (p.executeUpdate() != 1)
-                    throw new CodedException.Validation("ERR00010111");
+                    throw new CodedException.Validation(ErrorCode.APP_111);
             }
         });
     }
@@ -148,7 +148,7 @@ public class UserSecurityLogic {
                     p.setString(1, target);
                     try (ResultSet r = p.executeQuery()) {
                         if (!r.next() || "AI".equalsIgnoreCase(r.getString("account_type")))
-                            throw new CodedException.Validation("ERR00010108");
+                            throw new CodedException.Validation(ErrorCode.APP_108);
                         targetPermission = r.getString("permission");
                     }
                 }
@@ -163,7 +163,7 @@ public class UserSecurityLogic {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new CodedException.Failure("ERR00010112", e);
+            throw new CodedException.Failure(ErrorCode.APP_112, e);
         }
     }
 
@@ -174,7 +174,7 @@ public class UserSecurityLogic {
                 "SELECT permission,account_type FROM users_info WHERE user_id=? AND delete_flg='0' AND account_disabled=FALSE")) {
             p.setString(1, actorId);
             try (ResultSet r = p.executeQuery()) {
-                if (!r.next()) throw new CodedException.Validation("ERR00010113");
+                if (!r.next()) throw new CodedException.Validation(ErrorCode.APP_113);
                 actor = UserEntity.builder().permission(r.getString("permission"))
                         .accountType(r.getString("account_type")).build();
             }
@@ -182,7 +182,7 @@ public class UserSecurityLogic {
         if (!PermissionCheckUtil.can(actor, PermissionAction.USER_MANAGE)
                 || !PermissionCheckUtil.canManageRole(actor, targetPermission)
                 || (newPermission != null && !PermissionCheckUtil.canManageRole(actor, newPermission)))
-            throw new CodedException.Validation("ERR00010114");
+            throw new CodedException.Validation(ErrorCode.APP_114);
     }
 
     private java.time.LocalDateTime local(ResultSet r, String c) throws SQLException {

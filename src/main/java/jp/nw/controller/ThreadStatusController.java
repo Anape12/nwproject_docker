@@ -46,7 +46,7 @@ public class ThreadStatusController extends HttpServlet {
                 PermissionCheckUtil.can(user, PermissionAction.THREAD_MODERATE_ANY), status);
         session.setAttribute("threadFlash", updated
                 ? ("CLOSED".equals(status) ? "スレッドを完了しました。" : "スレッドを再開しました。")
-                : ErrorMessageLogic.get("ERR00010135"));
+                : ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_135));
         session.setAttribute("threadFlashType", updated ? "success" : "error");
         response.sendRedirect(request.getContextPath() + "/ThreadDetailController?id=" + threadId);
     }

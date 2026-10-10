@@ -18,7 +18,7 @@ public class UserInsertLogic {
 
     public void insert(UserEntity user, LocalDate passwordExpiration) {
         if (!permissionExists(user.getPermission())) {
-            throw new CodedException.Validation("ERR00010097");
+            throw new CodedException.Validation(ErrorCode.APP_097);
         }
 
         String sql = "INSERT INTO users_info "
@@ -35,9 +35,9 @@ public class UserInsertLogic {
             statement.setString(7, user.getLastName());
             statement.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
-            throw new CodedException.Validation("ERR00010024");
+            throw new CodedException.Validation(ErrorCode.APP_024);
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010098", e);
+            throw new CodedException.Failure(ErrorCode.APP_098, e);
         }
     }
 
@@ -48,7 +48,7 @@ public class UserInsertLogic {
             statement.setString(1, userId);
             try (ResultSet result = statement.executeQuery()) { return result.next(); }
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010099", e);
+            throw new CodedException.Failure(ErrorCode.APP_099, e);
         }
     }
 
@@ -59,7 +59,7 @@ public class UserInsertLogic {
             statement.setString(1, permission);
             try (ResultSet result = statement.executeQuery()) { return result.next(); }
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010100", e);
+            throw new CodedException.Failure(ErrorCode.APP_100, e);
         }
     }
 }

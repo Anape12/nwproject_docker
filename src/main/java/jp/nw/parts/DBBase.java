@@ -126,7 +126,7 @@ public class DBBase {
 				return rs.getLong(1);
 			}
 
-			throw new CodedException.Failure("ERR00010120");
+			throw new CodedException.Failure(jp.nw.model.ErrorCode.APP_120);
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);

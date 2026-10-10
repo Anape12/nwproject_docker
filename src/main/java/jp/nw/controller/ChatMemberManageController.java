@@ -62,9 +62,9 @@ public class ChatMemberManageController extends HttpServlet {
                         "INSERT IGNORE INTO chat_room_member(room_id,user_id) SELECT ?,user_id FROM users_info WHERE user_id=? AND delete_flg='0'")) {
             p.setString(1, room);
             p.setString(2, q.getParameter("userId"));
-            session.setAttribute("chatMemberFlash", p.executeUpdate() == 1 ? "メンバーを招待しました。" : ErrorMessageLogic.get("ERR00010136"));
+            session.setAttribute("chatMemberFlash", p.executeUpdate() == 1 ? "メンバーを招待しました。" : ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_136));
         } catch (Exception e) {
-            session.setAttribute("chatMemberFlash", ErrorMessageLogic.get("ERR00010137"));
+            session.setAttribute("chatMemberFlash", ErrorMessageLogic.get(jp.nw.model.ErrorCode.APP_137));
         }
         s.sendRedirect(q.getContextPath() + "/ChatMemberManage?roomId="
                 + java.net.URLEncoder.encode(room, java.nio.charset.StandardCharsets.UTF_8));

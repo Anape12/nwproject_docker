@@ -68,7 +68,7 @@ public class UserSecurityAdminController extends HttpServlet {
                     l.resetPassword(u.getUserId(), target, q.getParameter("temporaryPassword"), ip, agent);
                 case "updateProfile" -> l.updateProfile(u.getUserId(), target, trim(q.getParameter("firstName")),
                         trim(q.getParameter("lastName")), q.getParameter("permission"), ip, agent);
-                default -> throw new CodedException.Validation("ERR00010029");
+                default -> throw new CodedException.Validation(jp.nw.model.ErrorCode.APP_029);
             }
             flash(session, "更新しました。", "success");
         } catch (Exception e) {

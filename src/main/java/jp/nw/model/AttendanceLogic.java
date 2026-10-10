@@ -64,7 +64,7 @@ public class AttendanceLogic {
                 p.setString(i, v.getUserId());
             }
             if (p.executeUpdate() != 1)
-                throw new CodedException.Validation("ERR00010076");
+                throw new CodedException.Validation(ErrorCode.APP_076);
             if (v.getCorrectedById() != null && v.getAttendanceId() != 0)
                 history(c, v);
             else
@@ -73,9 +73,9 @@ public class AttendanceLogic {
                                 : String.valueOf(v.getAttendanceId()),
                         true, null, null, v.getCorrectionReason());
         } catch (SQLIntegrityConstraintViolationException e) {
-            throw new CodedException.Validation("ERR00010077");
+            throw new CodedException.Validation(ErrorCode.APP_077);
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010078", e);
+            throw new CodedException.Failure(ErrorCode.APP_078, e);
         }
     }
 
@@ -141,7 +141,7 @@ public class AttendanceLogic {
             p.setObject(3, v.getWorkDate());
             try (ResultSet r = p.executeQuery()) {
                 if (!r.next())
-                    throw new CodedException.Validation("ERR00010079");
+                    throw new CodedException.Validation(ErrorCode.APP_079);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -173,7 +173,7 @@ public class AttendanceLogic {
                 return l;
             }
         } catch (SQLException e) {
-            throw new CodedException.Failure("ERR00010080", e);
+            throw new CodedException.Failure(ErrorCode.APP_080, e);
         }
     }
 
