@@ -12,8 +12,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import jp.nw.entity.UserEntity;
+import jp.nw.domain.user.PermissionAction;
+import jp.nw.domain.user.PermissionStatus;
 import jp.nw.model.AuditLogLogic;
 import jp.nw.model.UserSecurityLogic;
+import jp.nw.util.PermissionCheckUtil;
 
 @WebServlet("/UserSecurityAdmin")
 public class UserSecurityAdminController extends HttpServlet {
@@ -30,6 +33,7 @@ public class UserSecurityAdminController extends HttpServlet {
             session.setAttribute("userSecurityCsrf", token);
         }
         q.setAttribute("csrfToken", token);
+        q.setAttribute("canManageSystemUsers", PermissionCheckUtil.hasRole(u, PermissionStatus.SYSTEM_ADMINISTRATOR));
         q.setAttribute("users", new UserSecurityLogic().findAll());
         q.setAttribute("flash", session.getAttribute("securityFlash"));
         q.setAttribute("flashType", session.getAttribute("securityFlashType"));
@@ -78,7 +82,7 @@ public class UserSecurityAdminController extends HttpServlet {
     }
 
     private boolean admin(UserEntity u) {
-        return u != null && "1".equals(u.getPermission());
+        return PermissionCheckUtil.can(u, PermissionAction.USER_MANAGE);
     }
 
     private String trim(String v) {

@@ -17,6 +17,7 @@ import jp.nw.entity.ChatMessageEntity;
 import jp.nw.entity.UserEntity;
 import jp.nw.model.AttachmentAccessPolicy;
 import jp.nw.model.AttachmentOwnerType;
+import jp.nw.model.ChatRoomPermissionPolicy;
 
 /**
  * Servlet implementation class UserView
@@ -55,7 +56,7 @@ public class ChatChanelRoomController extends HttpServlet {
 		if(displayName!=null&&!displayName.isBlank())session.setAttribute("RoomName",displayName);
 		session.setAttribute("RoomId", roomId);
 		request.setAttribute("attachments",new jp.nw.model.AttachmentLogic().find("CHAT",roomId));
-		request.setAttribute("canManageMembers",canManageMembers(loginUser,roomId));
+		request.setAttribute("canManageMembers", new ChatRoomPermissionPolicy().canManageMembers(loginUser, roomId));
 
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/chat/ChatWindow.jsp");
 
@@ -63,5 +64,4 @@ public class ChatChanelRoomController extends HttpServlet {
 
 	}
 
-	private boolean canManageMembers(UserEntity user,String roomId){jp.nw.parts.DBBase db=new jp.nw.parts.DBBase();try(java.sql.Connection c=db.getConnection();java.sql.PreparedStatement p=c.prepareStatement("SELECT 1 FROM chat_room WHERE room_id=? AND room_type='2' AND (created_by_id=? OR ?='1')")){p.setString(1,roomId);p.setString(2,user.getUserId());p.setString(3,user.getPermission());try(java.sql.ResultSet r=p.executeQuery()){return r.next();}}catch(Exception e){return false;}}
 }

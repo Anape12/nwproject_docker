@@ -64,8 +64,9 @@
                 ><span>残業 <b>${attendanceSummary.overtime}</b>分</span
                 ><c:if test="${monthClosed}"><span class="approval-status APPROVED">月次締め済み</span></c:if>
             </div>
-            <c:if test="${sessionScope.loginUser.permission == '1'}"
+            <c:if test="${canCloseAttendance}"
                 ><form method="post" action="${pageContext.request.contextPath}/AttendanceAction">
+                    <input type="hidden" name="csrfToken" value="${csrfToken}" />
                     <input type="hidden" name="month" value="${displayMonth}" /><button
                         class="edit-link"
                         name="action"

@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.YearMonth;
+import java.util.Objects;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -14,14 +15,27 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.nw.entity.UserEntity;
+import jp.nw.domain.user.PermissionAction;
 import jp.nw.model.AuditLogLogic;
 import jp.nw.parts.DBBase;
+import jp.nw.util.PermissionCheckUtil;
 
 @WebServlet("/AttendanceAction")
 public class AttendanceActionController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
         UserEntity u = (UserEntity) req.getSession().getAttribute("loginUser");
         String action = req.getParameter("action");
+        if (("close".equals(action) || "reopen".equals(action))
+                && !PermissionCheckUtil.can(u, PermissionAction.ATTENDANCE_CLOSE)) {
+            res.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+        String expectedToken = (String) req.getSession().getAttribute("attendanceCsrfToken");
+        if (("close".equals(action) || "reopen".equals(action))
+                && (expectedToken == null || !Objects.equals(expectedToken, req.getParameter("csrfToken")))) {
+            res.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
         DBBase db = new DBBase();
         try (Connection c = db.getConnection()) {
             if ("clockIn".equals(action)) {
@@ -40,7 +54,7 @@ public class AttendanceActionController extends HttpServlet {
                         throw new IllegalArgumentException("先に出勤を打刻するか、締め状態を確認してください。");
                     AuditLogLogic.record(req, "ATTENDANCE", "CLOCK_OUT", "USER", u.getUserId(), true, null);
                 }
-            } else if (("close".equals(action) || "reopen".equals(action)) && "1".equals(u.getPermission())) {
+            } else if ("close".equals(action) || "reopen".equals(action)) {
                 YearMonth month = YearMonth.parse(req.getParameter("month"));
                 if ("close".equals(action)) {
                     try (PreparedStatement p = c.prepareStatement(

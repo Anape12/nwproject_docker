@@ -48,8 +48,7 @@ public class AttachmentAccessPolicy {
     }
 
     private boolean isReviewer(UserEntity user) {
-        return "1".equals(user.getPermission())
-                || new ApprovalLogic().canReview(user.getUserId(), user.getPermission());
+        return new ApprovalLogic().canReview(user);
     }
 
     private boolean validUser(UserEntity user) {

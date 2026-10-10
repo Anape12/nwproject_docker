@@ -9,14 +9,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.nw.entity.UserEntity;
+import jp.nw.domain.user.PermissionAction;
 import jp.nw.model.PortalLogic;
+import jp.nw.util.PermissionCheckUtil;
 
 @WebServlet("/Portal")
 public class PortalController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         UserEntity u = (UserEntity) req.getSession().getAttribute("loginUser");
         PortalLogic l = new PortalLogic();
-        req.setAttribute("dashboard", l.dashboard(u.getUserId(), "1".equals(u.getPermission())));
+        req.setAttribute("dashboard", l.dashboard(u.getUserId(), PermissionCheckUtil.can(u, PermissionAction.ADMIN_DASHBOARD_VIEW)));
         req.setAttribute("query", req.getParameter("q"));
         req.setAttribute("searchResults", l.search(u.getUserId(), req.getParameter("q")));
         req.getRequestDispatcher("/WEB-INF/jsp/portal/dashboard.jsp").forward(req, res);

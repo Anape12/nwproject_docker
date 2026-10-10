@@ -21,6 +21,8 @@ import javax.servlet.http.HttpSession;
 
 import jp.nw.entity.AttendanceEntity;
 import jp.nw.entity.UserEntity;
+import jp.nw.domain.user.PermissionAction;
+import jp.nw.util.PermissionCheckUtil;
 import jp.nw.model.AttendanceDay;
 import jp.nw.model.AttendanceLogic;
 import jp.nw.model.WorkReportLogic;
@@ -56,6 +58,7 @@ public class WorkManagement extends HttpServlet {
             session.setAttribute("attendanceCsrfToken", token);
         }
         request.setAttribute("attendanceDays", days);
+        request.setAttribute("canCloseAttendance", PermissionCheckUtil.can(user, PermissionAction.ATTENDANCE_CLOSE));
         request.setAttribute("attendanceSummary", logic.summary(user.getUserId(), month));
         request.setAttribute("monthClosed", logic.isClosed(user.getUserId(), month));
         request.setAttribute("displayMonth", month);

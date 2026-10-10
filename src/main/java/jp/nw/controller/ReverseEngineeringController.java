@@ -12,9 +12,10 @@ import javax.servlet.http.HttpSession;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jp.nw.domain.user.PermissionStatus;
+import jp.nw.domain.user.PermissionAction;
 import jp.nw.entity.UserEntity;
 import jp.nw.model.ReverseEngineeringLogic;
+import jp.nw.util.PermissionCheckUtil;
 
 @WebServlet("/ReverseEngineering")
 public class ReverseEngineeringController extends HttpServlet {
@@ -27,7 +28,7 @@ public class ReverseEngineeringController extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         UserEntity user = session == null ? null : (UserEntity) session.getAttribute("loginUser");
-        if (user == null || !PermissionStatus.SYSTEM_ADMINISTRATOR.getValue().equals(user.getPermission())) {
+        if (!PermissionCheckUtil.can(user, PermissionAction.DESIGN_REVERSE_VIEW)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }

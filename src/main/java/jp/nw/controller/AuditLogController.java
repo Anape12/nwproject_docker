@@ -10,13 +10,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.nw.entity.UserEntity;
+import jp.nw.domain.user.PermissionAction;
 import jp.nw.model.AuditLogLogic;
+import jp.nw.util.PermissionCheckUtil;
 
 @WebServlet("/AuditLog")
 public class AuditLogController extends HttpServlet {
     protected void doGet(HttpServletRequest q, HttpServletResponse s) throws ServletException, IOException {
         UserEntity u = (UserEntity) q.getSession().getAttribute("loginUser");
-        if (u == null || !"1".equals(u.getPermission())) {
+        if (!PermissionCheckUtil.can(u, PermissionAction.AUDIT_VIEW)) {
             s.sendError(403);
             return;
         }

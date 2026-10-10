@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import jp.nw.entity.UserEntity;
+import jp.nw.model.ChatRoomPermissionPolicy;
 import jp.nw.parts.DBBase;
 
 @WebServlet("/ChatMemberManage")
@@ -26,7 +27,7 @@ public class ChatMemberManageController extends HttpServlet {
     protected void doGet(HttpServletRequest q, HttpServletResponse s) throws ServletException, IOException {
         UserEntity u = user(q);
         String room = q.getParameter("roomId");
-        if (!canManage(u, room)) {
+        if (!new ChatRoomPermissionPolicy().canManageMembers(u, room)) {
             s.sendError(403);
             return;
         }
@@ -46,7 +47,7 @@ public class ChatMemberManageController extends HttpServlet {
         UserEntity u = user(q);
         HttpSession session = q.getSession(false);
         String room = q.getParameter("roomId");
-        if (!canManage(u, room)) {
+        if (!new ChatRoomPermissionPolicy().canManageMembers(u, room)) {
             s.sendError(403);
             return;
         }
@@ -66,24 +67,6 @@ public class ChatMemberManageController extends HttpServlet {
         }
         s.sendRedirect(q.getContextPath() + "/ChatMemberManage?roomId="
                 + java.net.URLEncoder.encode(room, java.nio.charset.StandardCharsets.UTF_8));
-    }
-
-    private boolean canManage(UserEntity u, String room) {
-        if (u == null || room == null)
-            return false;
-        DBBase db = new DBBase();
-        try (Connection c = db.getConnection();
-                PreparedStatement p = c.prepareStatement(
-                        "SELECT 1 FROM chat_room WHERE room_id=? AND room_type='2' AND delete_flg='0' AND (created_by_id=? OR ?='1')")) {
-            p.setString(1, room);
-            p.setString(2, u.getUserId());
-            p.setString(3, u.getPermission());
-            try (ResultSet r = p.executeQuery()) {
-                return r.next();
-            }
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     private List<UserEntity> available(String room) {

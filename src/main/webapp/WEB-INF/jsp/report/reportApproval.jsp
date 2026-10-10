@@ -22,7 +22,7 @@
             <c:if test="${not empty flashMessage}"
                 ><div class="notice ${flashType}"><c:out value="${flashMessage}" /></div
             ></c:if>
-            <c:if test="${sessionScope.loginUser.permission=='1'}"
+            <c:if test="${canConfigureApprovals}"
                 ><div class="batch-approval">
                     <form method="post">
                         <input type="hidden" name="csrfToken" value="${csrfToken}" />

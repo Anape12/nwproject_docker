@@ -12,7 +12,9 @@ import javax.servlet.http.HttpSession;
 
 import jp.nw.entity.AiCharacterEntity;
 import jp.nw.entity.UserEntity;
+import jp.nw.domain.user.PermissionAction;
 import jp.nw.model.AiCharacterLogic;
+import jp.nw.util.PermissionCheckUtil;
 
 @WebServlet("/AiCharacterAdmin")
 public class AiCharacterAdminController extends HttpServlet {
@@ -20,7 +22,7 @@ public class AiCharacterAdminController extends HttpServlet {
 
     protected void doGet(HttpServletRequest q, HttpServletResponse s) throws ServletException, IOException {
         UserEntity u = user(q);
-        if (u == null || !"1".equals(u.getPermission())) {
+        if (!PermissionCheckUtil.can(u, PermissionAction.AI_CHARACTER_MANAGE)) {
             s.sendError(403);
             return;
         }
@@ -47,7 +49,7 @@ public class AiCharacterAdminController extends HttpServlet {
         q.setCharacterEncoding("UTF-8");
         UserEntity u = user(q);
         HttpSession session = q.getSession(false);
-        if (u == null || !"1".equals(u.getPermission())) {
+        if (!PermissionCheckUtil.can(u, PermissionAction.AI_CHARACTER_MANAGE)) {
             s.sendError(403);
             return;
         }

@@ -12,6 +12,8 @@ import javax.servlet.http.HttpSession;
 
 import jp.nw.dao.ThreadDao;
 import jp.nw.entity.UserEntity;
+import jp.nw.domain.user.PermissionAction;
+import jp.nw.util.PermissionCheckUtil;
 
 @WebServlet("/ThreadStatus")
 public class ThreadStatusController extends HttpServlet {
@@ -40,7 +42,7 @@ public class ThreadStatusController extends HttpServlet {
         }
         String status = "reopen".equals(request.getParameter("action")) ? "OPEN" : "CLOSED";
         boolean updated = new ThreadDao().updateStatus(threadId, user.getUserId(),
-                "1".equals(user.getPermission()), status);
+                PermissionCheckUtil.can(user, PermissionAction.THREAD_MODERATE_ANY), status);
         session.setAttribute("threadFlash", updated
                 ? ("CLOSED".equals(status) ? "スレッドを完了しました。" : "スレッドを再開しました。")
                 : "このスレッドを変更する権限がありません。");

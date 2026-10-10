@@ -1,5 +1,8 @@
 package jp.nw.domain.user;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public enum PermissionStatus {
 
     SYSTEM_ADMINISTRATOR("0"),
@@ -14,5 +17,9 @@ public enum PermissionStatus {
 
     public String getValue() {
         return value;
+    }
+
+    public static Optional<PermissionStatus> fromValue(String value) {
+        return Arrays.stream(values()).filter(role -> role.value.equals(value)).findFirst();
     }
 }

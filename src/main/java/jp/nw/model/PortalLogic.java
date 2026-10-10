@@ -81,7 +81,7 @@ public class PortalLogic {
     public void notifyAdmins(Connection con, String category, String title, String message, String link)
             throws SQLException {
         try (PreparedStatement ps = con.prepareStatement(
-                "INSERT INTO notification(user_id,category,title,message,link_url) SELECT user_id,?,?,?,? FROM users_info WHERE permission='1' AND delete_flg='0'")) {
+                "INSERT INTO notification(user_id,category,title,message,link_url) SELECT user_id,?,?,?,? FROM users_info WHERE permission IN ('0','1') AND delete_flg='0'")) {
             ps.setString(1, category);
             ps.setString(2, title);
             ps.setString(3, message);

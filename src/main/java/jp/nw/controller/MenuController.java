@@ -8,8 +8,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import jp.nw.domain.user.PermissionStatus;
+import jp.nw.domain.user.PermissionAction;
 import jp.nw.entity.UserEntity;
+import jp.nw.util.PermissionCheckUtil;
 
 @WebServlet(urlPatterns = { "/MenuSelect", "/BusinessMenu", "/CommunicationMenu" })
 public class MenuController extends HttpServlet {
@@ -29,7 +30,13 @@ public class MenuController extends HttpServlet {
             return;
         }
         UserEntity user = (UserEntity) request.getSession().getAttribute("loginUser");
-        String page = PermissionStatus.ADMINISTRATOR.getValue().equals(user.getPermission())
+        request.setAttribute("canManageUsers", PermissionCheckUtil.can(user, PermissionAction.USER_MANAGE));
+        request.setAttribute("canAudit", PermissionCheckUtil.can(user, PermissionAction.AUDIT_VIEW));
+        request.setAttribute("canManageAi", PermissionCheckUtil.can(user, PermissionAction.AI_CHARACTER_MANAGE));
+        request.setAttribute("canViewDesign", PermissionCheckUtil.can(user, PermissionAction.DESIGN_REVERSE_VIEW));
+        request.setAttribute("canUseExternalTools", PermissionCheckUtil.can(user, PermissionAction.EXTERNAL_TOOLS_VIEW));
+        request.setAttribute("canReviewApprovals", new jp.nw.model.ApprovalLogic().canReview(user));
+        String page = PermissionCheckUtil.can(user, PermissionAction.USER_MANAGE)
                 ? "/WEB-INF/jsp/Menu/perMenu.jsp"
                 : "/WEB-INF/jsp/Menu/genMenu.jsp";
         request.getRequestDispatcher(page).forward(request, response);

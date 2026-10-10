@@ -52,7 +52,7 @@
                             <dd>${u.forcePasswordChange ? '必要' : '不要'}</dd>
                         </dl>
 
-                        <c:if test="${u.accountType != 'AI'}">
+                        <c:if test="${u.accountType != 'AI' and (u.permission != '0' or canManageSystemUsers)}">
                             <form method="post">
                                 <input type="hidden" name="csrfToken" value="${csrfToken}" />
                                 <input type="hidden" name="targetUserId" value="${u.userId}" />
@@ -71,11 +71,22 @@
                                         権限
                                         <select name="permission">
                                             <c:choose>
+                                                <c:when test="${u.permission == '0'}">
+                                                    <option value="0" selected>システム権限者</option>
+                                                    <option value="1">管理者</option>
+                                                    <option value="2">一般ユーザー</option>
+                                                </c:when>
                                                 <c:when test="${u.permission == '1'}">
+                                                    <c:if test="${canManageSystemUsers}"
+                                                        ><option value="0">システム権限者</option></c:if
+                                                    >
                                                     <option value="1" selected>管理者</option>
                                                     <option value="2">一般ユーザー</option>
                                                 </c:when>
                                                 <c:otherwise>
+                                                    <c:if test="${canManageSystemUsers}"
+                                                        ><option value="0">システム権限者</option></c:if
+                                                    >
                                                     <option value="1">管理者</option>
                                                     <option value="2" selected>一般ユーザー</option>
                                                 </c:otherwise>

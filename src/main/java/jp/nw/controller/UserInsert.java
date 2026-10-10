@@ -15,8 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import jp.nw.entity.UserEntity;
+import jp.nw.domain.user.PermissionAction;
 import jp.nw.model.AuditLogLogic;
 import jp.nw.model.UserInsertLogic;
+import jp.nw.util.PermissionCheckUtil;
 import jp.nw.util.PermissionGetUtil;
 
 @WebServlet("/UserInsert")
@@ -41,7 +43,9 @@ public class UserInsert extends HttpServlet {
             session.setAttribute("userInsertCsrfToken", csrfToken);
         }
         request.setAttribute("csrfToken", csrfToken);
-        request.setAttribute("permissionLevels", PermissionGetUtil.getAllPermissionLevels());
+        request.setAttribute("permissionLevels", PermissionGetUtil.getAllPermissionLevels().stream()
+                .filter(level -> PermissionCheckUtil.canManageRole((UserEntity) session.getAttribute("loginUser"),
+                        level.getPermissionId())).toList());
         request.setAttribute("defaultExpiration", LocalDate.now().plusDays(90));
         request.setAttribute("currentDate", LocalDate.now());
         request.setAttribute("successMessage", session.getAttribute("userInsertSuccess"));
@@ -65,6 +69,9 @@ public class UserInsert extends HttpServlet {
 
         try {
             UserEntity user = validateAndBuild(request);
+            UserEntity actor = (UserEntity) session.getAttribute("loginUser");
+            if (!PermissionCheckUtil.canManageRole(actor, user.getPermission()))
+                throw new IllegalArgumentException("この権限のユーザーは登録できません。");
             LocalDate expiration = LocalDate.parse(request.getParameter("passwordExpiration"));
             if (expiration.isBefore(LocalDate.now()))
                 throw new IllegalArgumentException("パスワード有効期限は今日以降にしてください。");
@@ -83,7 +90,9 @@ public class UserInsert extends HttpServlet {
             request.setAttribute("errorMessage", e.getMessage() == null ? "入力内容を確認してください。" : e.getMessage());
             setEnteredValues(request);
             request.setAttribute("csrfToken", session.getAttribute("userInsertCsrfToken"));
-            request.setAttribute("permissionLevels", PermissionGetUtil.getAllPermissionLevels());
+            request.setAttribute("permissionLevels", PermissionGetUtil.getAllPermissionLevels().stream()
+                    .filter(level -> PermissionCheckUtil.canManageRole((UserEntity) session.getAttribute("loginUser"),
+                            level.getPermissionId())).toList());
             request.setAttribute("defaultExpiration", LocalDate.now().plusDays(90));
             request.setAttribute("currentDate", LocalDate.now());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -131,7 +140,7 @@ public class UserInsert extends HttpServlet {
         if (session == null)
             return false;
         UserEntity loginUser = (UserEntity) session.getAttribute("loginUser");
-        return loginUser != null && "1".equals(loginUser.getPermission());
+        return PermissionCheckUtil.can(loginUser, PermissionAction.USER_MANAGE);
     }
 
     private String trim(String value) {

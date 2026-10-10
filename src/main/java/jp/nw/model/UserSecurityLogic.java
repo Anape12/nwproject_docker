@@ -10,11 +10,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import jp.nw.entity.UserEntity;
+import jp.nw.domain.user.PermissionAction;
+import jp.nw.domain.user.PermissionStatus;
 import jp.nw.parts.DBBase;
 import jp.nw.parts.PasswordUtil;
+import jp.nw.util.PermissionCheckUtil;
 
 public class UserSecurityLogic {
     public List<UserEntity> findAll() {
@@ -43,7 +45,7 @@ public class UserSecurityLogic {
             String agent) {
         if (first.isBlank() || last.isBlank())
             throw new IllegalArgumentException("姓と名を入力してください。");
-        if (!Set.of("1", "2").contains(permission))
+        if (PermissionStatus.fromValue(permission).isEmpty())
             throw new IllegalArgumentException("権限が不正です。");
         DBBase db = new DBBase();
         try (Connection c = db.getConnection()) {
@@ -51,24 +53,26 @@ public class UserSecurityLogic {
             try {
                 String oldFirst, oldLast, oldPermission;
                 try (PreparedStatement p = c.prepareStatement(
-                        "SELECT first_name,last_name,permission FROM users_info WHERE user_id=? FOR UPDATE")) {
+                        "SELECT first_name,last_name,permission,account_type FROM users_info WHERE user_id=? FOR UPDATE")) {
                     p.setString(1, target);
                     try (ResultSet r = p.executeQuery()) {
-                        if (!r.next())
+                        if (!r.next() || "AI".equalsIgnoreCase(r.getString("account_type")))
                             throw new IllegalArgumentException("ユーザーが見つかりません。");
                         oldFirst = r.getString(1);
                         oldLast = r.getString(2);
                         oldPermission = r.getString(3);
                     }
                 }
+                authorize(c, actor, oldPermission, permission);
                 if (actor.equals(target) && !oldPermission.equals(permission))
                     throw new IllegalArgumentException("ログイン中の自分自身の権限は変更できません。");
                 try (PreparedStatement p = c.prepareStatement(
-                        "UPDATE users_info SET first_name=?,last_name=?,permission=? WHERE user_id=?")) {
+                        "UPDATE users_info SET first_name=?,last_name=?,current_login_token=CASE WHEN permission<>? THEN NULL ELSE current_login_token END,permission=? WHERE user_id=?")) {
                     p.setString(1, first);
                     p.setString(2, last);
                     p.setString(3, permission);
-                    p.setString(4, target);
+                    p.setString(4, permission);
+                    p.setString(5, target);
                     p.executeUpdate();
                 }
                 if (!Objects.equals(oldFirst, first) || !Objects.equals(oldLast, last))
@@ -136,6 +140,17 @@ public class UserSecurityLogic {
         try (Connection c = db.getConnection()) {
             c.setAutoCommit(false);
             try {
+                String targetPermission;
+                try (PreparedStatement p = c.prepareStatement(
+                        "SELECT permission,account_type FROM users_info WHERE user_id=? FOR UPDATE")) {
+                    p.setString(1, target);
+                    try (ResultSet r = p.executeQuery()) {
+                        if (!r.next() || "AI".equalsIgnoreCase(r.getString("account_type")))
+                            throw new IllegalArgumentException("対象アカウントを変更できません。");
+                        targetPermission = r.getString("permission");
+                    }
+                }
+                authorize(c, actor, targetPermission, null);
                 work.run(c);
                 AuditLogLogic.record(c, actor, "SECURITY", action, "USER", target, true, ip, agent, null);
                 c.commit();
@@ -148,6 +163,24 @@ public class UserSecurityLogic {
         } catch (Exception e) {
             throw new RuntimeException("セキュリティ設定の更新に失敗しました。", e);
         }
+    }
+
+    private void authorize(Connection c, String actorId, String targetPermission, String newPermission)
+            throws SQLException {
+        UserEntity actor;
+        try (PreparedStatement p = c.prepareStatement(
+                "SELECT permission,account_type FROM users_info WHERE user_id=? AND delete_flg='0' AND account_disabled=FALSE")) {
+            p.setString(1, actorId);
+            try (ResultSet r = p.executeQuery()) {
+                if (!r.next()) throw new IllegalArgumentException("管理操作の権限がありません。");
+                actor = UserEntity.builder().permission(r.getString("permission"))
+                        .accountType(r.getString("account_type")).build();
+            }
+        }
+        if (!PermissionCheckUtil.can(actor, PermissionAction.USER_MANAGE)
+                || !PermissionCheckUtil.canManageRole(actor, targetPermission)
+                || (newPermission != null && !PermissionCheckUtil.canManageRole(actor, newPermission)))
+            throw new IllegalArgumentException("このアカウントまたは権限を変更できません。");
     }
 
     private java.time.LocalDateTime local(ResultSet r, String c) throws SQLException {

@@ -16,7 +16,9 @@ import javax.servlet.http.HttpSession;
 
 import jp.nw.entity.ApprovalRequestEntity;
 import jp.nw.entity.UserEntity;
+import jp.nw.domain.user.PermissionAction;
 import jp.nw.model.ApprovalLogic;
+import jp.nw.util.PermissionCheckUtil;
 
 @WebServlet("/ReportApproval")
 public class ReportApprovalController extends HttpServlet {
@@ -34,6 +36,7 @@ public class ReportApprovalController extends HttpServlet {
             session.setAttribute("approvalCsrfToken", token);
         }
         q.setAttribute("applications", l.findAll());
+        q.setAttribute("canConfigureApprovals", PermissionCheckUtil.can(u, PermissionAction.APPROVAL_CONFIGURE));
         ApprovalRequestEntity selected = selected(q.getParameter("id"), l);
         q.setAttribute("selected", selected);
         if (selected != null)
@@ -61,11 +64,13 @@ public class ReportApprovalController extends HttpServlet {
         try {
             ApprovalLogic l = new ApprovalLogic();
             String action = q.getParameter("action");
-            if ("route".equals(action) && "1".equals(u.getPermission()))
+            if ("route".equals(action) && PermissionCheckUtil.can(u, PermissionAction.APPROVAL_CONFIGURE))
                 l.saveRoute(q.getParameter("applicationType"), Integer.parseInt(q.getParameter("requiredSteps")));
-            else if ("delegate".equals(action) && "1".equals(u.getPermission()))
+            else if ("delegate".equals(action) && PermissionCheckUtil.can(u, PermissionAction.APPROVAL_CONFIGURE))
                 l.addDelegate(u.getUserId(), q.getParameter("delegateUserId"),
                         LocalDate.parse(q.getParameter("validFrom")), LocalDate.parse(q.getParameter("validTo")));
+            else if ("route".equals(action) || "delegate".equals(action))
+                throw new SecurityException("設定変更の権限がありません。");
             else {
                 String decision = q.getParameter("decision"), comment = trim(q.getParameter("comment"));
                 if ("REJECTED".equals(decision) && comment.isBlank())
@@ -75,9 +80,9 @@ public class ReportApprovalController extends HttpServlet {
                     List<Long> ids = new ArrayList<>();
                     for (String v : values)
                         ids.add(Long.valueOf(v));
-                    l.reviewBatch(ids, u.getUserId(), decision, comment);
+                    l.reviewBatch(ids, u, decision, comment);
                 } else
-                    l.review(Long.parseLong(q.getParameter("approvalId")), u.getUserId(), decision, comment);
+                    l.review(Long.parseLong(q.getParameter("approvalId")), u, decision, comment);
             }
             flash(session, "処理が完了しました。", "success");
         } catch (Exception e) {
@@ -95,7 +100,7 @@ public class ReportApprovalController extends HttpServlet {
     }
 
     private boolean reviewer(UserEntity u) {
-        return u != null && new ApprovalLogic().canReview(u.getUserId(), u.getPermission());
+        return new ApprovalLogic().canReview(u);
     }
 
     private String trim(String v) {

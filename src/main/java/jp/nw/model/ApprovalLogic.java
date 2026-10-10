@@ -122,10 +122,11 @@ public class ApprovalLogic {
         }
     }
 
-    public int reviewBatch(List<Long> ids, String reviewerId, String decision, String comment) {
+    public int reviewBatch(List<Long> ids, jp.nw.entity.UserEntity reviewer, String decision, String comment) {
+        if (!canReview(reviewer)) throw new SecurityException("承認権限がありません。");
         int count = 0;
         for (Long id : ids) {
-            review(id, reviewerId, decision, comment);
+            review(id, reviewer, decision, comment);
             count++;
         }
         return count;
@@ -211,7 +212,9 @@ public class ApprovalLogic {
         }
     }
 
-    public void review(long approvalId, String reviewerId, String decision, String comment) {
+    public void review(long approvalId, jp.nw.entity.UserEntity reviewer, String decision, String comment) {
+        if (!canReview(reviewer)) throw new SecurityException("承認権限がありません。");
+        String reviewerId = reviewer.getUserId();
         if (!"APPROVED".equals(decision) && !"REJECTED".equals(decision))
             throw new IllegalArgumentException("承認結果が不正です。");
         DBBase db = new DBBase();
@@ -355,14 +358,16 @@ public class ApprovalLogic {
         }
     }
 
-    public boolean canReview(String user, String permission) {
-        if ("1".equals(permission))
-            return true;
+    public boolean canReview(jp.nw.entity.UserEntity user) {
+        if (user == null || user.getUserId() == null || user.getUserId().isBlank()
+                || "AI".equalsIgnoreCase(user.getAccountType())
+                || jp.nw.domain.user.PermissionStatus.fromValue(user.getPermission()).isEmpty()) return false;
+        if (jp.nw.util.PermissionCheckUtil.can(user, jp.nw.domain.user.PermissionAction.APPROVAL_REVIEW)) return true;
         DBBase db = new DBBase();
         try (Connection c = db.getConnection();
                 PreparedStatement p = c.prepareStatement(
                         "SELECT 1 FROM approval_delegate WHERE delegate_user_id=? AND CURDATE() BETWEEN valid_from AND valid_to LIMIT 1")) {
-            p.setString(1, user);
+            p.setString(1, user.getUserId());
             try (ResultSet r = p.executeQuery()) {
                 return r.next();
             }

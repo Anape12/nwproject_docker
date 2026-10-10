@@ -16,6 +16,8 @@ import jp.nw.dao.ThreadDao;
 import jp.nw.dto.ThreadCommentDto;
 import jp.nw.dto.ThreadDto;
 import jp.nw.entity.UserEntity;
+import jp.nw.domain.user.PermissionAction;
+import jp.nw.util.PermissionCheckUtil;
 import jp.nw.model.AiResponseJobLogic;
 
 @WebServlet("/ThreadDetailController")
@@ -57,7 +59,7 @@ public class ThreadDetailController extends HttpServlet {
                                 loginUser.getUserId());
                 request.setAttribute("canManageThread",
                                 loginUser.getUserId().equals(thread.getAuthorId())
-                                                || "1".equals(loginUser.getPermission()));
+                                                || PermissionCheckUtil.can(loginUser, PermissionAction.THREAD_MODERATE_ANY));
                 if (session.getAttribute("threadCsrfToken") == null) {
                         session.setAttribute("threadCsrfToken", UUID.randomUUID().toString());
                 }
