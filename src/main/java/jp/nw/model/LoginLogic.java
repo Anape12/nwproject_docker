@@ -23,7 +23,7 @@ public class LoginLogic {
 
 			// SQL SELECT共通部品実行
 			dbCon = new DBBase();
-			userList = (List<UserEntity>)dbCon.execute(query, UserEntity.class);
+			userList = dbCon.selectEntities(query, UserEntity.class);
 
 			if(userList.isEmpty()) {
 				return userList;

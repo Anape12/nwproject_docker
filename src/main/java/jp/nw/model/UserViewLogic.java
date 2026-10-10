@@ -78,21 +78,12 @@ public class UserViewLogic extends BaseModel {
 					.querySub(querySub)
 					.build();
 
-			List<Map<String, Object>> result = (List<Map<String, Object>>) dbCon.execute(query);
-
-			for (Map<String, Object> rowInfo : result) {
-				int id = (int) rowInfo.get("id");
-				String name = (String) rowInfo.get("user_id");
-				String pass = (String) rowInfo.get("password");
-				String permission = (String) rowInfo.get("permission");
-				UserEntity userEntity = UserEntity.builder()
-						.id(id)
-						.userId(name)
-						.password(pass)
-						.permission(permission)
-						.build();
-				userList.add(userEntity);
-			}
+			userList.addAll(dbCon.selectList(query, rs -> UserEntity.builder()
+					.id(rs.getInt("id"))
+					.userId(rs.getString("user_id"))
+					.password(rs.getString("password"))
+					.permission(rs.getString("permission"))
+					.build()));
 
 		} catch (SQLException e) {
 			e.printStackTrace();

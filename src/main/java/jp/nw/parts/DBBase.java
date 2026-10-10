@@ -7,8 +7,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class DBBase {
 
@@ -50,21 +52,41 @@ public class DBBase {
 		return this.con;
 	}
 
-	public Object execute(Query query) {
-
-		try {
-			SqlBuilder builder = new SqlBuilder();
-			String sql = builder.build(query);
-
-			try (PreparedStatement ps = con.prepareStatement(sql)) {
-				bindParameter(ps, query);
-				if (query.getSqlType() == SqlType.SELECT) {
-					try (ResultSet rs = ps.executeQuery()) {
-						return getResultList(rs);
-					}
+	public <T> List<T> selectList(Query query, RowMapper<T> mapper) {
+		requireSelect(query);
+		try (PreparedStatement ps = con.prepareStatement(new SqlBuilder().build(query))) {
+			bindParameter(ps, query);
+			try (ResultSet rs = ps.executeQuery()) {
+				List<T> rows = new ArrayList<>();
+				while (rs.next()) {
+					rows.add(mapper.map(rs));
 				}
-				return ps.executeUpdate();
+				return rows;
 			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public <T> Optional<T> selectOne(Query query, RowMapper<T> mapper) {
+		requireSelect(query);
+		try (PreparedStatement ps = con.prepareStatement(new SqlBuilder().build(query))) {
+			bindParameter(ps, query);
+			try (ResultSet rs = ps.executeQuery()) {
+				return rs.next() ? Optional.ofNullable(mapper.map(rs)) : Optional.empty();
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public int executeUpdate(Query query) {
+		if (query.getSqlType() == SqlType.SELECT) {
+			throw new IllegalArgumentException("Use selectList or selectOne for SELECT queries");
+		}
+		try (PreparedStatement ps = con.prepareStatement(new SqlBuilder().build(query))) {
+			bindParameter(ps, query);
+			return ps.executeUpdate();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -78,54 +100,39 @@ public class DBBase {
 		return value;
 	}
 
-	public <T> List<T> execute(Query query, Class<T> clazz) {
-
-		try {
-			SqlBuilder builder = new SqlBuilder();
-			String sql = builder.build(query);
-
-			PreparedStatement ps = con.prepareStatement(sql);
-
+	public <T> List<T> selectEntities(Query query, Class<T> clazz) {
+		requireSelect(query);
+		try (PreparedStatement ps = con.prepareStatement(new SqlBuilder().build(query))) {
 			bindParameter(ps, query);
-
-			ResultSet rs = ps.executeQuery();
-
-			ResultMapper resultMapper = new ResultMapper();
-
-			List<Map<String, Object>> rows =
-					resultMapper.toList(rs);
-
-			EntityMapper entityMapper = new EntityMapper();
-
-			return entityMapper.toEntityList(rows, clazz);
-
+			try (ResultSet rs = ps.executeQuery()) {
+				List<Map<String, Object>> rows = getResultList(rs);
+				return new EntityMapper().toEntityList(rows, clazz);
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
+	private void requireSelect(Query query) {
+		if (query.getSqlType() != SqlType.SELECT) {
+			throw new IllegalArgumentException("Only SELECT queries can be mapped to rows");
+		}
+	}
+
 	public long executeInsert(Query query) {
-
-		try {
-			SqlBuilder builder = new SqlBuilder();
-			String sql = builder.build(query);
-
-			PreparedStatement ps = con.prepareStatement(
-					sql,
-					Statement.RETURN_GENERATED_KEYS);
-
+		if (query.getSqlType() != SqlType.INSERT) {
+			throw new IllegalArgumentException("Only INSERT queries can return generated keys");
+		}
+		try (PreparedStatement ps = con.prepareStatement(
+				new SqlBuilder().build(query), Statement.RETURN_GENERATED_KEYS)) {
 			bindParameter(ps, query);
-
 			ps.executeUpdate();
-
-			ResultSet rs = ps.getGeneratedKeys();
-
-			if (rs.next()) {
-				return rs.getLong(1);
+			try (ResultSet rs = ps.getGeneratedKeys()) {
+				if (rs.next()) {
+					return rs.getLong(1);
+				}
 			}
-
 			throw new CodedException.Failure(jp.nw.model.ErrorCode.APP_120);
-
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

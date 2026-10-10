@@ -38,17 +38,11 @@ public class PermissionGetUtil {
                 .build();
 
         dbCon = new DBBase();
-        List<Map<String, Object>> result = (List<Map<String, Object>>) dbCon.execute(query);
-        // ここで権限レベル情報を取得する処理を実装する
-
-        for (Map<String, Object> rowInfo : result) {
-            PermissionMasterEntity permissionEntity = PermissionMasterEntity.builder()
-                    .permissionId((String) rowInfo.get("permission_id"))
-                    .permissionName((String) rowInfo.get("permission_name"))
-                    .displayOrder((Integer) rowInfo.get("display_order"))
-                    .build();
-            permissionLevels.add(permissionEntity);
-        }
+        permissionLevels.addAll(dbCon.selectList(query, rs -> PermissionMasterEntity.builder()
+                .permissionId(rs.getString("permission_id"))
+                .permissionName(rs.getString("permission_name"))
+                .displayOrder(rs.getInt("display_order"))
+                .build()));
         return permissionLevels;
     }
 }

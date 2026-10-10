@@ -1,6 +1,5 @@
 package jp.nw.application;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -70,25 +69,21 @@ public class InitializeUserCommand extends ApplicationCommand {
                 .build();
 
         this.dbCon = new DBBase();
-        this.dbCon.execute(this.query);
+        this.dbCon.executeUpdate(this.query);
 
         // 更新の完了判定
         this.query = Query.builder()
                 .sqlType(SqlType.SELECT)
                 .tableName("users_info")
                 .selectColumns(List.of("user_id", "password"))
-                .conditions(this.values)
+                .conditions(this.conditions)
                 .build();
 
-        this.dbCon = new DBBase();
-        List<Object> resultList = (List<Object>) this.dbCon.execute(this.query);
-
-        if (resultList.isEmpty()) {
+        String updatedPassword = this.dbCon.selectOne(this.query, rs -> rs.getString("password")).orElse(null);
+        if (updatedPassword == null) {
             return false;
         }
 
-        // 更新後のレコードのパスワードを取得
-        String updatedPassword = (String) ((HashMap<String, Object>) resultList.get(0)).get("password");
         if (this.passwordEncoder.matches("0000", updatedPassword)) {
             this.finshFlg = true;
             return true;

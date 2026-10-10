@@ -1,6 +1,7 @@
 package jp.nw.model;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -50,26 +51,23 @@ public class AuthenticationLogic {
     }
 
     private UserRecord findForUpdate(DBBase db, String userId) {
-        List<Map<String, Object>> resultList = (List<Map<String, Object>>) db.execute(userForUpdateQuery(userId));
-        if (resultList.isEmpty()) {
-            return null;
-        }
+        return db.selectOne(userForUpdateQuery(userId), AuthenticationLogic::mapUserRecord).orElse(null);
+    }
 
-        Map<String, Object> resultMap = resultList.get(0);
+    private static UserRecord mapUserRecord(ResultSet rs) throws SQLException {
         UserRecord record = new UserRecord();
-        record.password = (String) resultMap.get("password");
-        record.firstName = (String) resultMap.get("first_name");
-        record.lastName = (String) resultMap.get("last_name");
-        record.permission = (String) resultMap.get("permission");
-        record.passwordExpiration = (String) resultMap.get("password_expiration");
-        record.deleteFlag = (String) resultMap.get("delete_flg");
-        record.accountType = (String) resultMap.get("account_type");
-        record.accountDisabled = Boolean.TRUE.equals(resultMap.get("account_disabled"));
-        record.failedCount = ((Number) resultMap.get("failed_login_count")).intValue();
-        Object lockedUntil = resultMap.get("locked_until");
-        record.lockedUntil = lockedUntil instanceof Timestamp timestamp ? timestamp.toLocalDateTime()
-                : (LocalDateTime) lockedUntil;
-        record.forcePasswordChange = Boolean.TRUE.equals(resultMap.get("force_password_change"));
+        record.password = rs.getString("password");
+        record.firstName = rs.getString("first_name");
+        record.lastName = rs.getString("last_name");
+        record.permission = rs.getString("permission");
+        record.passwordExpiration = rs.getString("password_expiration");
+        record.deleteFlag = rs.getString("delete_flg");
+        record.accountType = rs.getString("account_type");
+        record.accountDisabled = rs.getBoolean("account_disabled");
+        record.failedCount = rs.getInt("failed_login_count");
+        Timestamp lockedUntil = rs.getTimestamp("locked_until");
+        record.lockedUntil = lockedUntil == null ? null : lockedUntil.toLocalDateTime();
+        record.forcePasswordChange = rs.getBoolean("force_password_change");
         return record;
     }
 
@@ -120,8 +118,8 @@ public class AuthenticationLogic {
     private void applyDecision(DBBase db, Connection con, String userId, Decision decision, String ip, String agent)
             throws SQLException {
         switch (decision.outcome()) {
-            case BAD_PASSWORD, NOW_LOCKED -> db.execute(failedLoginUpdateQuery(userId, decision));
-            case SUCCESS -> db.execute(successfulLoginUpdateQuery(userId));
+            case BAD_PASSWORD, NOW_LOCKED -> db.executeUpdate(failedLoginUpdateQuery(userId, decision));
+            case SUCCESS -> db.executeUpdate(successfulLoginUpdateQuery(userId));
             default -> {
             }
         }

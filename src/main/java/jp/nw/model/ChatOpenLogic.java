@@ -49,6 +49,6 @@ public class ChatOpenLogic {
 
         dbBase = new DBBase();
 
-        return dbBase.execute(query, ChatMessageEntity.class);
+        return dbBase.selectEntities(query, ChatMessageEntity.class);
     }
 }

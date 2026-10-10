@@ -55,7 +55,7 @@ public class UpdateLogic {
 
 		DBBase db = new DBBase();
 
-		int updateCount = (Integer) db.execute(query);
+		int updateCount = db.executeUpdate(query);
 
 		if (updateCount == 0) {
 			// 更新対象なし

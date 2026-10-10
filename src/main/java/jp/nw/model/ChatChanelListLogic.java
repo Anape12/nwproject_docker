@@ -65,6 +65,6 @@ public class ChatChanelListLogic {
 
         dbBase = new DBBase();
 
-        return dbBase.execute(query, ChatRoomEntity.class);
+        return dbBase.selectEntities(query, ChatRoomEntity.class);
     }
 }
