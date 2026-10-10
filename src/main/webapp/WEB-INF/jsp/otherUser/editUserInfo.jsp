@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page import="jp.nw.entity.UserEntity,java.util.List,jp.nw.entity.PermissionMasterEntity" %>
 <% UserEntity loginUser = (UserEntity) session.getAttribute("loginUser"); List<UserEntity>
     userList = (List<UserEntity
@@ -27,7 +28,7 @@
                             <h1>ユーザー情報編集</h1>
 
                             <% if(errorMsg != null){ %>
-                            <div class="error-message"><%=errorMsg %></div>
+                            <div class="error-message"><c:out value="${errorMsg}" /></div>
                             <% } %>
 
                             <form

@@ -17,6 +17,8 @@ public class AuditLogEntity {
     private String ipAddress;
     private String userAgent;
     private String detail;
+    private String reasonCode;
+    private String displayDetail;
     private LocalDateTime createdAt;
 }
 

@@ -1,5 +1,7 @@
 package jp.nw.model;
 
+import jp.nw.model.CodedException;
+
 import java.util.Locale;
 import java.util.UUID;
 
@@ -10,17 +12,17 @@ public enum AttachmentOwnerType {
     APPROVAL;
 
     public static AttachmentOwnerType parse(String value) {
-        if (value == null || value.isBlank()) throw new IllegalArgumentException("添付先種別が不正です。");
+        if (value == null || value.isBlank()) throw new CodedException.Validation("ERR00010074");
         try {
             return valueOf(value.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("添付先種別が不正です。");
+            throw new CodedException.Validation("ERR00010074");
         }
     }
 
     public String validateOwnerId(String value) {
         if (value == null || value.isBlank() || value.length() > 64) {
-            throw new IllegalArgumentException("添付先IDが不正です。");
+            throw new CodedException.Validation("ERR00010075");
         }
         String normalized = value.trim();
         try {
@@ -32,7 +34,7 @@ public enum AttachmentOwnerType {
             }
             return normalized;
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("添付先IDが不正です。");
+            throw new CodedException.Validation("ERR00010075");
         }
     }
 }

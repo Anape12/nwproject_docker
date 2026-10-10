@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import jp.nw.dao.ThreadDao;
+import jp.nw.model.ErrorMessageLogic;
 import jp.nw.entity.UserEntity;
 import jp.nw.domain.user.PermissionAction;
 import jp.nw.util.PermissionCheckUtil;
@@ -45,7 +46,7 @@ public class ThreadStatusController extends HttpServlet {
                 PermissionCheckUtil.can(user, PermissionAction.THREAD_MODERATE_ANY), status);
         session.setAttribute("threadFlash", updated
                 ? ("CLOSED".equals(status) ? "スレッドを完了しました。" : "スレッドを再開しました。")
-                : "このスレッドを変更する権限がありません。");
+                : ErrorMessageLogic.get("ERR00010135"));
         session.setAttribute("threadFlashType", updated ? "success" : "error");
         response.sendRedirect(request.getContextPath() + "/ThreadDetailController?id=" + threadId);
     }

@@ -73,7 +73,7 @@ public class AiCharacterAdminController extends HttpServlet {
             }
             flash(session, "AI住人を保存しました。", "success");
         } catch (Exception e) {
-            flash(session, e.getMessage() == null ? "保存に失敗しました。" : e.getMessage(), "error");
+            flash(session, jp.nw.model.ErrorMessageLogic.forDisplay(e), "error");
         }
         s.sendRedirect(q.getContextPath() + "/AiCharacterAdmin");
     }

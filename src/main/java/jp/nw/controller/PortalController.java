@@ -32,7 +32,7 @@ public class PortalController extends HttpServlet {
             else
                 new PortalLogic().markRead(u.getUserId(), Long.parseLong(req.getParameter("notificationId")));
         } catch (Exception e) {
-            req.getSession().setAttribute("portalError", e.getMessage());
+            req.getSession().setAttribute("portalError", jp.nw.model.ErrorMessageLogic.forDisplay(e));
         }
         res.sendRedirect(req.getContextPath() + "/Portal");
     }

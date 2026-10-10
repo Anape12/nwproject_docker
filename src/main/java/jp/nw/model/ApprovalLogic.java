@@ -1,5 +1,7 @@
 package jp.nw.model;
 
+import jp.nw.model.CodedException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,7 +33,7 @@ public class ApprovalLogic {
 
     public void submit(String type, long targetId, String applicantId) {
         if (!"REPORT".equals(type) && !"ATTENDANCE".equals(type))
-            throw new IllegalArgumentException("申請種別が不正です。");
+            throw new CodedException.Validation("ERR00010050");
         DBBase db = new DBBase();
         try (Connection con = db.getConnection()) {
             con.setAutoCommit(false);
@@ -46,7 +48,7 @@ public class ApprovalLogic {
                     target.setLong(1, targetId);
                     target.setString(2, applicantId);
                     if (target.executeUpdate() != 1)
-                        throw new IllegalArgumentException("申請できるデータが見つかりません。");
+                        throw new CodedException.Validation("ERR00010051");
                 }
                 long approvalId;
                 try (PreparedStatement upsert = con.prepareStatement(
@@ -74,7 +76,7 @@ public class ApprovalLogic {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("承認申請に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010052", e);
         }
     }
 
@@ -91,7 +93,7 @@ public class ApprovalLogic {
                     ps.setString(2, applicantId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next())
-                            throw new IllegalArgumentException("取下げできる申請がありません。");
+                            throw new CodedException.Validation("ERR00010053");
                         type = rs.getString(1);
                         targetId = rs.getLong(2);
                     }
@@ -118,12 +120,12 @@ public class ApprovalLogic {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("申請の取下げに失敗しました。", e);
+            throw new CodedException.Failure("ERR00010054", e);
         }
     }
 
     public int reviewBatch(List<Long> ids, jp.nw.entity.UserEntity reviewer, String decision, String comment) {
-        if (!canReview(reviewer)) throw new SecurityException("承認権限がありません。");
+        if (!canReview(reviewer)) throw new CodedException.Denied("ERR00010055");
         int count = 0;
         for (Long id : ids) {
             review(id, reviewer, decision, comment);
@@ -151,7 +153,7 @@ public class ApprovalLogic {
                 return list;
             }
         } catch (SQLException e) {
-            throw new RuntimeException("承認履歴の取得に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010056", e);
         }
     }
 
@@ -172,14 +174,14 @@ public class ApprovalLogic {
                     }
                 }
                 if (targetIds.isEmpty())
-                    throw new IllegalArgumentException("この月に申請できる勤怠がありません。");
+                    throw new CodedException.Validation("ERR00010057");
                 for (long targetId : targetIds) {
                     try (PreparedStatement update = con.prepareStatement(
                             "UPDATE attendance_record SET approval_status='SUBMITTED' WHERE attendance_id=? AND user_id=? AND approval_status IN ('DRAFT','REJECTED')")) {
                         update.setLong(1, targetId);
                         update.setString(2, applicantId);
                         if (update.executeUpdate() != 1)
-                            throw new IllegalArgumentException("勤怠の状態が変更されたため一括申請できませんでした。");
+                            throw new CodedException.Validation("ERR00010058");
                     }
                     long approvalId;
                     try (PreparedStatement upsert = con.prepareStatement(
@@ -208,15 +210,15 @@ public class ApprovalLogic {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("勤怠の月次一括申請に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010059", e);
         }
     }
 
     public void review(long approvalId, jp.nw.entity.UserEntity reviewer, String decision, String comment) {
-        if (!canReview(reviewer)) throw new SecurityException("承認権限がありません。");
+        if (!canReview(reviewer)) throw new CodedException.Denied("ERR00010055");
         String reviewerId = reviewer.getUserId();
         if (!"APPROVED".equals(decision) && !"REJECTED".equals(decision))
-            throw new IllegalArgumentException("承認結果が不正です。");
+            throw new CodedException.Validation("ERR00010060");
         DBBase db = new DBBase();
         try (Connection con = db.getConnection()) {
             con.setAutoCommit(false);
@@ -229,7 +231,7 @@ public class ApprovalLogic {
                     lock.setLong(1, approvalId);
                     try (ResultSet rs = lock.executeQuery()) {
                         if (!rs.next() || !"SUBMITTED".equals(rs.getString("status")))
-                            throw new IllegalArgumentException("この申請は承認待ちではありません。");
+                            throw new CodedException.Validation("ERR00010061");
                         type = rs.getString("application_type");
                         targetId = rs.getLong("target_id");
                         step = rs.getInt("approval_step");
@@ -289,7 +291,7 @@ public class ApprovalLogic {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("承認処理に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010062", e);
         }
     }
 
@@ -328,7 +330,7 @@ public class ApprovalLogic {
 
     public void saveRoute(String type, int steps) {
         if (!java.util.Set.of("REPORT", "ATTENDANCE").contains(type) || steps < 1 || steps > 5)
-            throw new IllegalArgumentException("承認経路が不正です。");
+            throw new CodedException.Validation("ERR00010063");
         DBBase db = new DBBase();
         try (Connection c = db.getConnection();
                 PreparedStatement p = c.prepareStatement(
@@ -343,7 +345,7 @@ public class ApprovalLogic {
 
     public void addDelegate(String approver, String delegate, java.time.LocalDate from, java.time.LocalDate to) {
         if (to.isBefore(from) || approver.equals(delegate))
-            throw new IllegalArgumentException("代理承認期間が不正です。");
+            throw new CodedException.Validation("ERR00010064");
         DBBase db = new DBBase();
         try (Connection c = db.getConnection();
                 PreparedStatement p = c.prepareStatement(
@@ -388,7 +390,7 @@ public class ApprovalLogic {
                 return list;
             }
         } catch (SQLException e) {
-            throw new RuntimeException("申請一覧の取得に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010065", e);
         }
     }
 

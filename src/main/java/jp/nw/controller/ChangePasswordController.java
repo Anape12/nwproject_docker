@@ -1,5 +1,7 @@
 package jp.nw.controller;
 
+import jp.nw.model.CodedException;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -55,12 +57,12 @@ public class ChangePasswordController extends HttpServlet {
                         p.setString(1, u.getUserId());
                         try (var r = p.executeQuery()) {
                             if (!r.next() || !PasswordUtil.matches(current, r.getString(1)))
-                                throw new IllegalArgumentException("現在のパスワードが正しくありません。");
+                                throw new CodedException.Validation("ERR00010003");
                             encoded = r.getString(1);
                         }
                     }
                     if (PasswordUtil.matches(next, encoded))
-                        throw new IllegalArgumentException("現在と異なるパスワードを指定してください。");
+                        throw new CodedException.Validation("ERR00010004");
                     try (PreparedStatement p = c.prepareStatement(
                             "UPDATE users_info SET password=?,password_changed_at=NOW(),password_expiration=?,force_password_change=FALSE WHERE user_id=?")) {
                         p.setString(1, PasswordUtil.encode(next));
@@ -80,7 +82,7 @@ public class ChangePasswordController extends HttpServlet {
             s.setAttribute("passwordChangedMessage", "パスワードを変更しました。");
             res.sendRedirect(req.getContextPath() + "/MenuSelect");
         } catch (Exception e) {
-            req.setAttribute("errorMessage", e.getMessage());
+            req.setAttribute("errorMessage", jp.nw.model.ErrorMessageLogic.forDisplay(e));
             req.setAttribute("csrfToken", s.getAttribute("passwordCsrfToken"));
             req.getRequestDispatcher("/WEB-INF/jsp/security/changePassword.jsp").forward(req, res);
         }
@@ -88,8 +90,8 @@ public class ChangePasswordController extends HttpServlet {
 
     private void validate(String p, String c) {
         if (p == null || p.length() < 8 || p.length() > 72 || !p.matches(".*[A-Za-z].*") || !p.matches(".*[0-9].*"))
-            throw new IllegalArgumentException("英字と数字を含む8～72文字で入力してください。");
+            throw new CodedException.Validation("ERR00010005");
         if (!p.equals(c))
-            throw new IllegalArgumentException("確認用パスワードが一致しません。");
+            throw new CodedException.Validation("ERR00010006");
     }
 }

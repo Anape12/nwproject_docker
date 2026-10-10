@@ -1,5 +1,7 @@
 package jp.nw.dao;
 
+import jp.nw.model.CodedException;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,7 +51,7 @@ public class ThreadDao extends DBBase {
                         }
 
                 } catch (SQLException e) {
-                        throw new RuntimeException("スレッド一覧の取得に失敗しました。", e);
+                        throw new CodedException.Failure("ERR00010037", e);
                 }
 
                 return list;
@@ -89,7 +91,7 @@ public class ThreadDao extends DBBase {
                         }
 
                 } catch (SQLException e) {
-                        throw new RuntimeException("スレッドの取得に失敗しました。", e);
+                        throw new CodedException.Failure("ERR00010038", e);
                 }
 
                 return dto;
@@ -134,7 +136,7 @@ public class ThreadDao extends DBBase {
                         }
 
                 } catch (SQLException e) {
-                        throw new RuntimeException("コメントの取得に失敗しました。", e);
+                        throw new CodedException.Failure("ERR00010039", e);
                 }
 
                 return list;
@@ -164,7 +166,7 @@ public class ThreadDao extends DBBase {
                         return true;
 
                 } catch (SQLException e) {
-                        throw new RuntimeException("コメントの投稿に失敗しました。", e);
+                        throw new CodedException.Failure("ERR00010040", e);
                 }
         }
 
@@ -183,7 +185,7 @@ public class ThreadDao extends DBBase {
                         ps.setInt(7, admin ? 1 : 0);
                         return ps.executeUpdate() == 1;
                 } catch (SQLException e) {
-                        throw new RuntimeException("スレッド状態の更新に失敗しました。", e);
+                        throw new CodedException.Failure("ERR00010041", e);
                 }
         }
 

@@ -1,5 +1,7 @@
 package jp.nw.model;
 
+import jp.nw.model.CodedException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,7 +64,7 @@ public class AttendanceLogic {
                 p.setString(i, v.getUserId());
             }
             if (p.executeUpdate() != 1)
-                throw new IllegalArgumentException("更新対象がないか、月次締め済みです。");
+                throw new CodedException.Validation("ERR00010076");
             if (v.getCorrectedById() != null && v.getAttendanceId() != 0)
                 history(c, v);
             else
@@ -71,9 +73,9 @@ public class AttendanceLogic {
                                 : String.valueOf(v.getAttendanceId()),
                         true, null, null, v.getCorrectionReason());
         } catch (SQLIntegrityConstraintViolationException e) {
-            throw new IllegalArgumentException("同じ勤務日の勤怠は既に登録されています。");
+            throw new CodedException.Validation("ERR00010077");
         } catch (SQLException e) {
-            throw new RuntimeException("勤怠情報の保存に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010078", e);
         }
     }
 
@@ -139,7 +141,7 @@ public class AttendanceLogic {
             p.setObject(3, v.getWorkDate());
             try (ResultSet r = p.executeQuery()) {
                 if (!r.next())
-                    throw new IllegalArgumentException("同じ報告日の本人の報告書だけを関連付けできます。");
+                    throw new CodedException.Validation("ERR00010079");
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -171,7 +173,7 @@ public class AttendanceLogic {
                 return l;
             }
         } catch (SQLException e) {
-            throw new RuntimeException("勤怠情報の取得に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010080", e);
         }
     }
 

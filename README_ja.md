@@ -14,9 +14,9 @@
 
     * docker restart my-tomcat
 
-# SQL 反映(Flyway 起動)
+# SQL 反映（Flyway）
 
-    * docker compose run --rm flyway
+DBを削除せずに未適用のSQLを反映する手順は [DBマイグレーションの適用](docs/database-migrations.md) を参照してください。プロジェクト直下から `.env` とComposeファイルを指定して実行します。
 
 # Playwrite のテスト実行
 
@@ -62,11 +62,7 @@ JSP の整形には`prettier-plugin-jsp`を使用します。プラグインが�
 
 # Flyway 実行
 
-    * cd .devcontainer
-    * docker compose up flyway
-    or
-    * docker compose down -v
-    * docker compose up -d --build
+適用状況の確認、実行、失敗時の注意点は [DBマイグレーションの適用](docs/database-migrations.md) にまとめています。通常のマイグレーションで `docker compose down -v` は実行しません。
 
 # 修正後の資産適用
 

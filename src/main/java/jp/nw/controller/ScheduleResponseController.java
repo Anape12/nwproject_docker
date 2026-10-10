@@ -18,7 +18,7 @@ public class ScheduleResponseController extends HttpServlet {
             new ScheduleEventLogic().respond(Long.parseLong(q.getParameter("eventId")), u.getUserId(),
                     q.getParameter("status"));
         } catch (Exception e) {
-            q.getSession().setAttribute("scheduleFlash", e.getMessage());
+            q.getSession().setAttribute("scheduleFlash", jp.nw.model.ErrorMessageLogic.forDisplay(e));
         }
         s.sendRedirect(q.getContextPath() + "/OpenCalender");
     }

@@ -19,8 +19,10 @@ docker restart my-tomcat
 
 # Apply Database Migrations (Flyway)
 
+Run from the repository root with `.env` and the Compose file explicitly specified. See [Database migrations](docs/database-migrations.md) for status checks and recovery guidance.
+
 ```bash
-docker compose run --rm flyway
+docker compose --env-file .env -f .devcontainer/docker-compose.yml run --rm flyway
 ```
 
 # Run Playwright Tests
@@ -65,10 +67,7 @@ JSP files are formatted with `prettier-plugin-jsp`. Legacy JSP files that use sy
 
 # Start Flyway
 
-```bash
-cd .devcontainer
-docker compose up flyway
-```
+Use the [database migration procedure](docs/database-migrations.md); do not remove the DB volume for a routine migration.
 
 # Apply Modified Application
 

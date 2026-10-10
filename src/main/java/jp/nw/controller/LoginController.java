@@ -45,9 +45,9 @@ public class LoginController extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		if ("1".equals(request.getParameter("sessionInvalid"))) {
-			request.setAttribute("errorMessage", "別のブラウザまたは端末でログインされたため、以前のセッションを終了しました。再度ログインしてください。");
+			request.setAttribute("errorMessage", jp.nw.model.ErrorMessageLogic.get("ERR00010128"));
 		} else if ("1".equals(request.getParameter("windowInvalid"))) {
-			request.setAttribute("errorMessage", "この画面を開いた後に同じブラウザで再ログインされたため、この画面からの操作を停止しました。再度ログインしてください。");
+			request.setAttribute("errorMessage", jp.nw.model.ErrorMessageLogic.get("ERR00010129"));
 		}
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/login/login.jsp");
 		dispatcher.forward(request, response);
@@ -82,12 +82,18 @@ public class LoginController extends HttpServlet {
 		}
 
 		String token = UUID.randomUUID().toString();
-		boolean isTokenUpdated = SecurityToken.updateToken(userEntity.getUserId(), token);
+		boolean isTokenUpdated;
+		try {
+			isTokenUpdated = SecurityToken.updateToken(userEntity.getUserId(), token);
+		} catch (RuntimeException e) {
+			isTokenUpdated = false;
+		}
 
 		// トークンの更新に失敗した場合もログイン不可
 		if (!isTokenUpdated) {
 			this.baseModel.writeInfo("トークン更新失敗");
 			// ログイン失敗
+			request.setAttribute("errorMessage", jp.nw.model.ErrorMessageLogic.get("ERR00010134"));
 			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/login/loginMiss.jsp");
 			dispatcher.forward(request, response);
 			return;

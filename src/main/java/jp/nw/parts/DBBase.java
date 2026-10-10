@@ -1,5 +1,7 @@
 package jp.nw.parts;
 
+import jp.nw.model.CodedException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -124,7 +126,7 @@ public class DBBase {
 				return rs.getLong(1);
 			}
 
-			throw new RuntimeException("Generated key not found.");
+			throw new CodedException.Failure("ERR00010120");
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);

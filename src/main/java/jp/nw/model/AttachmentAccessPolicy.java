@@ -1,5 +1,7 @@
 package jp.nw.model;
 
+import jp.nw.model.CodedException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,7 +65,7 @@ public class AttachmentAccessPolicy {
                 return result.next();
             }
         } catch (SQLException e) {
-            throw new RuntimeException("添付ファイルの権限確認に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010066", e);
         }
     }
 }

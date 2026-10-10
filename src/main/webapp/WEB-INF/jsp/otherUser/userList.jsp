@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page import="jp.nw.entity.UserEntity,java.util.List" %>
 <%-- <JSP taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"  /> --%>
 <% UserEntity loginUser = (UserEntity) session.getAttribute("loginUser"); List<UserEntity>
@@ -41,7 +42,7 @@
                 <h1 style="margin-left:450px">ユーザーID：パスワード一覧</h1>
                 <div style="width:200px"></div>
                 <% if(errorMsg != null) { %>
-                <p><%= errorMsg %></p>
+                <p><c:out value="${errorMsg}" /></p>
                 <% } %> <% if(successMsg != null) { %>
                 <p style="margin-left:450px; color:#14df5e; font-weight:bold;"><%= successMsg %></p>
                 <% } %>

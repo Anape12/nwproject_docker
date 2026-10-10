@@ -1,5 +1,7 @@
 package jp.nw.model;
 
+import jp.nw.model.CodedException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,13 +39,13 @@ public class ChatRoomCreateLogic {
             }
             return users;
         } catch (SQLException e) {
-            throw new RuntimeException("チャット対象ユーザーの取得に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010082", e);
         }
     }
 
     public CreatedRoom createOrGetDirectRoom(String loginUserId, String targetUserId) {
         if (targetUserId == null || targetUserId.isBlank() || loginUserId.equals(targetUserId)) {
-            throw new IllegalArgumentException("チャット対象ユーザーが不正です。");
+            throw new CodedException.Validation("ERR00010083");
         }
 
         DBBase dbBase = new DBBase();
@@ -70,7 +72,7 @@ public class ChatRoomCreateLogic {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("チャットルームの作成に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010084", e);
         }
     }
 
@@ -93,7 +95,7 @@ public class ChatRoomCreateLogic {
             }
         }
         if (found != 2 || displayName == null) {
-            throw new IllegalArgumentException("指定したユーザーは利用できません。");
+            throw new CodedException.Validation("ERR00010085");
         }
         return displayName;
     }

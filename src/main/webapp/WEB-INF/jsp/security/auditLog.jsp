@@ -118,7 +118,7 @@
                                     </span>
                                 </td>
                                 <td><c:out value="${log.ipAddress}" /></td>
-                                <td><c:out value="${log.detail}" /></td>
+                                <td><c:out value="${log.displayDetail}" /></td>
                             </tr>
                         </c:forEach>
 

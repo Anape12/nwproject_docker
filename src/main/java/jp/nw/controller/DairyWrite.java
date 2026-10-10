@@ -1,5 +1,7 @@
 package jp.nw.controller;
 
+import jp.nw.model.CodedException;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -61,7 +63,7 @@ public class DairyWrite extends HttpServlet {
         HttpSession session = request.getSession(false);
         UserEntity user = (UserEntity) session.getAttribute("loginUser");
         if (!Objects.equals(session.getAttribute("reportCsrfToken"), request.getParameter("csrfToken"))) {
-            response.sendError(403, "不正なリクエストです。");
+            response.sendError(403, jp.nw.model.ErrorMessageLogic.get("ERR00010121"));
             return;
         }
         WorkReportLogic logic = new WorkReportLogic();
@@ -72,14 +74,14 @@ public class DairyWrite extends HttpServlet {
                 flash(session, "報告書を承認申請しました。", "success");
             } else if ("delete".equals(action)) {
                 if (!logic.delete(id(request), user.getUserId()))
-                    throw new IllegalArgumentException("削除できる報告書が見つかりません。");
+                    throw new CodedException.Validation("ERR00010007");
                 flash(session, "下書きを削除しました。", "success");
             } else {
                 WorkReportEntity report = build(request, user.getUserId());
                 if ("update".equals(action)) {
                     report.setReportId(id(request));
                     if (!logic.update(report))
-                        throw new IllegalArgumentException("更新できる報告書が見つかりません。");
+                        throw new CodedException.Validation("ERR00010008");
                     flash(session, "下書きを更新しました。", "success");
                 } else {
                     logic.create(report);
@@ -87,7 +89,7 @@ public class DairyWrite extends HttpServlet {
                 }
             }
         } catch (IllegalArgumentException | DateTimeParseException e) {
-            flash(session, e.getMessage() == null ? "入力内容を確認してください。" : e.getMessage(), "error");
+            flash(session, jp.nw.model.ErrorMessageLogic.forDisplay(e), "error");
         }
         response.sendRedirect(request.getContextPath() + "/DairyWrite");
     }
@@ -97,9 +99,9 @@ public class DairyWrite extends HttpServlet {
         String body = trim(request.getParameter("body"));
         LocalDate date = LocalDate.parse(request.getParameter("reportDate"));
         if (title.isBlank() || title.length() > 150)
-            throw new IllegalArgumentException("タイトルを1～150文字で入力してください。");
+            throw new CodedException.Validation("ERR00010009");
         if (body.isBlank() || body.length() > 10000)
-            throw new IllegalArgumentException("報告内容を1～10000文字で入力してください。");
+            throw new CodedException.Validation("ERR00010010");
         return WorkReportEntity.builder().authorId(userId).reportDate(date).title(title).body(body).build();
     }
 
@@ -107,7 +109,7 @@ public class DairyWrite extends HttpServlet {
         try {
             return Long.parseLong(request.getParameter("reportId"));
         } catch (Exception e) {
-            throw new IllegalArgumentException("報告書IDが不正です。");
+            throw new CodedException.Validation("ERR00010011");
         }
     }
 

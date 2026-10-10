@@ -1,5 +1,7 @@
 package jp.nw.model;
 
+import jp.nw.model.CodedException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -47,39 +49,39 @@ public class AttachmentFileValidator {
         String originalName = sanitizeFileName(submittedName);
         long actualSize = Files.size(file);
         if (actualSize <= 0 || actualSize > maximumSize || actualSize != declaredSize) {
-            throw new IllegalArgumentException("ファイルサイズが不正です。10MB以下のファイルを選択してください。");
+            throw new CodedException.Validation("ERR00010067");
         }
 
         String extension = extension(originalName);
         FileType expected = ALLOWED_TYPES.get(extension);
         if (expected == null) {
-            throw new IllegalArgumentException("このファイル形式は添付できません。");
+            throw new CodedException.Validation("ERR00010068");
         }
 
         String supplied = normalizeContentType(submittedContentType);
         if (!"application/octet-stream".equals(supplied) && !expected.acceptedContentTypes().contains(supplied)) {
-            throw new IllegalArgumentException("拡張子とMIMEタイプが一致しません。");
+            throw new CodedException.Validation("ERR00010069");
         }
         if (!matchesSignature(file, expected.signature())) {
-            throw new IllegalArgumentException("拡張子とファイル内容が一致しません。");
+            throw new CodedException.Validation("ERR00010070");
         }
         return new ValidatedFile(originalName, expected.canonicalContentType(), actualSize);
     }
 
     private String sanitizeFileName(String submittedName) {
-        if (submittedName == null) throw new IllegalArgumentException("ファイル名が不正です。");
+        if (submittedName == null) throw new CodedException.Validation("ERR00010071");
         String normalized = submittedName.replace('\\', '/');
         String name = normalized.substring(normalized.lastIndexOf('/') + 1).trim();
         if (name.isBlank() || name.length() > 255 || name.startsWith(".") || name.endsWith(".")
                 || name.chars().anyMatch(c -> Character.isISOControl(c) || c == '/' || c == '\\' || c == ':')) {
-            throw new IllegalArgumentException("ファイル名が不正です。");
+            throw new CodedException.Validation("ERR00010071");
         }
         return name;
     }
 
     private String extension(String name) {
         int dot = name.lastIndexOf('.');
-        if (dot <= 0 || dot == name.length() - 1) throw new IllegalArgumentException("拡張子が必要です。");
+        if (dot <= 0 || dot == name.length() - 1) throw new CodedException.Validation("ERR00010072");
         return name.substring(dot + 1).toLowerCase(Locale.ROOT);
     }
 
@@ -123,7 +125,7 @@ public class AttachmentFileValidator {
             Enumeration<? extends ZipEntry> zipEntries = zip.entries();
             while (zipEntries.hasMoreElements()) {
                 ZipEntry entry = zipEntries.nextElement();
-                if (++entries > 10_000) throw new IllegalArgumentException("ZIPファイル内の項目数が多すぎます。");
+                if (++entries > 10_000) throw new CodedException.Validation("ERR00010073");
                 String name = entry.getName();
                 if ("[Content_Types].xml".equals(name)) hasContentTypes = true;
                 if (requiredPrefix != null && name.startsWith(requiredPrefix)) hasRequiredPrefix = true;

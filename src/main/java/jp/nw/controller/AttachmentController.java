@@ -53,7 +53,7 @@ public class AttachmentController extends HttpServlet {
         if (user == null) return;
 
         if (!Objects.equals(session.getAttribute("attachmentCsrfToken"), request.getParameter("csrfToken"))) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "不正なリクエストです。");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get("ERR00010121"));
             return;
         }
 
@@ -63,12 +63,12 @@ public class AttachmentController extends HttpServlet {
             ownerType = AttachmentOwnerType.parse(request.getParameter("ownerType"));
             ownerId = ownerType.validateOwnerId(request.getParameter("ownerId"));
         } catch (IllegalArgumentException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, jp.nw.model.ErrorMessageLogic.forDisplay(e));
             return;
         }
 
         if (!accessPolicy.canWrite(user, ownerType, ownerId)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "この対象へファイルを添付する権限がありません。");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get("ERR00010122"));
             return;
         }
 
@@ -77,11 +77,11 @@ public class AttachmentController extends HttpServlet {
             part = request.getPart("file");
         } catch (IllegalStateException e) {
             response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE,
-                    "ファイルサイズは10MB以下にしてください。");
+                    jp.nw.model.ErrorMessageLogic.get("ERR00010123"));
             return;
         }
         if (part == null || part.getSize() <= 0) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ファイルを選択してください。");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, jp.nw.model.ErrorMessageLogic.get("ERR00010124"));
             return;
         }
 
@@ -97,8 +97,7 @@ public class AttachmentController extends HttpServlet {
                     part.getSubmittedFileName(), part.getContentType(), part.getSize(), temporary);
             AttachmentVirusScanner.ScanResult scanResult = virusScanner.scan(temporary, file.originalName());
             if (!scanResult.clean()) {
-                response.sendError(422,
-                        scanResult.message() == null ? "安全性を確認できないファイルです。" : scanResult.message());
+                response.sendError(422, jp.nw.model.ErrorMessageLogic.get("ERR00010125"));
                 return;
             }
 
@@ -108,7 +107,7 @@ public class AttachmentController extends HttpServlet {
             insertMetadata(ownerType, ownerId, user.getUserId(), file, storedName);
             response.sendRedirect(redirectPath(request, ownerType, ownerId));
         } catch (IllegalArgumentException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, jp.nw.model.ErrorMessageLogic.forDisplay(e));
         } catch (SQLException e) {
             if (target != null) Files.deleteIfExists(target);
             throw new ServletException("添付ファイル情報の保存に失敗しました。", e);
@@ -127,7 +126,7 @@ public class AttachmentController extends HttpServlet {
             attachmentId = Long.parseLong(request.getParameter("id"));
             if (attachmentId <= 0) throw new NumberFormatException();
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "添付ファイルIDが不正です。");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, jp.nw.model.ErrorMessageLogic.get("ERR00010126"));
             return;
         }
 

@@ -1,5 +1,7 @@
 package jp.nw.controller;
 
+import jp.nw.model.CodedException;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -70,11 +72,11 @@ public class ReportApprovalController extends HttpServlet {
                 l.addDelegate(u.getUserId(), q.getParameter("delegateUserId"),
                         LocalDate.parse(q.getParameter("validFrom")), LocalDate.parse(q.getParameter("validTo")));
             else if ("route".equals(action) || "delegate".equals(action))
-                throw new SecurityException("設定変更の権限がありません。");
+                throw new CodedException.Denied("ERR00010020");
             else {
                 String decision = q.getParameter("decision"), comment = trim(q.getParameter("comment"));
                 if ("REJECTED".equals(decision) && comment.isBlank())
-                    throw new IllegalArgumentException("差戻し理由を入力してください。");
+                    throw new CodedException.Validation("ERR00010021");
                 String[] values = q.getParameterValues("approvalIds");
                 if (values != null) {
                     List<Long> ids = new ArrayList<>();
@@ -86,7 +88,7 @@ public class ReportApprovalController extends HttpServlet {
             }
             flash(session, "処理が完了しました。", "success");
         } catch (Exception e) {
-            flash(session, e.getMessage() == null ? "処理に失敗しました。" : e.getMessage(), "error");
+            flash(session, jp.nw.model.ErrorMessageLogic.forDisplay(e), "error");
         }
         s.sendRedirect(q.getContextPath() + "/ReportApproval");
     }

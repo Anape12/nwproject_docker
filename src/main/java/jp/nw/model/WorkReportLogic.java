@@ -1,5 +1,7 @@
 package jp.nw.model;
 
+import jp.nw.model.CodedException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,7 +36,7 @@ public class WorkReportLogic {
         DBBase db = new DBBase();
         try (Connection con=db.getConnection(); PreparedStatement ps=con.prepareStatement(sql); ResultSet rs=ps.executeQuery()) {
             List<WorkReportEntity> reports=new ArrayList<>(); while(rs.next()) reports.add(map(rs)); return reports;
-        } catch(SQLException e){ throw new RuntimeException("報告書一覧の取得に失敗しました。",e); }
+        } catch(SQLException e){ throw new CodedException.Failure("ERR00010115",e); }
     }
 
     public long create(WorkReportEntity report) {
@@ -43,7 +45,7 @@ public class WorkReportLogic {
         try(Connection con=db.getConnection();PreparedStatement ps=con.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)){
             ps.setString(1,report.getAuthorId());ps.setObject(2,report.getReportDate());ps.setString(3,report.getTitle());ps.setString(4,report.getBody());ps.executeUpdate();
             try(ResultSet keys=ps.getGeneratedKeys()){if(keys.next())return keys.getLong(1);}throw new SQLException("Generated key not found.");
-        }catch(SQLException e){throw new RuntimeException("報告書の保存に失敗しました。",e);}
+        }catch(SQLException e){throw new CodedException.Failure("ERR00010116",e);}
     }
 
     public boolean update(WorkReportEntity report) {
@@ -51,17 +53,17 @@ public class WorkReportLogic {
         DBBase db=new DBBase();
         try(Connection con=db.getConnection();PreparedStatement ps=con.prepareStatement(sql)){
             ps.setObject(1,report.getReportDate());ps.setString(2,report.getTitle());ps.setString(3,report.getBody());ps.setLong(4,report.getReportId());ps.setString(5,report.getAuthorId());return ps.executeUpdate()==1;
-        }catch(SQLException e){throw new RuntimeException("報告書の更新に失敗しました。",e);}
+        }catch(SQLException e){throw new CodedException.Failure("ERR00010117",e);}
     }
 
     public boolean submit(long id,String userId){
         String sql="UPDATE work_report SET status='SUBMITTED',submitted_at=NOW(),reviewed_at=NULL,reviewed_by_id=NULL,review_comment=NULL WHERE report_id=? AND author_id=? AND status IN ('DRAFT','REJECTED')";
-        return executeOwned(sql,id,userId,"報告書の提出に失敗しました。");
+        return executeOwned(sql,id,userId,"ERR00010138");
     }
 
     public boolean delete(long id,String userId){
         String sql="DELETE FROM work_report WHERE report_id=? AND author_id=? AND status IN ('DRAFT','REJECTED')";
-        return executeOwned(sql,id,userId,"報告書の削除に失敗しました。");
+        return executeOwned(sql,id,userId,"ERR00010139");
     }
 
     public void review(long id,String reviewerId,String decision,String comment){
@@ -70,7 +72,7 @@ public class WorkReportLogic {
             con.setAutoCommit(false);
             try{
                 try(PreparedStatement lock=con.prepareStatement("SELECT status FROM work_report WHERE report_id=? FOR UPDATE")){
-                    lock.setLong(1,id);try(ResultSet rs=lock.executeQuery()){if(!rs.next()||!"SUBMITTED".equals(rs.getString("status")))throw new IllegalArgumentException("この報告書は承認待ちではありません。");}
+                    lock.setLong(1,id);try(ResultSet rs=lock.executeQuery()){if(!rs.next()||!"SUBMITTED".equals(rs.getString("status")))throw new CodedException.Validation("ERR00010118");}
                 }
                 try(PreparedStatement update=con.prepareStatement("UPDATE work_report SET status=?,reviewed_at=NOW(),reviewed_by_id=?,review_comment=? WHERE report_id=?")){
                     update.setString(1,decision);update.setString(2,reviewerId);update.setString(3,comment);update.setLong(4,id);update.executeUpdate();
@@ -80,14 +82,14 @@ public class WorkReportLogic {
                 }
                 con.commit();
             }catch(Exception e){con.rollback();throw e;}
-        }catch(IllegalArgumentException e){throw e;}catch(Exception e){throw new RuntimeException("承認処理に失敗しました。",e);}
+        }catch(IllegalArgumentException e){throw e;}catch(Exception e){throw new CodedException.Failure("ERR00010062",e);}
     }
 
-    private boolean executeOwned(String sql,long id,String userId,String message){
-        DBBase db=new DBBase();try(Connection con=db.getConnection();PreparedStatement ps=con.prepareStatement(sql)){ps.setLong(1,id);ps.setString(2,userId);return ps.executeUpdate()==1;}catch(SQLException e){throw new RuntimeException(message,e);}
+    private boolean executeOwned(String sql,long id,String userId,String errorCode){
+        DBBase db=new DBBase();try(Connection con=db.getConnection();PreparedStatement ps=con.prepareStatement(sql)){ps.setLong(1,id);ps.setString(2,userId);return ps.executeUpdate()==1;}catch(SQLException e){throw new CodedException.Failure(errorCode,e);}
     }
     private List<WorkReportEntity> queryList(String sql,Object...params){
-        DBBase db=new DBBase();try(Connection con=db.getConnection();PreparedStatement ps=con.prepareStatement(sql)){bind(ps,params);try(ResultSet rs=ps.executeQuery()){List<WorkReportEntity> list=new ArrayList<>();while(rs.next())list.add(map(rs));return list;}}catch(SQLException e){throw new RuntimeException("報告書の取得に失敗しました。",e);}
+        DBBase db=new DBBase();try(Connection con=db.getConnection();PreparedStatement ps=con.prepareStatement(sql)){bind(ps,params);try(ResultSet rs=ps.executeQuery()){List<WorkReportEntity> list=new ArrayList<>();while(rs.next())list.add(map(rs));return list;}}catch(SQLException e){throw new CodedException.Failure("ERR00010119",e);}
     }
     private WorkReportEntity queryOne(String sql,Object...params){List<WorkReportEntity> list=queryList(sql,params);return list.isEmpty()?null:list.get(0);}
     private void bind(PreparedStatement ps,Object...params)throws SQLException{for(int i=0;i<params.length;i++)ps.setObject(i+1,params[i]);}

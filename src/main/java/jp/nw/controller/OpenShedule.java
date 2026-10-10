@@ -91,7 +91,7 @@ public class OpenShedule extends HttpServlet {
 		if (loginUser == null) {
 			response.sendRedirect("/nwproject_B/");
 			request.setCharacterEncoding("UTF-8");
-			request.setAttribute("errorMsg", "エラー");
+			request.setAttribute("errorMsg", jp.nw.model.ErrorMessageLogic.get("ERR00010000"));
 		} else {
 			RequestDispatcher dispatcher = request.getRequestDispatcher("WEB-INF/jsp/editUserInfo.jsp");
 			dispatcher.forward(request, response);

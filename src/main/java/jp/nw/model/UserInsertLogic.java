@@ -1,5 +1,7 @@
 package jp.nw.model;
 
+import jp.nw.model.CodedException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,7 +18,7 @@ public class UserInsertLogic {
 
     public void insert(UserEntity user, LocalDate passwordExpiration) {
         if (!permissionExists(user.getPermission())) {
-            throw new IllegalArgumentException("指定した権限は利用できません。");
+            throw new CodedException.Validation("ERR00010097");
         }
 
         String sql = "INSERT INTO users_info "
@@ -33,9 +35,9 @@ public class UserInsertLogic {
             statement.setString(7, user.getLastName());
             statement.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
-            throw new IllegalArgumentException("このユーザーIDは既に登録されています。");
+            throw new CodedException.Validation("ERR00010024");
         } catch (SQLException e) {
-            throw new RuntimeException("ユーザー情報の登録に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010098", e);
         }
     }
 
@@ -46,7 +48,7 @@ public class UserInsertLogic {
             statement.setString(1, userId);
             try (ResultSet result = statement.executeQuery()) { return result.next(); }
         } catch (SQLException e) {
-            throw new RuntimeException("ユーザーIDの確認に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010099", e);
         }
     }
 
@@ -57,7 +59,7 @@ public class UserInsertLogic {
             statement.setString(1, permission);
             try (ResultSet result = statement.executeQuery()) { return result.next(); }
         } catch (SQLException e) {
-            throw new RuntimeException("権限情報の確認に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010100", e);
         }
     }
 }

@@ -1,5 +1,7 @@
 package jp.nw.batch;
 
+import jp.nw.model.CodedException;
+
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,7 +37,7 @@ public class JobStart {
 				}
 			return true;
 		} catch (SQLException e) {
-			throw new RuntimeException("ジョブの実行に失敗しました。", e);
+			throw new CodedException.Failure("ERR00010001", e);
 		}
 	}
 }

@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="ja">
     <head>
@@ -16,9 +17,9 @@
                 <h1>パスワード変更</h1>
                 <p>安全のため、英字と数字を含む8文字以上を設定してください。</p>
 
-                <% if (request.getAttribute("errorMessage") != null) { %>
-                <div class="alert error"><%= request.getAttribute("errorMessage") %></div>
-                <% } %>
+                <c:if test="${not empty errorMessage}">
+                    <div class="alert error"><c:out value="${errorMessage}" /></div>
+                </c:if>
 
                 <form method="post">
                     <input type="hidden" name="csrfToken" value="${csrfToken}" />

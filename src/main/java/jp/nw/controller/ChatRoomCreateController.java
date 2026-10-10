@@ -46,7 +46,7 @@ public class ChatRoomCreateController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/ChatChanelRoom?roomId="
                     + room.roomId() + "&displayName=" + displayName);
         } catch (IllegalArgumentException e) {
-            request.setAttribute("errorMessage", e.getMessage());
+            request.setAttribute("errorMessage", jp.nw.model.ErrorMessageLogic.forDisplay(e));
             request.setAttribute("chatUsers", logic.getAvailableUsers(loginUser.getUserId()));
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             request.getRequestDispatcher("/WEB-INF/jsp/chat/ChatRoomCreate.jsp").forward(request, response);

@@ -42,7 +42,7 @@ public class ThreadCommentController
                         return;
                 }
                 if (commentText.isEmpty() || commentText.length() > 500) {
-                        flash(session, "コメントは1～500文字で入力してください。", "error");
+                        flash(session, jp.nw.model.ErrorMessageLogic.get("ERR00010130"), "error");
                         response.sendRedirect(request.getContextPath() + "/ThreadDetailController?id=" + threadId);
                         return;
                 }
@@ -63,7 +63,7 @@ public class ThreadCommentController
                         return;
                 }
                 if (thread.isClosed()) {
-                        flash(session, "完了済みのスレッドには投稿できません。", "error");
+                        flash(session, jp.nw.model.ErrorMessageLogic.get("ERR00010131"), "error");
                 } else if (dao.insertComment(dto)) {
                         flash(session, "コメントを投稿しました。", "success");
                 }

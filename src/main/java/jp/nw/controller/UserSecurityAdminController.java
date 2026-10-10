@@ -1,5 +1,7 @@
 package jp.nw.controller;
 
+import jp.nw.model.CodedException;
+
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
@@ -66,13 +68,13 @@ public class UserSecurityAdminController extends HttpServlet {
                     l.resetPassword(u.getUserId(), target, q.getParameter("temporaryPassword"), ip, agent);
                 case "updateProfile" -> l.updateProfile(u.getUserId(), target, trim(q.getParameter("firstName")),
                         trim(q.getParameter("lastName")), q.getParameter("permission"), ip, agent);
-                default -> throw new IllegalArgumentException("操作が不正です。");
+                default -> throw new CodedException.Validation("ERR00010029");
             }
             flash(session, "更新しました。", "success");
         } catch (Exception e) {
             AuditLogLogic.record(q, "SECURITY", action == null ? "UNKNOWN" : action.toUpperCase(), "USER", target,
                     false, e.getMessage());
-            flash(session, e.getMessage() == null ? "更新に失敗しました。" : e.getMessage(), "error");
+            flash(session, jp.nw.model.ErrorMessageLogic.forDisplay(e), "error");
         }
         s.sendRedirect(q.getContextPath() + "/UserSecurityAdmin");
     }

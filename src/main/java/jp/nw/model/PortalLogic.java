@@ -1,5 +1,7 @@
 package jp.nw.model;
 
+import jp.nw.model.CodedException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -118,7 +120,7 @@ public class PortalLogic {
                 return list;
             }
         } catch (SQLException e) {
-            throw new RuntimeException("ポータル情報の取得に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010086", e);
         }
     }
 

@@ -32,7 +32,7 @@ public class LogoutController extends HttpServlet {
         // LoginFilterで正規の画面からの要求であることを確認済みなので、全セッションを失効させる
         if (!SecurityToken.revokeAllSessions(loginUser.getUserId())) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "ログアウト処理に失敗しました。");
+                    jp.nw.model.ErrorMessageLogic.get("ERR00010133"));
             return;
         }
 

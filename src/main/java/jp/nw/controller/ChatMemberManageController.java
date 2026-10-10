@@ -18,6 +18,7 @@ import javax.servlet.http.HttpSession;
 
 import jp.nw.entity.UserEntity;
 import jp.nw.model.ChatRoomPermissionPolicy;
+import jp.nw.model.ErrorMessageLogic;
 import jp.nw.parts.DBBase;
 
 @WebServlet("/ChatMemberManage")
@@ -61,9 +62,9 @@ public class ChatMemberManageController extends HttpServlet {
                         "INSERT IGNORE INTO chat_room_member(room_id,user_id) SELECT ?,user_id FROM users_info WHERE user_id=? AND delete_flg='0'")) {
             p.setString(1, room);
             p.setString(2, q.getParameter("userId"));
-            session.setAttribute("chatMemberFlash", p.executeUpdate() == 1 ? "メンバーを招待しました。" : "既に参加済みか、利用できないユーザーです。");
+            session.setAttribute("chatMemberFlash", p.executeUpdate() == 1 ? "メンバーを招待しました。" : ErrorMessageLogic.get("ERR00010136"));
         } catch (Exception e) {
-            session.setAttribute("chatMemberFlash", "招待に失敗しました。");
+            session.setAttribute("chatMemberFlash", ErrorMessageLogic.get("ERR00010137"));
         }
         s.sendRedirect(q.getContextPath() + "/ChatMemberManage?roomId="
                 + java.net.URLEncoder.encode(room, java.nio.charset.StandardCharsets.UTF_8));

@@ -1,5 +1,7 @@
 package jp.nw.controller;
 
+import jp.nw.model.CodedException;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -33,7 +35,7 @@ public class UserInsert extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         if (!isAdministrator(session)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "この機能は管理者のみ利用できます。");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get("ERR00010127"));
             return;
         }
 
@@ -59,11 +61,11 @@ public class UserInsert extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         HttpSession session = request.getSession(false);
         if (!isAdministrator(session)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "この機能は管理者のみ利用できます。");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get("ERR00010127"));
             return;
         }
         if (!Objects.equals(session.getAttribute("userInsertCsrfToken"), request.getParameter("csrfToken"))) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "不正なリクエストです。");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, jp.nw.model.ErrorMessageLogic.get("ERR00010121"));
             return;
         }
 
@@ -71,14 +73,14 @@ public class UserInsert extends HttpServlet {
             UserEntity user = validateAndBuild(request);
             UserEntity actor = (UserEntity) session.getAttribute("loginUser");
             if (!PermissionCheckUtil.canManageRole(actor, user.getPermission()))
-                throw new IllegalArgumentException("この権限のユーザーは登録できません。");
+                throw new CodedException.Validation("ERR00010022");
             LocalDate expiration = LocalDate.parse(request.getParameter("passwordExpiration"));
             if (expiration.isBefore(LocalDate.now()))
-                throw new IllegalArgumentException("パスワード有効期限は今日以降にしてください。");
+                throw new CodedException.Validation("ERR00010023");
 
             UserInsertLogic logic = new UserInsertLogic();
             if (logic.userIdExists(user.getUserId()))
-                throw new IllegalArgumentException("このユーザーIDは既に登録されています。");
+                throw new CodedException.Validation("ERR00010024");
             logic.insert(user, expiration);
             AuditLogLogic.record(request, "USER", "USER_CREATED", "USER", user.getUserId(), true,
                     "権限=" + user.getPermission());
@@ -87,7 +89,7 @@ public class UserInsert extends HttpServlet {
         } catch (IllegalArgumentException | DateTimeParseException e) {
             AuditLogLogic.record(request, "USER", "USER_CREATE_FAILED", "USER",
                     trim(request.getParameter("userId")), false, e.getMessage());
-            request.setAttribute("errorMessage", e.getMessage() == null ? "入力内容を確認してください。" : e.getMessage());
+            request.setAttribute("errorMessage", jp.nw.model.ErrorMessageLogic.forDisplay(e));
             setEnteredValues(request);
             request.setAttribute("csrfToken", session.getAttribute("userInsertCsrfToken"));
             request.setAttribute("permissionLevels", PermissionGetUtil.getAllPermissionLevels().stream()
@@ -110,18 +112,18 @@ public class UserInsert extends HttpServlet {
         String passwordConfirmation = request.getParameter("passwordConfirmation");
 
         if (!USER_ID_PATTERN.matcher(userId).matches())
-            throw new IllegalArgumentException("ユーザーIDは英字で始まる4～20文字の英数字・_・-で入力してください。");
+            throw new CodedException.Validation("ERR00010025");
         if (lastName.isBlank() || lastName.length() > 36 || firstName.isBlank() || firstName.length() > 36)
-            throw new IllegalArgumentException("姓と名をそれぞれ1～36文字で入力してください。");
+            throw new CodedException.Validation("ERR00010026");
         LocalDate birthday = LocalDate.parse(birthdayValue);
         if (birthday.isAfter(LocalDate.now()) || birthday.isBefore(LocalDate.of(1900, 1, 1)))
-            throw new IllegalArgumentException("生年月日を正しく入力してください。");
+            throw new CodedException.Validation("ERR00010027");
         if (password == null || password.length() < 8 || password.length() > 72
                 || !HAS_LETTER.matcher(password).matches() || !HAS_NUMBER.matcher(password).matches()) {
-            throw new IllegalArgumentException("パスワードは英字と数字を含む8～72文字で入力してください。");
+            throw new CodedException.Validation("ERR00010028");
         }
         if (!password.equals(passwordConfirmation))
-            throw new IllegalArgumentException("確認用パスワードが一致しません。");
+            throw new CodedException.Validation("ERR00010006");
 
         return UserEntity.builder().userId(userId).lastName(lastName).firstName(firstName)
                 .birthDate(birthday.toString()).permission(permission).password(password).build();

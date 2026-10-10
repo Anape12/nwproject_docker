@@ -1,5 +1,7 @@
 package jp.nw.controller;
 
+import jp.nw.model.CodedException;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -51,7 +53,7 @@ public class AttendanceActionController extends HttpServlet {
                         "UPDATE attendance_record a SET clock_out=CURTIME(),overtime_minutes=GREATEST(TIMESTAMPDIFF(MINUTE,clock_in,CURTIME())-break_minutes-480,0) WHERE user_id=? AND work_date=CURDATE() AND approval_status IN ('DRAFT','REJECTED') AND NOT EXISTS(SELECT 1 FROM attendance_month_close m WHERE m.user_id=a.user_id AND m.target_month=DATE_FORMAT(a.work_date,'%Y-%m-01'))")) {
                     p.setString(1, u.getUserId());
                     if (p.executeUpdate() == 0)
-                        throw new IllegalArgumentException("先に出勤を打刻するか、締め状態を確認してください。");
+                        throw new CodedException.Validation("ERR00010002");
                     AuditLogLogic.record(req, "ATTENDANCE", "CLOCK_OUT", "USER", u.getUserId(), true, null);
                 }
             } else if ("close".equals(action) || "reopen".equals(action)) {
@@ -79,7 +81,7 @@ public class AttendanceActionController extends HttpServlet {
         } catch (Exception e) {
             AuditLogLogic.record(req, "ATTENDANCE", action == null ? "UNKNOWN" : action.toUpperCase(), "USER",
                     u.getUserId(), false, e.getMessage());
-            req.getSession().setAttribute("attendanceFlash", e.getMessage());
+            req.getSession().setAttribute("attendanceFlash", jp.nw.model.ErrorMessageLogic.forDisplay(e));
             req.getSession().setAttribute("attendanceFlashType", "error");
         }
         res.sendRedirect(req.getContextPath() + "/WorkManagement");

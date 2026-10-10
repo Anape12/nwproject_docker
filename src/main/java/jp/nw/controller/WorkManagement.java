@@ -1,5 +1,7 @@
 package jp.nw.controller;
 
+import jp.nw.model.CodedException;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -83,7 +85,7 @@ public class WorkManagement extends HttpServlet {
         UserEntity user = (UserEntity) session.getAttribute("loginUser");
         YearMonth month = month(request);
         if (!Objects.equals(session.getAttribute("attendanceCsrfToken"), request.getParameter("csrfToken"))) {
-            response.sendError(403, "不正なリクエストです。");
+            response.sendError(403, jp.nw.model.ErrorMessageLogic.get("ERR00010121"));
             return;
         }
         AttendanceLogic logic = new AttendanceLogic();
@@ -96,7 +98,7 @@ public class WorkManagement extends HttpServlet {
                 flash(session, "勤怠を日付単位で承認申請しました。", "success");
             } else if ("delete".equals(request.getParameter("action"))) {
                 if (!logic.delete(id(request), user.getUserId()))
-                    throw new IllegalArgumentException("削除対象の勤怠情報が見つかりません。");
+                    throw new CodedException.Validation("ERR00010030");
                 flash(session, "勤怠情報を削除しました。", "success");
             } else {
                 AttendanceEntity value = build(request, user.getUserId());
@@ -106,7 +108,7 @@ public class WorkManagement extends HttpServlet {
                 flash(session, "勤怠情報を保存しました。", "success");
             }
         } catch (IllegalArgumentException e) {
-            flash(session, e.getMessage() == null ? "入力内容を確認してください。" : e.getMessage(), "error");
+            flash(session, jp.nw.model.ErrorMessageLogic.forDisplay(e), "error");
         }
         response.sendRedirect(request.getContextPath() + "/WorkManagement?year=" + month.getYear() + "&month="
                 + month.getMonthValue());
@@ -116,7 +118,7 @@ public class WorkManagement extends HttpServlet {
         LocalDate date = LocalDate.parse(request.getParameter("workDate"));
         String type = request.getParameter("workType");
         if (!WORK_TYPES.contains(type))
-            throw new IllegalArgumentException("勤務区分が不正です。");
+            throw new CodedException.Validation("ERR00010031");
         boolean nonWorking = "LEAVE".equals(type) || "HOLIDAY".equals(type);
         LocalTime in = null, out = null;
         int breakMinutes = 0;
@@ -124,19 +126,19 @@ public class WorkManagement extends HttpServlet {
             in = LocalTime.parse(request.getParameter("clockIn"));
             out = LocalTime.parse(request.getParameter("clockOut"));
             if (!out.isAfter(in))
-                throw new IllegalArgumentException("退勤時刻は出勤時刻より後にしてください。");
+                throw new CodedException.Validation("ERR00010032");
             try {
                 breakMinutes = Integer.parseInt(request.getParameter("breakMinutes"));
             } catch (Exception e) {
-                throw new IllegalArgumentException("休憩時間を正しく入力してください。");
+                throw new CodedException.Validation("ERR00010033");
             }
             long duration = java.time.temporal.ChronoUnit.MINUTES.between(in, out);
             if (breakMinutes < 0 || breakMinutes >= duration)
-                throw new IllegalArgumentException("休憩時間は勤務時間より短くしてください。");
+                throw new CodedException.Validation("ERR00010034");
         }
         String note = trim(request.getParameter("note"));
         if (note.length() > 500)
-            throw new IllegalArgumentException("備考は500文字以内で入力してください。");
+            throw new CodedException.Validation("ERR00010035");
         String reportValue = request.getParameter("reportId");
         Long reportId = reportValue == null || reportValue.isBlank() ? null : Long.valueOf(reportValue);
         String attendanceType = request.getParameter("attendanceType");
@@ -181,7 +183,7 @@ public class WorkManagement extends HttpServlet {
         try {
             return Long.parseLong(request.getParameter("attendanceId"));
         } catch (Exception e) {
-            throw new IllegalArgumentException("勤怠IDが不正です。");
+            throw new CodedException.Validation("ERR00010036");
         }
     }
 

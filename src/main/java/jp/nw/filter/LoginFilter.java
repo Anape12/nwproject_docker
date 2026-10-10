@@ -161,7 +161,7 @@ public class LoginFilter implements Filter {
 
         if (request.getHeader("X-NW-Login-Context") != null) {
             response.sendError(HttpServletResponse.SC_CONFLICT,
-                    "この画面は再ログイン前に開かれたため操作できません。");
+                    jp.nw.model.ErrorMessageLogic.get("ERR00010132"));
             return;
         }
         response.sendRedirect(request.getContextPath() + "/Login?windowInvalid=1");

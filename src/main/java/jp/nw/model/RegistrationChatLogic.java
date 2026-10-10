@@ -1,5 +1,7 @@
 package jp.nw.model;
 
+import jp.nw.model.CodedException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,7 +14,7 @@ import jp.nw.parts.DBBase;
 public class RegistrationChatLogic {
     public long register(UserEntity user, String roomId, String comment) {
         if (comment == null || comment.isBlank() || comment.length() > 500)
-            throw new IllegalArgumentException("メッセージを1～500文字で入力してください。");
+            throw new CodedException.Validation("ERR00010087");
         DBBase db = new DBBase();
         try (Connection c = db.getConnection()) {
             c.setAutoCommit(false);
@@ -27,7 +29,7 @@ public class RegistrationChatLogic {
                     p.setString(4, roomId);
                     p.setString(5, user.getUserId());
                     if (p.executeUpdate() != 1)
-                        throw new IllegalArgumentException("このチャットルームには投稿できません。");
+                        throw new CodedException.Validation("ERR00010088");
                     try (ResultSet r = p.getGeneratedKeys()) {
                         if (!r.next())
                             throw new SQLException("Message key not found");
@@ -54,7 +56,7 @@ public class RegistrationChatLogic {
                 throw e;
             }
         } catch (Exception e) {
-            throw new RuntimeException("チャットの送信に失敗しました。", e);
+            throw new CodedException.Failure("ERR00010089", e);
         }
     }
 }
