@@ -51,6 +51,13 @@ public class SqlBuilder {
 
         sb.append(createQuerySubString(query.getQuerySub()));
 
+        if (query.isForUpdate()) {
+            if (sb.charAt(sb.length() - 1) != ' ') {
+                sb.append(' ');
+            }
+            sb.append("FOR UPDATE");
+        }
+
         return sb.toString();
     }
 

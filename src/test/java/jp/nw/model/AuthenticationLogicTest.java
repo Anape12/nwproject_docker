@@ -2,6 +2,7 @@ package jp.nw.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,6 +16,8 @@ import jp.nw.model.AuthenticationLogic.Decision;
 import jp.nw.model.AuthenticationLogic.Outcome;
 import jp.nw.model.AuthenticationLogic.UserRecord;
 import jp.nw.parts.PasswordUtil;
+import jp.nw.parts.Query;
+import jp.nw.parts.SqlBuilder;
 
 class AuthenticationLogicTest {
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 10, 10, 9, 0);
@@ -93,6 +96,35 @@ class AuthenticationLogicTest {
         assertEquals(ErrorCode.AUTH_005, Outcome.NOW_LOCKED.errorCode);
         assertEquals(ErrorCode.AUTH_006, Outcome.EXPIRED.errorCode);
         assertNull(Outcome.SUCCESS.errorCode);
+    }
+
+    @Test
+    void failedLoginQueryAcceptsNullLockUntilAndUsesBoundParameters() {
+        Query select = AuthenticationLogic.userForUpdateQuery("user1");
+        assertTrue(new SqlBuilder().build(select).contains("WHERE user_id = ? FOR UPDATE"));
+        assertEquals("user1", select.getConditions().get("user_id"));
+
+        Query update = AuthenticationLogic.failedLoginUpdateQuery("user1",
+                new Decision(Outcome.BAD_PASSWORD, 1, null));
+        assertEquals(1, update.getValues().get("failed_login_count"));
+        assertTrue(update.getValues().containsKey("locked_until"));
+        assertNull(update.getValues().get("locked_until"));
+        assertEquals("UPDATE users_info SET failed_login_count = ?,locked_until = ? WHERE user_id = ? ",
+                new SqlBuilder().build(update));
+
+        Query locked = AuthenticationLogic.failedLoginUpdateQuery("user1",
+                new Decision(Outcome.NOW_LOCKED, 5, NOW.plusMinutes(15)));
+        assertEquals(0, locked.getValues().get("failed_login_count"));
+        assertEquals(NOW.plusMinutes(15), locked.getValues().get("locked_until"));
+    }
+
+    @Test
+    void successfulLoginQueryClearsFailureState() {
+        Query update = AuthenticationLogic.successfulLoginUpdateQuery("user1");
+        assertEquals(0, update.getValues().get("failed_login_count"));
+        assertNull(update.getValues().get("locked_until"));
+        assertInstanceOf(LocalDateTime.class, update.getValues().get("last_login_at"));
+        assertEquals("user1", update.getConditions().get("user_id"));
     }
 
     private Decision decide(UserRecord record, String password) {

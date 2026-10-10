@@ -56,16 +56,14 @@ public class DBBase {
 			SqlBuilder builder = new SqlBuilder();
 			String sql = builder.build(query);
 
-			PreparedStatement ps = con.prepareStatement(sql);
-
-			bindParameter(ps, query);
-
-			switch (query.getSqlType()) {
-				case SELECT:
-					ResultSet rs = ps.executeQuery();
-					return getResultList(rs);
-				default:
-					return ps.executeUpdate();
+			try (PreparedStatement ps = con.prepareStatement(sql)) {
+				bindParameter(ps, query);
+				if (query.getSqlType() == SqlType.SELECT) {
+					try (ResultSet rs = ps.executeQuery()) {
+						return getResultList(rs);
+					}
+				}
+				return ps.executeUpdate();
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);

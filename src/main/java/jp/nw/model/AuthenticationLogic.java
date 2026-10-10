@@ -1,14 +1,14 @@
 package jp.nw.model;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,20 +16,25 @@ import javax.servlet.http.HttpServletRequest;
 import jp.nw.entity.UserEntity;
 import jp.nw.parts.DBBase;
 import jp.nw.parts.PasswordUtil;
+import jp.nw.parts.Query;
+import jp.nw.parts.SqlType;
 
 public class AuthenticationLogic {
     private static final int MAX_FAILURES = positiveEnv("LOGIN_MAX_FAILURES", 5);
     private static final int LOCK_MINUTES = positiveEnv("LOGIN_LOCK_MINUTES", 15);
 
+    private static final ZoneId DATABASE_ZONE = ZoneId.of("Asia/Tokyo");
+
     public Result authenticate(String userId, String rawPassword, HttpServletRequest request) {
-        try (Connection con = new DBBase().getConnection()) {
+        DBBase db = new DBBase();
+        try (Connection con = db.getConnection()) {
             con.setAutoCommit(false);
             try {
-                UserRecord record = findForUpdate(con, userId);
+                UserRecord record = findForUpdate(db, userId);
                 Decision decision = evaluate(record, rawPassword, LocalDateTime.now(), MAX_FAILURES, LOCK_MINUTES);
                 String ip = AuditLogLogic.clientIp(request);
                 String agent = request == null ? null : request.getHeader("User-Agent");
-                applyDecision(con, userId, decision, ip, agent);
+                applyDecision(db, con, userId, decision, ip, agent);
                 con.commit();
                 // 失敗回数と監査ログは、メッセージマスタの設定不備があっても確定させる。
                 String message = decision.outcome() == Outcome.SUCCESS ? null
@@ -44,78 +49,109 @@ public class AuthenticationLogic {
         }
     }
 
-    private UserRecord findForUpdate(Connection con, String userId) throws SQLException {
-        String sql = "SELECT password,first_name,last_name,permission,password_expiration,delete_flg,"
-                + "account_type,account_disabled,failed_login_count,locked_until,force_password_change "
-                + "FROM users_info WHERE user_id=? FOR UPDATE";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next())
-                    return null;
-                UserRecord record = new UserRecord();
-                record.password = rs.getString("password");
-                record.firstName = rs.getString("first_name");
-                record.lastName = rs.getString("last_name");
-                record.permission = rs.getString("permission");
-                record.passwordExpiration = rs.getString("password_expiration");
-                record.deleteFlag = rs.getString("delete_flg");
-                record.accountType = rs.getString("account_type");
-                record.accountDisabled = rs.getBoolean("account_disabled");
-                record.failedCount = rs.getInt("failed_login_count");
-                Timestamp lockedUntil = rs.getTimestamp("locked_until");
-                record.lockedUntil = lockedUntil == null ? null : lockedUntil.toLocalDateTime();
-                record.forcePasswordChange = rs.getBoolean("force_password_change");
-                return record;
-            }
+    private UserRecord findForUpdate(DBBase db, String userId) {
+        List<Map<String, Object>> resultList = (List<Map<String, Object>>) db.execute(userForUpdateQuery(userId));
+        if (resultList.isEmpty()) {
+            return null;
         }
+
+        Map<String, Object> resultMap = resultList.get(0);
+        UserRecord record = new UserRecord();
+        record.password = (String) resultMap.get("password");
+        record.firstName = (String) resultMap.get("first_name");
+        record.lastName = (String) resultMap.get("last_name");
+        record.permission = (String) resultMap.get("permission");
+        record.passwordExpiration = (String) resultMap.get("password_expiration");
+        record.deleteFlag = (String) resultMap.get("delete_flg");
+        record.accountType = (String) resultMap.get("account_type");
+        record.accountDisabled = Boolean.TRUE.equals(resultMap.get("account_disabled"));
+        record.failedCount = ((Number) resultMap.get("failed_login_count")).intValue();
+        Object lockedUntil = resultMap.get("locked_until");
+        record.lockedUntil = lockedUntil instanceof Timestamp timestamp ? timestamp.toLocalDateTime()
+                : (LocalDateTime) lockedUntil;
+        record.forcePasswordChange = Boolean.TRUE.equals(resultMap.get("force_password_change"));
+        return record;
+    }
+
+    static Query userForUpdateQuery(String userId) {
+        List<String> selectColumns = List.of("password", "first_name", "last_name", "permission", "password_expiration",
+                "delete_flg", "account_type", "account_disabled", "failed_login_count", "locked_until",
+                "force_password_change");
+
+        LinkedHashMap<String, Object> conditions = new LinkedHashMap<>();
+        conditions.put("user_id", userId);
+
+        return Query.builder()
+                .sqlType(SqlType.SELECT)
+                .tableName("users_info")
+                .selectColumns(selectColumns)
+                .conditions(conditions)
+                .forUpdate(true)
+                .build();
     }
 
     static Decision evaluate(UserRecord record, String rawPassword, LocalDateTime now,
             int maxFailures, int lockMinutes) {
         if (record == null)
             return new Decision(Outcome.NO_USER, 0, null);
+
         if (record.accountDisabled || !"0".equals(record.deleteFlag))
             return new Decision(Outcome.DISABLED, 0, null);
+
         if ("AI".equals(record.accountType))
             return new Decision(Outcome.AI_ACCOUNT, 0, null);
+
         if (record.lockedUntil != null && record.lockedUntil.isAfter(now))
             return new Decision(Outcome.ALREADY_LOCKED, 0, record.lockedUntil);
+
         if (!PasswordUtil.matches(rawPassword == null ? "" : rawPassword, record.password)) {
             int failures = record.failedCount + 1;
             LocalDateTime lockUntil = failures >= maxFailures ? now.plusMinutes(lockMinutes) : null;
             return new Decision(lockUntil == null ? Outcome.BAD_PASSWORD : Outcome.NOW_LOCKED,
                     failures, lockUntil);
         }
+
         if (passwordExpired(record.passwordExpiration, now.toLocalDate()))
             return new Decision(Outcome.EXPIRED, 0, null);
+
         return new Decision(Outcome.SUCCESS, 0, null);
     }
 
-    private void applyDecision(Connection con, String userId, Decision decision, String ip, String agent)
+    private void applyDecision(DBBase db, Connection con, String userId, Decision decision, String ip, String agent)
             throws SQLException {
         switch (decision.outcome()) {
-            case BAD_PASSWORD, NOW_LOCKED -> {
-                try (PreparedStatement ps = con.prepareStatement(
-                        "UPDATE users_info SET failed_login_count=?,locked_until=? WHERE user_id=?")) {
-                    ps.setInt(1, decision.lockUntil() == null ? decision.failures() : 0);
-                    ps.setObject(2, decision.lockUntil());
-                    ps.setString(3, userId);
-                    ps.executeUpdate();
-                }
-            }
-            case SUCCESS -> {
-                try (PreparedStatement ps = con.prepareStatement(
-                        "UPDATE users_info SET failed_login_count=0,locked_until=NULL,last_login_at=NOW() WHERE user_id=?")) {
-                    ps.setString(1, userId);
-                    ps.executeUpdate();
-                }
-            }
+            case BAD_PASSWORD, NOW_LOCKED -> db.execute(failedLoginUpdateQuery(userId, decision));
+            case SUCCESS -> db.execute(successfulLoginUpdateQuery(userId));
             default -> {
             }
         }
         AuditLogLogic.recordStructured(con, userId, "AUTH", decision.outcome().auditAction, "USER", userId,
                 decision.outcome() == Outcome.SUCCESS, ip, agent, decision.outcome().name(), decision.auditData());
+    }
+
+    static Query failedLoginUpdateQuery(String userId, Decision decision) {
+        LinkedHashMap<String, Object> values = new LinkedHashMap<>();
+        values.put("failed_login_count", decision.lockUntil() == null ? decision.failures() : 0);
+        values.put("locked_until", decision.lockUntil());
+
+        LinkedHashMap<String, Object> conditions = new LinkedHashMap<>();
+        conditions.put("user_id", userId);
+
+        return Query.builder().sqlType(SqlType.UPDATE).tableName("users_info")
+                .values(values).conditions(conditions).build();
+    }
+
+    static Query successfulLoginUpdateQuery(String userId) {
+        LinkedHashMap<String, Object> values = new LinkedHashMap<>();
+        values.put("failed_login_count", 0);
+        values.put("locked_until", null);
+        values.put("last_login_at", LocalDateTime.now(DATABASE_ZONE));
+
+        LinkedHashMap<String, Object> conditions = new LinkedHashMap<>();
+        conditions.put("user_id", userId);
+
+        return Query.builder().sqlType(SqlType.UPDATE).tableName("users_info")
+                .values(values).conditions(conditions).build();
     }
 
     private static boolean passwordExpired(String expiration, LocalDate today) {

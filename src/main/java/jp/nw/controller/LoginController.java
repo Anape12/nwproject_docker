@@ -65,6 +65,7 @@ public class LoginController extends HttpServlet {
 		String userId = request.getParameter("userId");
 		AuthenticationLogic.Result result = new AuthenticationLogic().authenticate(
 				userId == null ? "" : userId.trim(), request.getParameter("password"), request);
+
 		if (!result.authenticated()) {
 			this.baseModel.writeInfo("ログイン失敗");
 			request.setAttribute("errorMessage", result.message());
@@ -72,6 +73,7 @@ public class LoginController extends HttpServlet {
 			dispatcher.forward(request, response);
 			return;
 		}
+
 		UserEntity userEntity = result.user();
 
 		// 現在のブラウザに既存セッションがあれば、先に破棄する

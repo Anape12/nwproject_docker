@@ -14,6 +14,8 @@ public class Query {
     
     private SqlType sqlType;
 
+    private boolean forUpdate;
+
     private String tableName;
 
     private List<JoinInfo> joins;
