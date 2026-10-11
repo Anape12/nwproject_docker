@@ -39,7 +39,7 @@ public class AuthenticationLogic {
                 con.commit();
                 // 失敗回数と監査ログは、メッセージマスタの設定不備があっても確定させる。
                 String message = decision.outcome() == Outcome.SUCCESS ? null
-                        : ErrorMessageLogic.find(con, decision.outcome().errorCode);
+                        : ErrorMessageLogic.get(con, decision.outcome().errorCode);
                 return decision.toResult(userId, record, message);
             } catch (Exception e) {
                 con.rollback();

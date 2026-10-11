@@ -34,7 +34,8 @@ public class MenuController extends HttpServlet {
         request.setAttribute("canAudit", PermissionCheckUtil.can(user, PermissionAction.AUDIT_VIEW));
         request.setAttribute("canManageAi", PermissionCheckUtil.can(user, PermissionAction.AI_CHARACTER_MANAGE));
         request.setAttribute("canViewDesign", PermissionCheckUtil.can(user, PermissionAction.DESIGN_REVERSE_VIEW));
-        request.setAttribute("canUseExternalTools", PermissionCheckUtil.can(user, PermissionAction.EXTERNAL_TOOLS_VIEW));
+        request.setAttribute("canUseExternalTools",
+                PermissionCheckUtil.can(user, PermissionAction.EXTERNAL_TOOLS_VIEW));
         request.setAttribute("canReviewApprovals", new jp.nw.model.ApprovalLogic().canReview(user));
         String page = PermissionCheckUtil.can(user, PermissionAction.USER_MANAGE)
                 ? "/WEB-INF/jsp/Menu/perMenu.jsp"
