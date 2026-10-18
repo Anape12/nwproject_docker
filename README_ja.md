@@ -120,13 +120,11 @@ QIITA_GUIDE_URL=https://reader.example.com/
 
 # 技術スタック
 
--   Java(Servlet/JSP)
--   Docker
--   Tomcat
--   MySQL
--   Flyway
--   GitHub Actions(CI/CD)
--   Playwright(E2E)
--   Google Compute Engine (GCE)
--   Nginx (Reverse Proxy)
--   HTTPS (TLS)
+-   アプリケーション：Java 21、Servlet 4.0／JSP／JSTL、JavaScript、CSS。MavenでWARをビルドし、Apache Tomcat 9で実行。
+-   主なライブラリ：MySQL Connector/J、Jackson、Lombok、Spring SecurityのBCryptパスワードエンコーダー。
+-   データベース：MySQL 8.0、Flyway 11によるSQLマイグレーション。
+-   ローカル実行環境：Docker Compose、NginxによるリバースプロキシとTLS終端。
+-   任意のAI連携：別プロジェクトのMy-AiCreateと、そのAPI経由で利用するOllama。
+-   任意の記事読み上げ連携：Node.js 22でコンテナ化した別プロジェクトのQiita Guide（AI_Support）。
+-   テスト・整形：JUnit 5、PlaywrightによるE2Eテスト、Prettierと`prettier-plugin-jsp`。
+-   CI・デプロイ：GitHub Actions。Google Compute Engineは任意のデプロイ先として定義（ローカル開発には不要）。

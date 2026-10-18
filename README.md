@@ -93,13 +93,11 @@ Use the [database migration procedure](docs/database-migrations.md); do not remo
 
 # Tech Stack
 
--   Java (Servlet / JSP)
--   Docker
--   Apache Tomcat
--   MySQL
--   Flyway
--   GitHub Actions (CI/CD)
--   Playwright (E2E Testing)
--   Google Compute Engine (GCE)
--   Nginx (Reverse Proxy)
--   HTTPS (TLS)
+-   Application: Java 21, Servlet 4.0 / JSP / JSTL, JavaScript, CSS; built as a WAR with Maven and run on Apache Tomcat 9.
+-   Application libraries: MySQL Connector/J, Jackson, Lombok, and Spring Security's BCrypt password encoder.
+-   Database: MySQL 8.0 with Flyway 11 SQL migrations.
+-   Local runtime: Docker Compose with Nginx as the reverse proxy and TLS termination.
+-   Optional AI integration: the separate My-AiCreate service, connected to Ollama through its API.
+-   Optional article reader: the separate Qiita Guide (AI_Support) application, containerized with Node.js 22.
+-   Quality checks: JUnit 5, Playwright for browser E2E tests, and Prettier with `prettier-plugin-jsp` for formatting.
+-   Automation and deployment: GitHub Actions for CI; Google Compute Engine is configured as an optional deployment target (not required for local development).
