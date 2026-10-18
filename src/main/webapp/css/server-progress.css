@@ -1,0 +1,70 @@
+.nw-progress[hidden] {
+    display: none !important;
+}
+
+.nw-progress {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(18, 35, 55, 0.48);
+    pointer-events: auto;
+    cursor: progress;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.nw-progress-panel {
+    box-sizing: border-box;
+    width: min(100%, 360px);
+    padding: 28px 30px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 20px 55px rgba(12, 29, 48, 0.24);
+    text-align: center;
+}
+
+.nw-progress-track {
+    position: relative;
+    height: 8px;
+    overflow: hidden;
+    background: rgba(35, 100, 162, 0.18);
+    border-radius: 999px;
+}
+
+.nw-progress-track::after {
+    content: "";
+    display: block;
+    position: absolute;
+    left: -35%;
+    width: 35%;
+    height: 100%;
+    background: #2382c4;
+    border-radius: 0 4px 4px 0;
+    animation: nw-progress-slide 1.2s ease-in-out infinite;
+}
+
+.nw-progress-message {
+    margin-top: 18px;
+    color: #173951;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+@keyframes nw-progress-slide {
+    from {
+        left: -35%;
+    }
+    to {
+        left: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nw-progress-track::after {
+        animation: none;
+        left: 0;
+        width: 100%;
+    }
+}

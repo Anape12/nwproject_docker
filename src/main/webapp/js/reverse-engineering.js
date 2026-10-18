@@ -67,9 +67,14 @@
             if (!cache[view]) {
                 const url = new URL(endpoint, window.location.href);
                 url.searchParams.set("view", view);
-                const response = await fetch(url, { credentials: "same-origin" });
-                if (!response.ok) throw new Error("HTTP " + response.status);
-                cache[nextView] = await response.json();
+                const done = window.NWProgress?.start("構造を読み込んでいます…");
+                try {
+                    const response = await fetch(url, { credentials: "same-origin" });
+                    if (!response.ok) throw new Error("HTTP " + response.status);
+                    cache[nextView] = await response.json();
+                } finally {
+                    done?.();
+                }
             }
             if (view !== nextView) return;
             status.hidden = true;

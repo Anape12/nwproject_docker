@@ -10,3 +10,11 @@ if (nwLoginContext != null) {
 <%
 }
 %>
+<%
+if (request.getAttribute("nwProgressScriptIncluded") == null) {
+    request.setAttribute("nwProgressScriptIncluded", Boolean.TRUE);
+%>
+<script defer src="<%= request.getContextPath() %>/js/server-progress.js?v=20261018-2"></script>
+<%
+}
+%>

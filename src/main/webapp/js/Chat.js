@@ -28,6 +28,7 @@ messageInput.addEventListener("keydown", (e) => {
 
 
 async function sendMessage() {
+    const finishProgress = window.NWProgress ? window.NWProgress.start("送信中…") : () => {};
     try {
         const sendMsg = messageInput.value;
         const roomId = document.getElementById("roomId").value;
@@ -52,6 +53,8 @@ async function sendMessage() {
         messageInput.value = "";
     } catch (e) {
         console.error(e);
+    } finally {
+        finishProgress();
     }
 }
 
